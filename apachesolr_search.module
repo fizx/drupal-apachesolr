@@ -68,7 +68,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
             if (trim($snippet) == '...') {
               $snippet = '';
             }
-            $results[] = array('link' => url('node/'. $doc->nid, NULL, NULL, TRUE),
+            $results[] = array('link' => url('node/'. $doc->nid, array('absolute' => TRUE)),
                                'type' => node_get_types('name', $doc),
                                'title' => $doc->title,
                                'user' => theme('username', $doc),
