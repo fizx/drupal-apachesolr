@@ -1,3 +1,4 @@
+; $Id$
 name = Apache Solr framework
 description = Framework for searching with solr
 dependencies = search

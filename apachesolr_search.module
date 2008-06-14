@@ -1,4 +1,11 @@
 <?php
+// $Id$
+
+/**
+ * @file
+ *   Provides a content search implementation for node content for use with the
+ *   Apache Solr search application.
+ */
 
 function apachesolr_update_index() {
   ApacheSolrUpdate::update_index('apachesolr');
