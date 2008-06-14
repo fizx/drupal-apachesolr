@@ -447,7 +447,7 @@ class Apache_Solr_Service
       //check the stream meta data to see if we timed out during the operation
       $metaData = stream_get_meta_data($fp);
 
-      if ($metaData['timeout'])
+      if (isset($metaData['timeout']) && $metaData['timeout'])
       {
         fclose($fp);
         return false;
@@ -477,7 +477,7 @@ class Apache_Solr_Service
       //check the stream meta data to see if we timed out during the operation
       $metaData = stream_get_meta_data($fp);
 
-      if ($metaData['timeout'])
+      if (isset($metaData['timeout']) && $metaData['timeout'])
       {
         fclose($fp);
         return false;
@@ -554,23 +554,27 @@ class Apache_Solr_Service
    */
   public function addDocuments($documents, $allowDups = false, $overwritePending = true, $overwriteCommitted = true)
   {
-    $dupValue = $allowDups ? 'true' : 'false';
-    $pendingValue = $overwritePending ? 'true' : 'false';
-    $committedValue = $overwriteCommitted ? 'true' : 'false';
-
-    $rawPost = '<add allowDups="' . $dupValue . '" overwritePending="' . $pendingValue . '" overwriteCommitted="' . $committedValue . '">';
-
-    foreach ($documents as $document)
-    {
-      if ($document instanceof Apache_Solr_Document)
+    if (count($documents) > 0) {
+      $dupValue = $allowDups ? 'true' : 'false';
+      $pendingValue = $overwritePending ? 'true' : 'false';
+      $committedValue = $overwriteCommitted ? 'true' : 'false';
+  
+      $rawPost = '<add allowDups="' . $dupValue . '" overwritePending="' . $pendingValue . '" overwriteCommitted="' . $committedValue . '">';
+  
+      
+      foreach ($documents as $document)
       {
-        $rawPost .= $this->_documentToXmlFragment($document);
+        if ($document instanceof Apache_Solr_Document)
+        {
+          $rawPost .= $this->_documentToXmlFragment($document);
+        }
       }
+      
+  
+      $rawPost .= '</add>';
+  
+      return $this->add($rawPost);
     }
-
-    $rawPost .= '</add>';
-
-    return $this->add($rawPost);
   }
 
   /**
