@@ -257,7 +257,7 @@ class ApacheSolrUpdate {
       }
       self::success('apachesolr', $solr_last_change, $solr_last_id);
     }
-    if (count($documents) > 0 && is_object($solr)) {
+    if (is_object($solr)) {
       // remaining documents
       try {
         watchdog('Apache Solr', "Adding " . count($documents) ." documents in cleanup");
