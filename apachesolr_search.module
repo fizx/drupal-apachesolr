@@ -6,10 +6,17 @@
  *   Provides a content search implementation for node content for use with the
  *   Apache Solr search application.
  */
+
+/**
+ * Implementation of hook_update_index().
+ */
 function apachesolr_update_index() {
   ApacheSolrUpdate::update_index('apachesolr');
 }
 
+/**
+ * Implementation of hook_search().
+ */
 function apachesolr_search_search($op = 'search', $keys = NULL) {
 
   switch ($op) {
@@ -43,7 +50,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
           'fl' => '*,score',
           'rows' => 10,
           'facet' => 'true',
-          'facet.limit' => -1,
+          'facet.limit' => variable_get('apachesolr_facet_limit', 100),
           'facet.field' => array('tid', 'type', 'uid'),
           'facet.mincount' => 1,
           'facet.sort' => 'true'
