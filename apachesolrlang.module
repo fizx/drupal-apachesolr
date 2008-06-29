@@ -1,0 +1,8 @@
+; $Id$
+name = Apache Solr languages
+description = Adds language facets.
+dependencies[] = locale
+dependencies[] = apachesolr
+dependencies[] = search
+package = ApacheSolr
+core = "6.x"
