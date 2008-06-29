@@ -9,7 +9,7 @@ function apachesolrlang_block($op = 'list', $delta = 0, $edit = array()) {
   $title = t('ApacheSolr: Filter by language');
   switch ($op) {
     case 'list':
-      $blocks['type'] = array('info' => $type_title);
+      $blocks['type'] = array('info' => $title);
       return $blocks;
 
     case 'view':
