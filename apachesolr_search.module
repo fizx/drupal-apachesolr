@@ -51,7 +51,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
           'rows' => variable_get('apachesolr_rows', 10),
           'facet' => 'true',
           'facet.limit' => variable_get('apachesolr_facet_limit', 100),
-          'facet.field' => array('tid', 'type', 'uid'),
+          'facet.field' => array('tid', 'type', 'uid', 'language'),
           'facet.mincount' => 1,
           'facet.sort' => 'true'
         );
