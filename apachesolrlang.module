@@ -63,7 +63,7 @@ function apachesolrlang_block($op = 'list', $delta = 0, $edit = array()) {
     case 'configure':
       return apachesolr_block($op, $delta);
     
-    case 'edit':
+    case 'save':
       return apachesolr_block($op, $delta, $edit);
   }
 }
