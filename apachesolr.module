@@ -724,6 +724,9 @@ function apachesolr_current_keys($keys = NULL, $reset = FALSE) {
   if (!empty($keys)) {
     $_keys = $keys;
   }
+  if (empty($_keys)) {
+    $_keys = search_get_keys();
+  }
   return $_keys;
 }
 
