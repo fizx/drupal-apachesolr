@@ -424,18 +424,6 @@ function apachesolr_views_default_views() {
     ),
     'default' => 'created',
   ));
-  $handler = $view->new_display('page', 'Page', 'page_1');
-  $handler->override_option('path', 'solrsearch/results');
-  $handler->override_option('menu', array(
-    'type' => 'normal',
-    'title' => 'Solr Views search',
-    'weight' => '0',
-  ));
-  $handler->override_option('tab_options', array(
-    'type' => 'none',
-    'title' => '',
-    'weight' => 0,
-  ));
   
   $views[$view->name] = $view;
 
