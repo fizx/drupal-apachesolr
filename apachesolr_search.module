@@ -106,7 +106,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
 
       } // try
       catch (Exception $e) {
-        watchdog('Apache Solr', $e->getMessage(), WATCHDOG_ERROR);
+        watchdog('Apache Solr', $e->getMessage(), NULL, WATCHDOG_ERROR);
       }
 
   } // switch
