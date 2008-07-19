@@ -226,6 +226,20 @@ class ApacheSolrUpdate {
               $document->$key = $value;
             }
 
+            // Path aliases can have important information about the content.
+            // Add them to the index as well.
+            if (function_exists('drupal_get_path_alias')) {
+              // Add any path alias to the index, looking first for language specific
+              // aliases but using language neutral aliases otherwise.
+              $language = empty($node->language) ? '' : $node->language;
+              $path = 'node/' . $node->nid;
+              $output = drupal_get_path_alias($path, $language);
+              if ($output && $output != $path) {
+                $document->path = $output;
+                $text .= $output;
+              }
+            }
+
             if ($cck_fields && strpos($key, 'field_') === 0) {
               // Got a CCK field. See if it is to be indexed.
               if (in_array($key, array_keys($cck_fields))) {
