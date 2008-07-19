@@ -110,6 +110,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
       catch (Exception $e) {
         watchdog('Apache Solr', $e->getMessage(), WATCHDOG_ERROR);
       }
+      break;
 
   } // switch
 }
