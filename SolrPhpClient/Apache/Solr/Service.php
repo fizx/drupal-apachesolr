@@ -238,7 +238,7 @@ class Apache_Solr_Service
    */
   private function _sendRawGet($url)
   {
-    // drupal_set_message("Searching ". url($url, NULL, NULL, TRUE));
+    // drupal_set_message(url($url, array('absolute' => TRUE)));
     //$http_response_header is set by file_get_contents
     $response = new Apache_Solr_Response(@file_get_contents($url), $http_response_header);
 

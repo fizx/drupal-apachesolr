@@ -239,10 +239,9 @@ class Apache_Solr_Response
         $facet_name = (string) $field['name'];
         $facet_counts = array();
         foreach ($field as $facet) {
-          if ($name = (string) $facet['name']) {
-            $count = (string) $facet;
-            $facet_counts[$name] = $count;
-          }
+          $name = (string) $facet['name'];
+          $count = (string) $facet;
+          $facet_counts[$name] = $count;
         }
         $this->_parsedData->facets->$facet_name = $facet_counts;
       }
