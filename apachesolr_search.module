@@ -85,7 +85,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
         if ($total > 0) {
           static $users = array();
           foreach ($response->documents as $doc) {
-            $extra = node_invoke_nodeapi(&$doc, 'search result');
+            $extra = node_invoke_nodeapi($doc, 'search result');
             $extra['score'] = $doc->score;
             $snippet = search_excerpt($keys, $doc->body);
             if (trim($snippet) == '...') {
