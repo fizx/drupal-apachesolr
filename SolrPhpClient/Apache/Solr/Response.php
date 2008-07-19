@@ -214,6 +214,7 @@ class Apache_Solr_Response
             $document->$key = (string) $element;
           break;
           case 'arr':
+            $values = array();
             foreach ($element as $child) {
               // TODO: Respect types.
               $values[] = (string) $child;
