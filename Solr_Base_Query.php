@@ -172,7 +172,7 @@ class Solr_Base_Query {
     // the last breadcrumb is the current page, so it shouldn't be a link.
     $last = count($breadcrumb) - 1;
     $breadcrumb[$last] = strip_tags($breadcrumb[$last]);
-    drupal_set_breadcrumb($breadcrumb);
+    
     return $breadcrumb;
   }
 
