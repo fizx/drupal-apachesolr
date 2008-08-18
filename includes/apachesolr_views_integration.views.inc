@@ -136,10 +136,7 @@ function apachesolr_views_data() {
     'help' => t('Taxonomy terms associated with the node.'),
     'field' => array(
       'handler' => 'views_handler_field_apachesolr',
-      'click sortable' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort_apachesolr',
+      'click sortable' => FALSE,
     ),
   );
   if (module_exists('translation')) {
