@@ -5,7 +5,7 @@
 /**
  * Implementation of hook_views_data().
  */
-function apachesolr_views_data() {
+function apachesolr_views_views_data() {
   $data['node']['apachesolr'] = array(
     'group' => t('Apachesolr'),
     'title' => t('Apache Solr search'),
@@ -841,7 +841,7 @@ class views_handler_filter_apachesolr_type extends views_handler_filter {
  * 
  * Returns a view for displaying apachesolr search results.
  */
-function apachesolr_views_integration_views_default_views() {
+function apachesolr_views_views_default_views() {
   $view = new view;
   $view->name = 'apachesolr_search_result';
   $view->description = 'Display the results of the current Apache Solr search.';
