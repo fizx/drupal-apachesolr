@@ -808,7 +808,7 @@ function theme_apachesolr_facet_item($name, $count, $path, $active = FALSE, $unc
     return $unclick_link . " $name";
   }
   else {
-    return l($name. " ($count)",  $path, $attributes);
+    return l($name ." ($count)",  $path, $attributes);
   }
 }
 
