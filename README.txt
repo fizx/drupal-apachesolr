@@ -29,7 +29,7 @@ Test that your solr server is now available by visiting http://localhost:8983/so
 
 Now run cron on your Drupal site until your content is indexed.
 
-Enable blocks for facets at Administer > Site building > Blocks.
+Enable blocks for facets at Administer > Site building > Blocks.   
 
 Troubleshooting
 --------------
