@@ -53,10 +53,10 @@ function phptemplate_search_item($item, $type) {
   $break = '';
   if ($node = $item['node']) {
     if ($path = $node->ssfield_imagemodule_image) {
-      $item['snippet'] = '<span class="image">'. theme('image', $path, '', '', array('align' => 'left')). '</span>'. $item['snippet'];
+      $item['snippet'] = '<span class="image">'. theme('image', $path, '', '', array('align' => 'left')) .'</span>'. $item['snippet'];
       $break = '<br clear="all"/>';
     }
   }
-  $output .= ' <dd>'. ($item['snippet'] ? '<p>'. $item['snippet'] . $break. '</p>' : '') .'<p class="search-info">'. implode(' - ', $info) .'</p></dd>';
+  $output .= ' <dd>'. ($item['snippet'] ? '<p>'. $item['snippet'] . $break .'</p>' : '') .'<p class="search-info">'. implode(' - ', $info) .'</p></dd>';
   return $output;
 }
