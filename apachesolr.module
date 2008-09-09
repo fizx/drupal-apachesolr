@@ -153,7 +153,7 @@ function apachesolr_delete_index_form() {
 
 function apachesolr_delete_index_form_validate($form, $form_values) {
   if (!$form_values['delete_index']) {
-    form_set_error('delete_index', t('If you want to clear the Solr index, you must check the confirmation box.'));
+    form_set_error('delete_index', t('If you want to delete the Solr index, you must check the confirmation box.'));
   }
   if (!user_access('administer site configuration')) {
     drupal_access_denied();
