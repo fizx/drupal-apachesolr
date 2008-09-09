@@ -264,7 +264,7 @@ class ApacheSolrUpdate {
         $node = node_build_content($node, FALSE, FALSE);
         $node->body = drupal_render($node->content);
 
-        $text = check_plain($node->title) .  $node->body;
+        $text = check_plain($node->title) . ' ' . $node->body;
 
         // Fetch extra data normally not visible
         $extra = node_invoke_nodeapi($node, 'update index');
