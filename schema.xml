@@ -284,7 +284,8 @@
    <dynamicField name="dmfield*" type="date"    indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="bmfield*"  type="boolean" indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="bsfield*"  type="boolean" indexed="true"  stored="true" multiValued="false"/>
-   <!--<dynamicField name="*-f"  type="sfloat"  indexed="true"  stored="true"/>-->
+   <dynamicField name="fsfield*"  type="sfloat"  indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="fmfield*"  type="sfloat"  indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="psfield*"  type="sdouble" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="pmfield*"  type="sdouble" indexed="true"  stored="true" multiValued="true"/>
 
