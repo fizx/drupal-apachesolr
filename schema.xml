@@ -245,6 +245,7 @@
      result set and don't need to go to the database with a node_load. -->
 
    <field name="title" type="text" indexed="true" stored="true"/>
+   <field name="stitle" type="string" indexed="true" stored="true"/>
    <field name="body" type="text" indexed="false" stored="true"/>
    <field name="type" type="string" indexed="true" stored="true"/>
    <field name="path" type="text" indexed="true" stored="true"/>
