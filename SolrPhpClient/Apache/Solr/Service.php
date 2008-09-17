@@ -238,9 +238,11 @@ class Apache_Solr_Service
    */
   private function _sendRawGet($url)
   {
-    // drupal_set_message(url($url, NULL, NULL, TRUE));
-    //$http_response_header is set by file_get_contents
-    $response = new Apache_Solr_Response(@file_get_contents($url), $http_response_header);
+    // drupal_set_message(url($url, array('absolute' => TRUE)));
+    // $http_response_header is set by file_get_contents
+    $http_response_header = FALSE;
+    $contents = @file_get_contents($url);
+    $response = new Apache_Solr_Response($contents, $http_response_header);
 
     if ($response->getHttpStatus() != 200)
     {
