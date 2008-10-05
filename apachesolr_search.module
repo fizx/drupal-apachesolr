@@ -71,8 +71,13 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
 
         if (isset($_GET['solrsort'])) {
           $sort = check_plain($_GET['solrsort']);
+        }
+
+        // Validate sort parameter
+        if ($sort && preg_match('/^([a-z0-9_]+ (asc|desc)(,)?)+$/i', $sort)) {
           $params['sort'] = $sort;
         }
+
         if ($fields = apachesolr_cck_fields()) {
           foreach ($fields as $name => $field) {
             $index_key = apachesolr_index_key($field);
