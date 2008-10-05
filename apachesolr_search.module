@@ -74,7 +74,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
         }
 
         // Validate sort parameter
-        if ($sort && preg_match('/^([a-z0-9_]+ (asc|desc)(,)?)+$/i', $sort)) {
+        if (isset($sort) && preg_match('/^([a-z0-9_]+ (asc|desc)(,)?)+$/i', $sort)) {
           $params['sort'] = $sort;
         }
 
