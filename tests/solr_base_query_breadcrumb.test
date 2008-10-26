@@ -1,11 +1,11 @@
 <?php
 // $Id$
 
-class DrupalSolrQueryBreadcrumbTests extends DrupalWebTestCase {
-  function getInfo() {
-    return array('name' => 'Breadcrumb tests',
-      'description' => 'Make sure breadcrumbs get formed correctly.',
-      'group' => 'ApacheSolr');
+class DrupalSolrQueryBreadcrumbTests extends DrupalTestCase {
+  function get_info() {
+    return array('name' => 'Solr/query breadcrumb',
+      'desc' => 'Make sure breadcrumbs get formed correctly.',
+      'group' => 'Apache Solr tests');
   }
 
   private $breadcrumb;
