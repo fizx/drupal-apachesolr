@@ -1,11 +1,12 @@
 <?php
 // $Id$
 
-class DrupalSolrSearchResultTests extends DrupalTestCase {
-  function get_info() {
-    return array('name' => 'Solr/search results',
-      'desc' => 'Assure that searches with apachesolr yield correct results.',
-      'group' => 'Apache Solr tests');
+class DrupalSolrSearchResultTests extends DrupalWebTestCase {
+  
+  function getInfo() {
+    return array('name' => 'Search results',
+      'description' => 'Assure that searches with apachesolr yield correct results.',
+      'group' => 'ApacheSolr');
   }
 
   // Default Apache Solr stop words.
