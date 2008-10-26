@@ -1,18 +1,18 @@
 <?php
 // $Id$
 
-class DrupalSolrQueryBreadcrumbTests extends DrupalTestCase {
-  function get_info() {
-    return array('name' => 'Solr/query breadcrumb',
-      'desc' => 'Make sure breadcrumbs get formed correctly.',
-      'group' => 'Apache Solr tests');
+class DrupalSolrQueryBreadcrumbTests extends DrupalWebTestCase {
+  function getInfo() {
+    return array('name' => 'Breadcrumb',
+      'description' => 'Make sure breadcrumbs get formed correctly.',
+      'group' => 'ApacheSolr');
   }
 
   private $breadcrumb;
   private $menu_active_breadcrumb;
 
   function setUp() {
-    parent::setUp();
+    parent::setUp('search', 'apachesolr');
     $types = node_get_types('types');
     shuffle($types);
     $type = array_pop($types);

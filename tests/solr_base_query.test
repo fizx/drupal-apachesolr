@@ -1,11 +1,15 @@
 <?php
 // $Id$
 
-class DrupalSolrQueryTests extends DrupalTestCase {
-  function get_info() {
-    return array('name' => 'Solr/query handling',
-      'desc' => 'Throw various queries at the query object and make sure they all parse correctly.',
-      'group' => 'Apache Solr tests');
+class DrupalSolrQueryTests extends DrupalWebTestCase {
+  function getInfo() {
+    return array('name' => 'Query handling',
+      'description' => 'Throw various queries at the query object and make sure they all parse correctly.',
+      'group' => 'ApacheSolr');
+  }
+
+  function setUp() {
+    parent::setUp('search', 'apachesolr');
   }
 
   private $queries = array(
