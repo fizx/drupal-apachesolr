@@ -164,11 +164,11 @@ class Solr_Base_Query {
    *   'AND' or 'OR'
    */ 
   function add_subquery(Solr_Base_Query $query, $operator = 'AND') {
-    $this->_subqueries[md5(serialize($query))] = array('#query' => $query, '#operator' => $operator);
+    $this->_subqueries[$query->get_query_basic()] = array('#query' => $query, '#operator' => $operator);
   }
   
   function remove_subquery(Solr_Base_Query $query) {
-    unset($this->_subqueries[md5(serialize($query))]);
+    unset($this->_subqueries[$query->get_query_basic()]);
   }
   
   function remove_subqueries() {
