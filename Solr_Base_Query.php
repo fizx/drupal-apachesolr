@@ -96,9 +96,17 @@ class Solr_Base_Query {
    */
   private $_field_operator;
   
-  function __construct($query, $field_operator = "AND") {
+  /**
+   * @param $querystring
+   *   The string that a user would type into the search box. Suitable input
+   *   may come from search_get_keys()
+   * @param $field_operator
+   *   An object level operator. AND is the implicit default. All segments will
+   *   be joined with this operator.
+   */
+  function __construct($querystring, $field_operator = "AND") {
     $this->_field_operator = $field_operator;
-    $this->_query = trim($query);
+    $this->_query = trim($querystring);
     $this->parse_query();
   }
 
