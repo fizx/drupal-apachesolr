@@ -134,7 +134,6 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
               $snippet = '';
             }
             $results[] = array('link' => $doc->url,
-                               // TODO: This will break in multisite - the type name has to be saved to the index.
                                'type' => node_get_types('name', $doc),
                                'title' => $doc->title,
                                'user' => theme('username', $doc),
