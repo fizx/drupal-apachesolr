@@ -244,6 +244,9 @@
      Lucene store title, body, type, etc., is that we retrieve them with the search
      result set and don't need to go to the database with a node_load. -->
 
+   <field name="site" type="string" indexed="true" stored="true"/>
+   <field name="hash" type="string" indexed="true" stored="true"/>
+   <field name="url" type="string" indexed="true" stored="true"/>
    <field name="title" type="text" indexed="true" stored="true" termVectors="true"/>
    <field name="stitle" type="string" indexed="true" stored="true"/>
    <field name="body" type="text" indexed="false" stored="true"/>
@@ -303,7 +306,7 @@
  <!-- Field to use to determine and enforce document uniqueness.
       Unless this field is marked with required="false", it will be a required field
    -->
- <uniqueKey>nid</uniqueKey>
+ <uniqueKey>url</uniqueKey>
 
  <!-- field for the QueryParser to use when an explicit fieldname is absent -->
  <defaultSearchField>text</defaultSearchField>

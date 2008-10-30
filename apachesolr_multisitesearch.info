@@ -1,0 +1,8 @@
+; $Id$
+name = Apache Solr multisite search
+description = Search with solr
+dependencies[] = search
+dependencies[] = apachesolr
+package = ApacheSolr
+core = "6.x"
+php = 5.0
