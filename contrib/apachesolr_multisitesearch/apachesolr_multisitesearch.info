@@ -1,0 +1,5 @@
+; $Id$
+name = Apache Solr multisite search
+description = Search across multiple Drupal sites with solr
+dependencies = apachesolr
+package = ApacheSolr
