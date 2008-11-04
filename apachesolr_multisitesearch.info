@@ -1,6 +1,6 @@
 ; $Id$
-name = Apache Solr multisite search
-description = Search with solr
+name = ApacheSolr multisite search
+description = Search multiple Drupal sites with Solr
 dependencies[] = search
 dependencies[] = apachesolr
 package = ApacheSolr

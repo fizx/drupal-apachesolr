@@ -1,6 +1,6 @@
 ; $Id$
-name = Apache Solr search
-description = Search with solr
+name = ApacheSolr search
+description = Search with Solr
 dependencies[] = search
 dependencies[] = apachesolr
 package = ApacheSolr
