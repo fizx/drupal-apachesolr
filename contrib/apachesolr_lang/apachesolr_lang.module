@@ -5,7 +5,7 @@
 /**
  * Implementation of hook_block().
  */
-function apachesolrlang_block($op = 'list', $delta = 0, $edit = array()) {
+function apachesolr_lang_block($op = 'list', $delta = 0, $edit = array()) {
   $title = t('ApacheSolr: Filter by language');
   switch ($op) {
     case 'list':
