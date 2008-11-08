@@ -15,6 +15,8 @@ class Solr_Base_Query {
       $response = drupal_http_request(apachesolr_base_url() ."/admin/luke?numTerms=0&wt=json");
       if ($response->code == '200') {
         $data = json_decode($response->data);
+      } else {
+        throw new Exception('ApacheSolr Failed to get data from LUKE got '.$response->code.' from '  . apachesolr_base_url() ."/admin/luke?numTerms=0&wt=json");
       }
     }
     return $data->fields;
