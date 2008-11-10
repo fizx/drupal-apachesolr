@@ -1,0 +1,6 @@
+; $Id$
+name = ApacheSolr Node Access
+description = Integrates Node Access and ApacheSolr
+dependencies[] = apachesolr
+package = ApacheSolr
+core = "6.x"

@@ -292,12 +292,12 @@
    <dynamicField name="fmfield*"  type="sfloat"  indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="psfield*"  type="sdouble" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="pmfield*"  type="sdouble" indexed="true"  stored="true" multiValued="true"/>
+   <!-- This field is used to store node access records, as opposed to CCK field data -->
+   <dynamicField name="nodeaccess*" type="sint"  indexed="true"  stored="true" multiValued="true"/>
 
-
-
-   <!-- uncomment the following to ignore any fields that don't already match an existing
+   <!-- The following causes solr to ignore any fields that don't already match an existing
         field name or dynamic field, rather than reporting them as an error.
-        alternately, change the type="ignored" to some other type e.g. "text" if you want
+        Alternately, change the type="ignored" to some other type e.g. "text" if you want
         unknown fields indexed and/or stored by default -->
    <dynamicField name="*" type="ignored" />
 
