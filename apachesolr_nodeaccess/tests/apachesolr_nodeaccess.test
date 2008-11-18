@@ -84,7 +84,7 @@ class DrupalApacheSolrNodeAccess extends DrupalWebTestCase {
     $this->drupalLogin($basic_user);
 
     include_once drupal_get_path('module', 'apachesolr') .'/Solr_Base_Query.php';
-    $query = new Solr_Base_Query("keyword");
+    $query = apachesolr_drupal_query();
     $params = array();
 
     $subquery = _apachesolr_nodeaccess_build_subquery($basic_user);

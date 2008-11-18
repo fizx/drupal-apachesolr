@@ -21,8 +21,8 @@
  * @author Donovan Jimenez <djimenez@conduit-it.com>
  */
 
-require_once('Apache/Solr/Document.php');
-require_once('Apache/Solr/Response.php');
+require_once(dirname(__FILE__) . '/Document.php');
+require_once(dirname(__FILE__) . '/Response.php');
 
 /**
  * Starting point for the Solr API. Represents a Solr server resource and has
