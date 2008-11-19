@@ -187,7 +187,7 @@ function apachesolr_search_block($op = 'list', $delta = 0, $edit = array()) {
       if ($fields = apachesolr_cck_fields()) {
         foreach ($fields as $name => $field) {
           $index_key = apachesolr_index_key($field);
-          $label = db_result(db_query("SELECT label FROM {node_field_instance} WHERE field_name = '%s'", $name));
+          $label = db_result(db_query("SELECT label FROM {content_node_field_instance} WHERE field_name = '%s'", $name));
           // TODO: $index_key must be wrong here.
           $blocks[$index_key] = array('info' => t('ApacheSolr Search: Filter by @field', array('@field' => $label)));
         }
