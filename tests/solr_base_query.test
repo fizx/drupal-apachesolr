@@ -87,7 +87,7 @@ class DrupalSolrQueryTests extends DrupalWebTestCase {
     else {
       foreach ($components as $s) {
         if (strpos($q, $s) === FALSE) {
-          $pass = false;
+          $pass = FALSE;
           break;
         }
       }
