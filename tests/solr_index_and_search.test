@@ -19,7 +19,7 @@ class DrupalSolrMatchTestCase extends DrupalWebTestCase {
   function setUp() {
 
     //We run this pre-setup in case the user wants to use a different solr location for testing than the default
-    $this->solr =& apachesolr_get_solr(variable_get('apachesolr_host', 'localhost'), variable_get('apachesolr_port', 8983), variable_get('apachesolr_path', '/solr'));
+    $this->solr = apachesolr_get_solr(variable_get('apachesolr_host', 'localhost'), variable_get('apachesolr_port', 8983), variable_get('apachesolr_path', '/solr'));
     parent::setUp('apachesolr', 'apachesolr_search');
   }
 
