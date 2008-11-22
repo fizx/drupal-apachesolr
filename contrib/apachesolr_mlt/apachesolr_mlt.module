@@ -122,7 +122,7 @@ function apachesolr_mlt_settings() {
       l('Edit', 'admin/settings/apachesolr_mlt/configure_block/' . check_plain($block->id)) .' | ' . l('Delete', 'admin/settings/apachesolr_mlt/delete_block/' . check_plain($block->id)),
     );
   }
-  $header = array('Id', 'name', 'options');
+  $header = array(t('Id'), t('Name'), t('Options'));
   $output = l('Add block', 'admin/settings/apachesolr_mlt/configure_block');
   $output .= theme('table', $header, $rows);
   return $output;
