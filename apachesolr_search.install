@@ -1,0 +1,16 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Install and related hooks for apachesolr_search.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function apachesolr_search_uninstall() {
+  variable_del('apachesolr_search_last_change');
+  variable_del('apachesolr_search_last_nid');
+}
+
