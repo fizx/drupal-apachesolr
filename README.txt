@@ -21,10 +21,8 @@ Install and enable the ApacheSolr Drupal module as you would any Drupal module.
 
 Prerequisite: Java 5 or higher.  PHP 5.2 or higher.
 
-Download Solr 1.2 or higher from a mirror site:
+Download Solr 1.3.x from a mirror site:
 http://www.apache.org/dyn/closer.cgi/lucene/solr/
-
-The current version is 1.3.0.
 
 Unpack the tarball somewhere not visible to the web (not in your apache docroot
 and not inside of your drupal directory).
