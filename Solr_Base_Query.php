@@ -242,7 +242,7 @@ class Solr_Base_Query {
         if (count($values) > 0) {
           foreach ($values as $value) {
             $found = Solr_Base_Query::make_field(array('#name' => $name, '#value' => $value));
-            $pos = strpos($_keys, $found);
+            $pos = strpos($this->_query, $found);
             // $solr_keys and $solr_crumbs are keyed on $pos so that query order
             // is maintained. This is important for breadcrumbs.
             $this->_fields[$pos] = array('#name' => $name, '#value' => trim($value));
