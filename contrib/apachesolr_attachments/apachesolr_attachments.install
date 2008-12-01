@@ -16,4 +16,7 @@ function apachesolr_attachments_install() {
 function apachesolr_attachments_uninstall() {
   variable_del('apachesolr_attachment_pdf_path');
   variable_del('apachesolr_attachment_txt_path');
+  variable_del('apachesolr_attachment_doc_path');
+  variable_del('apachesolr_attachment_last_change');
+  variable_del('apachesolr_attachment_last_nid');  
 } 
