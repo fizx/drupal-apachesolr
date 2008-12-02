@@ -284,8 +284,10 @@
         both match, the first appearing in the schema will be used.  -->
 
    <!-- <dynamicField name="*-l"  type="slong"   indexed="true"  stored="true"/> -->
-   <dynamicField name="isfield*"  type="sint"    indexed="true"  stored="true" multiValued="false"/>
-   <dynamicField name="imfield*"  type="sint"    indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="isfield*"  type="integer" indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="imfield*"  type="integer" indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="sisfield*" type="sint"    indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="simfield*" type="sint"    indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="smfield*"  type="string"    indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="tmfield*"  type="text"    indexed="true"  stored="true" multiValued="true" termVectors="true"/>
    <dynamicField name="ssfield*"  type="string"    indexed="true"  stored="true" multiValued="false"/>
@@ -299,7 +301,7 @@
    <dynamicField name="psfield*"  type="sdouble" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="pmfield*"  type="sdouble" indexed="true"  stored="true" multiValued="true"/>
    <!-- This field is used to store node access records, as opposed to CCK field data -->
-   <dynamicField name="nodeaccess*" type="sint"  indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="nodeaccess*" type="integer" indexed="true" stored="false" multiValued="true"/>
 
    <!-- The following causes solr to ignore any fields that don't already match an existing
         field name or dynamic field, rather than reporting them as an error.
