@@ -115,7 +115,7 @@ class Solr_Base_Query {
     $this->rebuild_query();
   }
 
-  function get_fields() {
+  public function get_fields() {
     return $this->_fields;
   }
 
