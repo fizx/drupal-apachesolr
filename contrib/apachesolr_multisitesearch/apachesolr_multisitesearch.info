@@ -4,5 +4,6 @@ description = Search multiple Drupal sites with Solr
 dependencies[] = search
 dependencies[] = apachesolr
 package = ApacheSolr
-core = "6.x"
-php = 5.0
+;don't use until it's fixed for new APIs 
+;core = "6.x"
+php = 5.2
