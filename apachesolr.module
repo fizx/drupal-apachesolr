@@ -594,8 +594,8 @@ function apachesolr_block($op = 'list', $delta = 0, $edit = array()) {
   switch ($op) {
     case 'list':
       // Sorting block
-      $blocks['sort'] = array('info' => t('ApacheSolr Core: Sorting'));
-      $blocks['type'] = array('info' => t('ApacheSolr Core: Filter by type'));
+      $blocks['sort'] = array('info' => t('ApacheSolr Core: Sorting'), 'cache' => BLOCK_CACHE_PER_PAGE);
+      $blocks['type'] = array('info' => t('ApacheSolr Core: Filter by type'), 'cache' => BLOCK_CACHE_PER_PAGE);
       return $blocks;
 
     case 'view':

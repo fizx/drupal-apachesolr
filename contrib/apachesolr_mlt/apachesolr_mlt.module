@@ -337,7 +337,7 @@ function apachesolr_mlt_list_blocks() {
   $blocks = array();
   while ($block = db_fetch_object($block_results)) {
     $block->data = unserialize($block->data);
-    $blocks[$block->id] = array('info' => t('ApacheSolr recommendations: ') . $block->data['name']);
+    $blocks[$block->id] = array('info' => t('ApacheSolr recommendations: ') . $block->data['name'], 'cache' => BLOCK_CACHE_PER_PAGE);
   }
   return $blocks;
 }

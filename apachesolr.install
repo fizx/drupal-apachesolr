@@ -115,3 +115,16 @@ function apachesolr_update_6000() {
   return $ret;
 }
 
+/**
+ * Fix block caching settings.
+ *
+ * Work-around for core bug: http://drupal.org/node/235673
+ */
+function apachesolr_update_6001() {
+  $ret = array();
+
+  $ret[] = update_sql("UPDATE {blocks} set cache = " . BLOCK_CACHE_PER_PAGE . " WHERE module LIKE 'apachesolr%'");
+
+  return $ret;
+  
+}
