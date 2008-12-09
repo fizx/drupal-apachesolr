@@ -136,6 +136,8 @@ function apachesolr_attachments_add_documents(&$documents, $nid) {
           $document->bsfield_isfile = TRUE;
           _as_configure_taxonomy($document, $node);
           
+          drupal_alter('apachesolr_attachment', $document, $node, $file);
+           
           $documents[] = $document;
         }
       }
