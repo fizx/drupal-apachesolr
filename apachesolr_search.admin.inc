@@ -27,7 +27,7 @@ function apachesolr_search_settings_page() {
 }
 
 /**
- * Form builder function to set date bias.
+ * Form builder function to set date, comment, etc biases.
  */
 function apachesolr_search_bias_form($form_state) {
 
