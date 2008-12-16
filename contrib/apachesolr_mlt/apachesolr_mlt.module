@@ -74,20 +74,21 @@ function apachesolr_mlt_suggestions($block_id) {
         }
       }
       $response = $solr->search('id:' . apachesolr_document_id($nid), 0, $block['num_results'], $params);
-
-      $r = (array) end($response->response);
-      $links = array();
-
-      if (is_array($r)) {
-        foreach ($r as $result) {
-          $links[] = l($result->title, $result->url);
-        }
-      }
-
       $suggestions = array();
-      if (count($links) > 0) {
-        $suggestions['subject'] = $block['name'];
-        $suggestions['content'] = theme('apachesolr_mlt_recommendation_block', $links);
+      if ($response->response) {
+        $r = (array) end($response->response);
+        $links = array();
+  
+        if (is_array($r)) {
+          foreach ($r as $result) {
+            $links[] = l($result->title, $result->url);
+          }
+        }
+  
+        if (count($links) > 0) {
+          $suggestions['subject'] = $block['name'];
+          $suggestions['content'] = theme('apachesolr_mlt_recommendation_block', $links);
+        }
       }
       return $suggestions;
     } catch ( Exception $e ) {
