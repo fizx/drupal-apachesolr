@@ -291,7 +291,7 @@ class Solr_Base_Query {
       $subfq = $data['#query']->get_fq();
       if ($subfq) {
         $operator = $data['#fq_operator'];
-        $fq = $this->fq[] = implode(" {$operator} ", $subfq);
+        $fq[] = implode(" {$operator} ", $subfq);
       }
     }
     return $fq;
@@ -302,7 +302,9 @@ class Solr_Base_Query {
     foreach ($this->subqueries as $id => $data) {
       $operator = $data['#q_operator'];
       $subquery = $data['#query']->get_query_basic();
-      $query .= " {$operator} ({$subquery})";
+      if ($subquery) {
+        $query .= " {$operator} ({$subquery})";
+      }
     }
     return $query;
   }
