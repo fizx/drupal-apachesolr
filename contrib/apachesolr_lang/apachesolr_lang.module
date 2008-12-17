@@ -15,11 +15,11 @@ function apachesolr_lang_block($op = 'list', $delta = 0, $edit = array()) {
     case 'view':
       if (apachesolr_has_searched()) {
         // Get the query and response. Without these no blocks make sense.
-        $response =& apachesolr_static_response_cache();
+        $response = apachesolr_static_response_cache();
         if (empty($response)) {
           return;
         }
-        $query =& apachesolr_drupal_query();
+        $query = apachesolr_current_query();
         
         switch ($delta) {
           case 'language':
