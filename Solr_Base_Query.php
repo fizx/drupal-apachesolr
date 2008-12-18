@@ -57,7 +57,7 @@ class Solr_Base_Query {
       return $values['#name']. ':'. $values['#value'];
     }
   }
-  
+
   /**
    * Static shared by all instances, used to increment ID numbers.
    */
@@ -74,7 +74,7 @@ class Solr_Base_Query {
    */
   protected $fields;
   protected $filters;
-  
+
   /**
    * An array of subqueries.
    */
@@ -291,7 +291,7 @@ class Solr_Base_Query {
       $subfq = $data['#query']->get_fq();
       if ($subfq) {
         $operator = $data['#fq_operator'];
-        $fq[] = implode(" {$operator} ", $subfq);
+        $fq[] = "(" . implode(" {$operator} ", $subfq) .")";
       }
     }
     return $fq;
