@@ -36,9 +36,8 @@ function apachesolr_language_block_view() {
         }
         else {
           $languages[] = theme('apachesolr_facet_item', locale_language_name($language), $count, $path, $querystring, $active, $unclick_link);
-        }`
+        }
       }
-
       if (count($languages) > 0) {
         $facet_display_limits = variable_get('apachesolr_facet_query_limits', array());
         $facet_display_limit = isset($facet_display_limits[$delta]) ? $facet_display_limits[$delta] : 10;
