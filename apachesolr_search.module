@@ -237,7 +237,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
               'type' => node_get_types('name', $doc),
               'title' => $doc->title,
               'user' => theme('username', $doc),
-              'date' => $doc->changed,
+              'date' => apachesolr_date_timestamp($doc->changed),
               'node' => $doc,
               'extra' => $extra,
               'score' => $doc->score,

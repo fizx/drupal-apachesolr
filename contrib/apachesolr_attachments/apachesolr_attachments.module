@@ -127,7 +127,7 @@ function apachesolr_attachments_add_documents(&$documents, $nid) {
           $document->hash = $hash;
           $document->nid = $node->nid;
           $document->title = $file->filename; 
-          $document->changed = $node->changed;
+          $document->changed = apachesolr_date_iso($node->changed);
           $document->uid = $node->uid;
           $document->name = $node->name;
           $document->body = $text;
