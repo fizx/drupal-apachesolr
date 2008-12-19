@@ -197,11 +197,6 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
         if (!$query) {
           return array();
         }
-        // An arry of fq parameters.
-        $fq = $query->get_fq();
-        if ($fq) {
-          $params['fq'] = $fq;
-        }
 
         $response = $solr->search($query->get_query_basic(), $params['start'], $params['rows'], $params);
         // The response is cached so that it is accessible to the blocks and anything
