@@ -253,7 +253,9 @@
    <field name="path" type="text" indexed="true" stored="true" termVectors="true"/>
    <field name="uid"  type="integer" indexed="true" stored="true"/>
    <field name="name" type="text" indexed="true" stored="true" termVectors="true"/>
+   <field name="created" type="date" indexed="true" stored="true"/>
    <field name="changed" type="date" indexed="true" stored="true"/>
+   <field name="last_comment_or_change" type="date" indexed="true" stored="true"/>
    <field name="nid"  type="integer" indexed="true" stored="true"/>
    <field name="status" type="integer" indexed="true" stored="true"/>
    <field name="comment_count" type="integer" indexed="true" stored="true"/>
