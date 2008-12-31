@@ -69,6 +69,7 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_path');
   variable_del('apachesolr_rows');
   variable_del('apachesolr_facet_query_limits');
+  variable_del('apachesolr_facet_query_limit_default');  
   variable_del('apachesolr_site_hash');
   // Remove tables.
   drupal_uninstall_schema('apachesolr');
