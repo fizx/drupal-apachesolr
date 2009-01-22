@@ -501,7 +501,7 @@ function apachesolr_node_to_document($nid) {
       $path = 'node/' . $node->nid;
       $output = drupal_get_path_alias($path, $language);
       if ($output && $output != $path) {
-        $document->path = $output;
+        $document->path = apachesolr_strip_ctl_chars($output);
       }
     }
 
