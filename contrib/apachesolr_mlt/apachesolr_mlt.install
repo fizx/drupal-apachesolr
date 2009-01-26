@@ -23,7 +23,7 @@ function apachesolr_mlt_schema() {
         'type' => 'text',
         'size' => 'big',
         'not null' => TRUE,
-        'default' => ''),
+      ),
     ),
     'primary key' => array('id'),
   );
