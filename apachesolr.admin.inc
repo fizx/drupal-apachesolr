@@ -149,6 +149,7 @@ function apachesolr_enabled_facets_form_submit($form, &$form_state) {
  */
 function apachesolr_enabled_facets_form() {
   $facets = array();
+  $module_facets = array();
   $module_list = array();
   foreach (module_implements('apachesolr_facets') as $module) {
     $module_facets[$module] = module_invoke($module, 'apachesolr_facets');
@@ -190,9 +191,16 @@ function apachesolr_enabled_facets_form() {
     }
   }
 
+  $has_facets = (bool)$module_facets;
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#access' => $has_facets,
+  );
+  $form['no-facets-message'] = array(
+    '#value' => t('<em>No filters are available from your currently enabled modules</em>'),
+    '#access' => !$has_facets,
   );
 
   $form['#tree'] = TRUE;
