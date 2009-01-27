@@ -84,6 +84,10 @@ function apachesolr_mlt_suggestions($block_id, $nid) {
       }
     }
     $query = apachesolr_drupal_query('id:' . apachesolr_document_id($nid));
+    if (empty($query)) {
+      // An error contacting the server.
+      return;
+    }
     // This hook allows modules to modify the query and params objects.
     apachesolr_modify_query($query, $params);
 
