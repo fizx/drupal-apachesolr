@@ -64,5 +64,5 @@ function apachesolr_image_theme() {
  * Implementation of hook_enable().
  */
 function apachesolr_image_enable() {
-  drupal_set_message(t('The ApacheSolr Image integration module will not have any apparent effect until Image type nodes are indexed or re-indexed.'));
+  drupal_set_message(t('The Apache Solr image integration module will not have any apparent effect until Image type nodes are indexed or re-indexed.'));
 }

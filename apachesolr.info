@@ -1,7 +1,7 @@
 ; $Id$
-name = ApacheSolr framework
+name = Apache Solr framework
 description = Framework for searching with Solr
 dependencies [] = search
-package = ApacheSolr
+package = Apache Solr
 core = "6.x"
 php = 5.2

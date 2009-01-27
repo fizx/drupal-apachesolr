@@ -1,6 +1,6 @@
 ; $Id$
-name = ApacheSolr more like this
+name = Apache Solr more like this
 description = Use Solr to make content recommendations
 dependencies[] = apachesolr
-package = ApacheSolr
+package = Apache Solr
 core = 6.x
