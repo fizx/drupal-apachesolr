@@ -31,8 +31,8 @@ function apachesolr_search_settings_page() {
  */
 function apachesolr_search_bias_form($form_state) {
 
-  $date_settings = variable_get('apacehsolr_search_date_boost', '4:200.0');
-  $comment_settings = variable_get('apacehsolr_search_comment_boost', '4:200.0');
+  $date_settings = variable_get('apachesolr_search_date_boost', '4:200.0');
+  $comment_settings = variable_get('apachesolr_search_comment_boost', '4:200.0');
   
   $options = array(
     '10:2000.0' => '10',
@@ -55,14 +55,14 @@ function apachesolr_search_bias_form($form_state) {
     '#collapsed' => FALSE,
     '#description' => t('Specify here biasing for different node properties when ordering the search results. Choose <em>Omit</em> to ignore this property.'),
   );
-  $form['biasing']['apacehsolr_search_date_boost'] = array(
+  $form['biasing']['apachesolr_search_date_boost'] = array(
     '#type' => 'select',
     '#options' => $options,
     '#title' => t("More recent change bias"),
     '#default_value' => $date_settings,
     '#description' => t('This setting will change the scoring so that more recent results may appear before those with higher keyword matching.'),
   );
-  $form['biasing']['apacehsolr_search_comment_boost'] = array(
+  $form['biasing']['apachesolr_search_comment_boost'] = array(
     '#type' => 'select',
     '#options' => $options,
     '#title' => t("More comments bias"),

@@ -45,3 +45,21 @@ function apachesolr_search_update_6001() {
   }
   return $ret;
 }
+
+/**
+ * Update mis-named variables.
+ */
+function apachesolr_search_update_6002() {
+  $ret = array();
+  $date_settings = variable_get('apacehsolr_search_date_boost', '');
+  $comment_settings = variable_get('apacehsolr_search_comment_boost', '');
+  if ($date_settings) {
+    variable_set('apachesolr_search_date_boost', $date_settings);
+  }
+  if ($comment_settings) {
+    variable_set('apachesolr_search_comment_boost', $comment_settings);
+  }
+  variable_del('apacehsolr_search_date_boost');
+  variable_del('apacehsolr_search_comment_boost');
+  return $ret;
+}
