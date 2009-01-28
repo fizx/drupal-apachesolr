@@ -1,7 +1,8 @@
 ; $Id$
 name = Apache Solr search
-description = Search with solr
+description = Search with Solr
 dependencies[] = search
 dependencies[] = apachesolr
-package = ApacheSolr
+package = Apache Solr
 core = "6.x"
+php = 5.2
