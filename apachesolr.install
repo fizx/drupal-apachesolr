@@ -18,6 +18,9 @@ function apachesolr_install() {
  * Implementation of hook_enable().
  */
 function apachesolr_enable() {
+  // Make sure we don't have stale data.
+  variable_del('apachesolr_index_last');
+  db_query("DELETE FROM {apachesolr_search_node}");
   // Populate table
   db_query("INSERT INTO {apachesolr_search_node} (nid, status, changed)
             SELECT n.nid, n.status, GREATEST(n.created, n.changed, c.last_comment_timestamp) AS changed
@@ -71,6 +74,7 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_facet_query_limits');
   variable_del('apachesolr_facet_query_limit_default');  
   variable_del('apachesolr_site_hash');
+  variable_del('apachesolr_index_last');
   // Remove tables.
   drupal_uninstall_schema('apachesolr');
 }
