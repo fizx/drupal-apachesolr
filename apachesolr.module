@@ -449,7 +449,6 @@ class ApacheSolrUpdate {
         foreach ($docs_chunk as $docs) {
           $solr->addDocuments($docs);
         }
-        $solr->addDocuments($documents);
         $solr->commit();
         $solr->optimize(FALSE, FALSE); 
       }
