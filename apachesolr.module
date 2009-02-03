@@ -394,6 +394,10 @@ function apachesolr_node_to_document($nid) {
     foreach (module_implements('apachesolr_update_index') as $module) {
       $function = $module .'_apachesolr_update_index';
       $function($document, $node);
+      // Break if the hook implementation decided to not index this document.
+      if (empty($document)) {
+        break;
+      }
     }
   }
   return $document;
