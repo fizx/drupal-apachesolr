@@ -174,7 +174,7 @@ class Solr_Base_Query {
       $querystring = 'filters='. implode(' ', $fq);
     }
     if ($this->solrsort) {
-      $querystring .= ($querystring) ? '&' . $this->solrsort : $this->solrsort;
+      $querystring .= ($querystring ? '&' : '') .'solrsort='. $this->solrsort;
     }
     return $querystring;
   }
