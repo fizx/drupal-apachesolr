@@ -251,8 +251,8 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
             call_user_func_array($function, array(&$results));
           }
         }
-        // Set breadcrumb
-        drupal_set_breadcrumb($query->get_breadcrumb());
+        // Add search terms and filters onto the breadcrumb.
+        drupal_set_breadcrumb(array_merge(menu_get_active_breadcrumb(), $query->get_breadcrumb($_GET['q'])));
         return $results;
 
       } // try
