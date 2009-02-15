@@ -54,7 +54,8 @@ The solrconfig.xml that comes with this modules defines auto-commit, so
 it may take a few minutes between running cron and when the new content
 is visible in search.
 
-Enable blocks for facets at Administer > Site building > Blocks.   
+Enable blocks for facets first at Administer > Site configuration > Apache Solr > Enabled filters,
+then position them as you like at Administer > Site building > Blocks.   
 
 Troubleshooting
 --------------
