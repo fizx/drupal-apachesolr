@@ -8,6 +8,7 @@ Apache Solr integration 6.x-1.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-1.0-xxxxx, xxxx-xx-xx
 ------------------------------
+#373921 by JacobSingh, show pending docs on index page from autocommit
 #371858 by pwolanin, re-fill the Luke cache after we empty it on cron
 #372120 by pwolanin, create one MLT block by default on install of apachesolr_mlt
 #370707 compact field names, create "order by" fields in schema.xml
