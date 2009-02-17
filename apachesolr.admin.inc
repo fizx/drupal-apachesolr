@@ -83,11 +83,17 @@ function apachesolr_index_page() {
 
   $output  = '';
   if (isset($data->index->numDocs)) {
-    $stats = $solr->getStats(true);
-    $docsPendingXpath = $stats->xpath('//stat[@name="docsPending"]');
-    $pending_docs = (int)(string)$docsPendingXpath[0];
-    $pending_msg = $pending_docs ? t('(@pending_docs sent but not yet indexed)', array('@pending_docs' => $pending_docs)) : '';
-    $output .= '<p>' . t('Number of documents in index: @num @pending', array('@num' => $data->index->numDocs, '@pending' => $pending_msg)) . "</p>\n";
+    $pending_docs = '';
+    try {
+      $stats = $solr->getStats(TRUE);
+      $docsPendingXpath = $stats->xpath('//stat[@name="docsPending"]');
+      $pending_docs = trim($docsPendingXpath[0]);
+    }
+    catch (Exception $e) {
+      watchdog('apachesolr', $e->getMessage());
+    }
+    $pending_msg = $pending_docs ? t('(@pending_docs sent but not yet processed)', array('@pending_docs' => $pending_docs)) : '';
+    $output .= '<p>' . t('Number of documents in index: @num !pending', array('@num' => $data->index->numDocs, '!pending' => $pending_msg)) . "</p>\n";
     $output .= '<p>' . t('Number of terms in index: @num', array('@num' => $data->index->numTerms)) . "</p>\n";
   }
 
