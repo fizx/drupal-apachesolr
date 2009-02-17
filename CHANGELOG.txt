@@ -8,6 +8,7 @@ Apache Solr integration 6.x-1.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-1.0-xxxxx, xxxx-xx-xx
 ------------------------------
+#370707 by pwolanin, make sort field names consistent, make ignored multiValued
 #375723 by pwolanin, prevent fatal error if available facet list changes
 #373921 by JacobSingh, show pending docs on index page from autocommit
 #371858 by pwolanin, re-fill the Luke cache after we empty it on cron

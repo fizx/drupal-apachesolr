@@ -171,7 +171,7 @@ function apachesolr_enabled_facets_form() {
   $form = array();
   $form['apachesolr_enabled_facets']['help'] = array (
     '#type' => 'item',
-    '#value' => t('You can use this screen to select which Apache Solr filter blocks should be created by enabling the corresponding Apache Solr filters. For performance reasons, you should only enable filters that you intend to have available to users on the search page.  After selecting which filter blocks to create, you will be sent to the blocks page where you can choose which of those blocks should be enabled when your users search by placing each block in a region.'),
+    '#value' => t('You can use this screen to select which search filter blocks should be created by enabling the corresponding filters on this page. For performance reasons, you should only enable filters that you intend to have available to users on the search page.  After selecting which filter blocks to create, you will be sent to the blocks page where you can choose which of those blocks should be enabled when your users search by placing each block in a region.'),
   );
   if ($module_list) {
     $placeholders = implode(', ', array_fill(0, count($module_list), "'%s'"));

@@ -602,9 +602,9 @@ function apachesolr_block($op = 'list', $delta = 0, $edit = array()) {
           case 'sort':
             $sorts = array(
               'relevancy' => array('name' => t('Relevancy'), 'default' => 'asc'),
-              'title_sort' => array('name' => t('Title'), 'default' => 'asc'),
+              'sort_title' => array('name' => t('Title'), 'default' => 'asc'),
               'type' => array('name' => t('Type'), 'default' => 'asc'),
-              'name_sort' => array('name' => t('Author'), 'default' => 'asc'),
+              'sort_name' => array('name' => t('Author'), 'default' => 'asc'),
               'created' => array('name' => t('Date'), 'default' => 'desc'),
             );
 
