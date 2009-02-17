@@ -325,7 +325,9 @@ function apachesolr_search_block($op = 'list', $delta = 0, $edit = array()) {
       // Add the blocks
       $blocks = array();
       foreach ($enabled_facets as $delta => $facet_field) {
-        $blocks[$delta] = $facets[$delta] + array('cache' => BLOCK_CACHE_PER_PAGE,);
+        if (isset($facets[$delta])) {
+          $blocks[$delta] = $facets[$delta] + array('cache' => BLOCK_CACHE_PER_PAGE,);
+        }
       }
       $blocks['currentsearch'] = array(
         'info' => t('Apache Solr Search: Current search'),
