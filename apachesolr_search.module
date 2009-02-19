@@ -174,7 +174,7 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
           }
         }
         // Note: we use 2 since 1 fails on Ubuntu Hardy.
-        $data = $solr->getLuke(2);
+        $data = $solr->getLuke();
         if (isset($data->index->numDocs)) {
           $total = $data->index->numDocs;
         }
