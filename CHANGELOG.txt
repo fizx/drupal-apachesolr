@@ -8,6 +8,7 @@ Apache Solr integration 6.x-1.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-1.0-xxxxx, xxxx-xx-xx
 ------------------------------
+#378196 by pwolanin, remove PHP client from CVS
 #231200 by janusman and pwolanin, turn on mapping of accented to non-accented
         ISO characters for indexing and search. 
 #377494 by pwolanin, Update text type in schema to new example.
