@@ -251,7 +251,8 @@
    <field name="body" type="text" indexed="true" stored="true" termVectors="true"/>
    <field name="type" type="string" indexed="true" stored="true"/>
    <field name="type_name" type="string" indexed="true" stored="true"/>
-   <field name="path" type="text" indexed="true" stored="true" termVectors="true"/>
+   <field name="path" type="string" indexed="true" stored="true"/>
+   <field name="path_alias" type="text" indexed="true" stored="true" termVectors="true"/>
    <field name="uid"  type="integer" indexed="true" stored="true"/>
    <field name="name" type="text" indexed="true" stored="true" termVectors="true"/>
    <field name="sname" type="string" indexed="true" stored="false"/>
