@@ -399,7 +399,7 @@ function apachesolr_search_block($op = 'list', $delta = 0, $edit = array()) {
               }
             }
           }
-          $vid = substr($delta, 12);
+          $vid = substr($delta, 7);
           $vocab = taxonomy_vocabulary_load($vid);
           if (is_numeric($vid) && is_array($terms) && isset($terms[$vid]) && is_array($terms[$vid])) {
             ksort($terms[$vid]);
