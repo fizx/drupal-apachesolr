@@ -545,6 +545,15 @@ function apachesolr_search_form_apachesolr_settings_alter(&$form, $form_state) {
   $form['buttons'] = $buttons;
 }
 
+/**
+ * Implementation of hook_form_[form_id]_alter().
+ *
+ * Rebuild (empty) the spellcheck dictionary when the index is deleted..
+ */
+function apachesolr_search_form_apachesolr_delete_index_form_alter(&$form, $form_state) {
+  $form['submit']['#submit'][] = 'apachesolr_search_build_spellcheck';
+}
+
 function apachesolr_search_build_spellcheck() {
   try {
     $solr = apachesolr_get_solr();
