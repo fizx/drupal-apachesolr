@@ -114,9 +114,10 @@ class Solr_Base_Query {
   }
 
   function add_field($field, $value) {
-    // microtime guarantees that added fields come at the end of the query,
+    static $i = 0;
+    // Counter guarantees that added fields come at the end of the query,
     // in order.
-    $this->fields[microtime()] = array('#name' => $field, '#value' => trim($value));
+    $this->fields[$i++] = array('#name' => $field, '#value' => trim($value));
   }
 
   public function get_fields() {
