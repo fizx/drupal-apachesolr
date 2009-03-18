@@ -103,7 +103,7 @@ class Solr_Base_Query {
   function __construct($solr, $querypath, $filterstring, $sortstring) {
     $this->solr = $solr;
     $this->querypath = trim($querypath);
-    $this->filters = trim($filterstring); 
+    $this->filters = trim($filterstring);
     $this->solrsort = trim($sortstring);
     $this->id = ++self::$idCount;
     $this->parse_filters();
@@ -114,10 +114,7 @@ class Solr_Base_Query {
   }
 
   function add_field($field, $value) {
-    static $i = 0;
-    // Counter guarantees that added fields come at the end of the query,
-    // in order.
-    $this->fields[$i++] = array('#name' => $field, '#value' => trim($value));
+    $this->fields[] = array('#name' => $field, '#value' => trim($value));
   }
 
   public function get_fields() {
