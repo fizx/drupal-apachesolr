@@ -27,7 +27,7 @@ Get the PHP library from the external project. The project is
 found at:  http://code.google.com/p/solr-php-client/
 From the apachesolr module directory, run this command:
 
-svn checkout -r5 http://solr-php-client.googlecode.com/svn/trunk/ SolrPhpClient
+svn checkout -r6 http://solr-php-client.googlecode.com/svn/trunk/ SolrPhpClient
 
 Note that revision 5 is the currently tested and suggested revision. If you
 do not have svn, you may be able to downlaod a copy of the library from
