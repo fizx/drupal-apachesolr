@@ -608,7 +608,7 @@ function apachesolr_block($op = 'list', $delta = 0, $edit = array()) {
       if (apachesolr_has_searched()) {
         // Get the query and response. Without these no blocks make sense.
         $response = apachesolr_static_response_cache();
-        if (empty($response)) {
+        if (empty($response) || ($response->response->numFound == 0)) {
           return;
         }
 
