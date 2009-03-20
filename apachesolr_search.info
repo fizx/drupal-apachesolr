@@ -5,4 +5,4 @@ dependencies[] = search
 dependencies[] = apachesolr
 package = Apache Solr
 core = "6.x"
-php = 5.2
+php = 5.1.4
