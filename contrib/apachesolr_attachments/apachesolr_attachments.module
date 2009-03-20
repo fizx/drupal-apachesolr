@@ -254,7 +254,7 @@ function _asa_remove_attachments_from_index($nid) {
     $solr->commit();
   }
   catch (Exception $e) {
-    watchdog(SOLR_ATTACHMENT_WD, $e->getMessage(), WATCHDOG_ERROR);
+    watchdog(SOLR_ATTACHMENT_WD, $e->getMessage(), NULL, WATCHDOG_ERROR);
   }
 }
 
