@@ -1,0 +1,7 @@
+; $Id$
+name = ApacheSolr Organic Groups
+description = Integrates Organic Groups and ApacheSolr
+dependencies[] = apachesolr
+dependencies[] = og
+package = Apache Solr
+core = "6.x"

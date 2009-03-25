@@ -296,6 +296,7 @@ class Solr_Base_Query {
    * a URL query parameter or passed to Solr as fq paramters.
    */
   protected function rebuild_fq($aliases = FALSE) {
+    $fq = array();
     $fields = array();
     foreach ($this->fields as $pos => $field) {
       // Look for a field alias.
