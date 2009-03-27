@@ -205,7 +205,10 @@ class Solr_Base_Query {
   public function get_url_querystring() {
     $querystring = '';
     if ($fq = $this->rebuild_fq(TRUE)) {
-      $querystring = 'filters='. implode(' ', $fq);
+      foreach ($fq as $key => $value) {
+        $fq[$key] = drupal_urlencode($value);
+      }
+      $querystring = 'filters='. implode('+', $fq);
     }
     if ($this->solrsort) {
       $querystring .= ($querystring ? '&' : '') .'solrsort='. $this->solrsort;
