@@ -570,7 +570,9 @@ function apachesolr_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       }
       break;
     case 'insert':
-      db_query("INSERT INTO {apachesolr_search_node} (nid, status, changed) VALUES  (%d, %d, GREATEST(%d, %d))", $node->nid, $node->status, $node->created, $node->changed);
+      // Make sure no node ends up with a timestamp that's in the future
+      // by using time() rather than the node's changed or created timestamp.
+      db_query("INSERT INTO {apachesolr_search_node} (nid, status, changed) VALUES  (%d, %d, %d)", $node->nid, $node->status, time());
       break;
     case 'update':
       // Check if the node has gone from published to unpublished.
