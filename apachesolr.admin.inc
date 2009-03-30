@@ -98,7 +98,7 @@ function apachesolr_index_page() {
       watchdog('apachesolr', $e->getMessage(), NULL, WATCHDOG_ERROR);
     }
     $output .= $delay_msg;
-    $pending_msg = $summary['pending_docs'] ? t('(@pending_docs sent but not yet processed)', $stats_summary) : '';
+    $pending_msg = $stats_summary['@pending_docs'] ? t('(@pending_docs sent but not yet processed)', $stats_summary) : '';
     $output .= '<p>' . t('Number of documents in index: @num !pending', array('@num' => $data->index->numDocs, '!pending' => $pending_msg)) . "</p>\n";
     $output .= $delete_msg;
   }
