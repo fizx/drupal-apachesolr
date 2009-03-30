@@ -12,6 +12,7 @@
 function apachesolr_install() {
   // Create tables.
   drupal_install_schema('apachesolr');
+  drupal_set_message(t('Search is enabled. You\'re site is <a href="!index_settings_link">currently 0% indexed</a>.', array('!index_settings_link' => url('admin/settings/apachesolr/index'))));
 }
 
 /**
