@@ -8,6 +8,10 @@ Apache Solr integration 6.x-1.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-1.0-xxxxx, xxxx-xx-xx
 ------------------------------
+
+Apache Solr integration 6.x-1.0-beta7, 2009-04-03
+------------------------------
+#293989 by bjaspan and vladimir.dolgopolov, add date facets for created and changed dates. 
 #420290 by mkalkbrenner and pwolanin, add spaces around tags to avoid running words together.
 #368688 by hurleyit and pwolanin, send MLT docs instead of processed links to theme function.
 #383478 by pwolanin and JacobSingh, provide more information about autocommit lag, pending deletes.
