@@ -299,6 +299,16 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
           $this->fields[$pos] = array('#name' => $name, '#value' => trim($value));
         }
       }
+      // Look for negative queries for the same field.
+      $extracted = Solr_Base_Query::filter_extract($filters, '-'. $alias);
+      if (count($extracted['values'])) {
+        foreach ($extracted['values'] as $index => $value) {
+          $pos = strpos($this->filters, $extracted['queries'][$index]);
+          // $solr_keys and $solr_crumbs are keyed on $pos so that query order
+          // is maintained. This is important for breadcrumbs.
+          $this->fields[$pos] = array('#name' => '-'. $name, '#value' => trim($value));
+        }
+      }
     }
     // Even though the array has the right keys they are likely in the wrong
     // order. ksort() sorts the array by key while maintaining the key.
