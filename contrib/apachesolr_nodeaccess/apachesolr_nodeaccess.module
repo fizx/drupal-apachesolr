@@ -32,7 +32,7 @@ function _apachesolr_nodeaccess_build_subquery($account) {
     $node_access_query = apachesolr_drupal_query();
     foreach ($grants as $realm => $gids) {
       foreach ($gids as $gid) {
-        $node_access_query->add_field('nodeaccess_' . $realm, $gid);
+        $node_access_query->add_filter('nodeaccess_' . $realm, $gid);
       }
     }
     return $node_access_query;
