@@ -548,7 +548,7 @@ function apachesolr_facet_block($response, $query, $module, $delta, $facet_field
         $querystring = $new_query->get_url_querystring();
       }
       if ($count || $active) {
-        $items[$countsort . ':' . $facet_text] = theme('apachesolr_facet_item', $facet_text, $count, $path, $querystring, $active, $unclick_link, $response->response->numFound, $options);
+        $items[$countsort . '*' . $facet_text] = theme('apachesolr_facet_item', $facet_text, $count, $path, $querystring, $active, $unclick_link, $response->response->numFound, $options);
       }
     }
     // Unless a facet is active only display 2 or more.
