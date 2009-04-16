@@ -297,9 +297,15 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
 
     foreach ($this->fields as $field) {
       $name = $field['#name'];
+      $prefix = '';
+      // Handle negative queries.
+      if ($name[0] == '-') {
+        $name = substr($name, 1);
+        $prefix = '-';
+      }
       // Look for a field alias.
       if (isset($this->field_map[$name])) {
-        $field['#name'] = $this->field_map[$name];
+        $field['#name'] = $prefix . $this->field_map[$name];
       }
       $progressive_crumb[] = $this->make_filter($field);
       $options = array('query' => 'filters=' . implode(' ', $progressive_crumb));
