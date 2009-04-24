@@ -55,7 +55,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
   /**
    * Each query/subquery will have a unique ID
    */
-  protected $id;
+  public $id;
 
   /**
    * A keyed array where the key is a position integer and the value
