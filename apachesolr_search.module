@@ -747,7 +747,7 @@ function theme_apachesolr_breadcrumb_is_book_bid($bid) {
  * Return current search block contents
  */
 function theme_apachesolr_currentsearch($total_found, $links) {
-  return theme_item_list($links, t('Search found @count items', array('@count' => $total_found)));
+  return theme_item_list($links, format_plural($total_found, 'Search found 1 item', 'Search found @count items'));
 }
 
 /**
