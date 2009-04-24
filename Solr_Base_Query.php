@@ -217,7 +217,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $this->subqueries[$query->id] = array('#query' => $query, '#fq_operator' => $fq_operator, '#q_operator' => $q_operator);
   }
 
-  public function remove_subquery(Solr_Base_Query $query) {
+  public function remove_subquery(Drupal_Solr_Query_Interface $query) {
     unset($this->subqueries[$query->id]);
   }
 
