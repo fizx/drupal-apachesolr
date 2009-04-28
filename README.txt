@@ -121,7 +121,28 @@ hook_apachesolr_modify_query(&$query, &$params, $caller);
           $query->add_field("uid", 1);         
         }        
     
-hook_apachesolr_cck_field_mappings
+hook_apachesolr_cck_fields_alter(&$mappings)
+
+  Add or alter index mappings for CCK types.  The default mappings array handles just 
+  text fields with option widgets:
+
+    $mappings['text'] = array(
+      'optionwidgets_select' => array('callback' => '', 'index_type' => 'string'),
+      'optionwidgets_buttons' => array('callback' => '', 'index_type' => 'string')
+    );
+
+  In your _alter hook implementation you can add additional field types such as:
+
+    $mappings['number_integer']['number'] = array('callback' => '', 'index_type' => 'integer');
+
+  You can allso add a mapping for a specific field.  This will take precedence over any
+  mapping for a general field type. A field-specific mapping would look like:
+
+    $mappings['per-field']['field_model_name'] = array('callback' => '', 'index_type' => 'string');
+
+  or
+
+    $mappings['per-field']['field_model_price'] = array('callback' => '', 'index_type' => 'float');
 
 hook_apachesolr_node_exclude($node)
 

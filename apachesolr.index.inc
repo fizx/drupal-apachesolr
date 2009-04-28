@@ -115,7 +115,7 @@ function apachesolr_node_to_document($nid) {
         // Got a CCK field. See if it is to be indexed.
         $function = $cck_info['callback'];
         if ($cck_info['callback'] && function_exists($function)) {
-          $field = call_user_func_array($function, array($node, $key));
+          $field = $function($node, $key);
         }
         else {
           $field = $node->$key;
