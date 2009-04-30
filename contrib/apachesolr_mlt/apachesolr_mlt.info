@@ -1,0 +1,6 @@
+; $Id$
+name = Apache Solr more like this
+description = Use Solr to make content recommendations
+dependencies[] = apachesolr
+package = Apache Solr
+core = 6.x
