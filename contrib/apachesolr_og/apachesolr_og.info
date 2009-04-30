@@ -1,6 +1,6 @@
 ; $Id$
-name = ApacheSolr Organic Groups
-description = Integrates Organic Groups and ApacheSolr
+name = Apache Solr Organic Groups
+description = Integrates Organic Groups and Apache Solr Search
 dependencies[] = apachesolr
 dependencies[] = og
 package = Apache Solr
