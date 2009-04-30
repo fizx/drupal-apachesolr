@@ -265,7 +265,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $querystring = '';
     if ($fq = $this->rebuild_fq(TRUE)) {
       foreach ($fq as $key => $value) {
-        $fq[$key] = drupal_urlencode($value);
+        $fq[$key] = rawurlencode($value);
       }
       $querystring = 'filters='. implode('+', $fq);
     }
