@@ -144,11 +144,18 @@ hook_apachesolr_cck_fields_alter(&$mappings)
 
     $mappings['per-field']['field_model_price'] = array('callback' => '', 'index_type' => 'float');
 
-hook_apachesolr_node_exclude($node)
+hook_apachesolr_types_exclude($namespace)
+
+  
+  Invoked by apachesolr.module when generating a list of nodes to index for a given
+  namespace.  Return an array of node types to be excldued from indexing for that namespace 
+  (e.g. 'apachesolr_search'). This is used by apachesolr_search module to exclude 
+  certain node types from the index.
+
+hook_apachesolr_node_exclude($node, $namespace)
 
   This is invoked by apachesolr.module for each node to be added to the index - if any module
-  returns TRUE, the node is skipped for indexing. For example, this is used by apachesolr_search
-  module to exclude certain node types from the index.
+  returns TRUE, the node is skipped for indexing. 
 
 hook_apachesolr_update_index(&$document, $node)
 

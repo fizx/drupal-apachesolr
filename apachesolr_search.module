@@ -62,12 +62,13 @@ function apachesolr_search_update_index() {
 }
 
 /**
- * Implementation of hook_apachesolr_node_exclude().
+ * Implementation of hook_apachesolr_types_exclude().
  */
-function apachesolr_search_apachesolr_node_exclude($node) {
-  $excluded_types = variable_get('apachesolr_search_excluded_types', array());
-  // Exclude from processing node types we don't want.
-  return !empty($excluded_types[$node->type]);
+function apachesolr_search_apachesolr_types_exclude($namespace) {
+  if ($namespace == 'apachesolr_search') {
+    $excluded_types = variable_get('apachesolr_search_excluded_types', array());
+    return array_filter($excluded_types);
+  }
 }
 
 /**
