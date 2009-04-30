@@ -239,6 +239,7 @@ function apachesolr_search_type_boost_form_submit($form_id, &$form_state) {
     if (!empty($new_excluded_types[$type])) {
       $solr = apachesolr_get_solr();
       $solr->deleteByQuery("type:$type");
+      apachesolr_index_updated(time());
     }
   }
 
