@@ -6,6 +6,10 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 Apache Solr integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
 
+Apache Solr integration 6.x-1.0-xxxxx, 2009-xx-xx
+------------------------------
+#454352 by Damien Tournoud, make optimize interval configurable, document variables.
+
 Apache Solr integration 6.x-1.0-beta9, 2009-04-30
 ------------------------------
 #435924 by pwolanin, only clear cache on cron after updates and if the server is available.
