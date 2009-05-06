@@ -1075,6 +1075,14 @@ function apachesolr_index_key($field) {
 }
 
 /**
+ * Try to map a schema field name to a human-readable description.
+ */
+function apachesolr_field_name_map($field_name) {
+  require_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.admin.inc'); 
+  return _apachesolr_field_name_map($field_name);
+}
+
+/**
  * Invokes hook_apachesolr_cck_field_mappings to find out how to handle CCK fields.
  */
 function apachesolr_cck_fields() {
