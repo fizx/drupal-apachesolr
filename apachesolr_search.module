@@ -500,7 +500,7 @@ function apachesolr_search_block($op = 'list', $delta = 0, $edit = array()) {
             if (!$fields) {
               $options['attributes']['class'] = 'active';
             }
-            $links[] = apachesolr_l($search_keys, $path, $options);
+            $links[] = apachesolr_l($query->get_query_basic(), $path, $options);
             foreach($fields as $field) {
               if ($field['#name']) {
                 $new_query = clone $query;
