@@ -303,8 +303,11 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
   /**
    * Build additional breadcrumb elements relative to $base.
    */
-  public function get_breadcrumb($base = '') {
+  public function get_breadcrumb($base = NULL) {
     $progressive_crumb = array();
+    if (!isset($base)) {
+      $base = $this->get_path();
+    }
 
     $search_keys = $this->get_query_basic();
     if ($search_keys) {
@@ -323,7 +326,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
         $breadcrumb[] = l($themed, $base, $options);
       }
       else {
-        $breadcrumb[] = l($field['#name'], $base, $options);
+        $breadcrumb[] = l($field['#value'], $base, $options);
       }
     }
     // The last breadcrumb is the current page, so it shouldn't be a link.
