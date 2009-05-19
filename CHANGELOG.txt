@@ -6,6 +6,10 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 Apache Solr integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
 
+Apache Solr integration 6.x-1.0-xxx, xxxx-xx-xx
+------------------------------
+#466328 by pwolanin, fix classes for sort links.
+
 Apache Solr integration 6.x-1.0-beta10, 2009-05-14
 ------------------------------
 #449414 by pwolanin, aufumy, & Scott Reynolds, refactor apachesolr_search_search().

@@ -1384,6 +1384,8 @@ function theme_apachesolr_facet_list($items, $display_limit = 0) {
 }
 
 function theme_apachesolr_sort_list($items) {
+  // theme('item_list') expects a numerically indexed array.
+  $items = array_values($items);
   return theme('item_list', $items);
 }
 
