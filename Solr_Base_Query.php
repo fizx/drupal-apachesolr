@@ -264,13 +264,10 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
   public function get_url_querystring() {
     $querystring = '';
     if ($fq = $this->rebuild_fq(TRUE)) {
-      foreach ($fq as $key => $value) {
-        $fq[$key] = rawurlencode($value);
-      }
-      $querystring = 'filters='. implode('+', $fq);
+      $querystring = 'filters='. rawurlencode(implode(' ', $fq));
     }
     if ($this->solrsort) {
-      $querystring .= ($querystring ? '&' : '') .'solrsort='. $this->solrsort;
+      $querystring .= ($querystring ? '&' : '') .'solrsort='. rawurlencode($this->solrsort);
     }
     return $querystring;
   }
@@ -321,7 +318,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
         $field['#name'] = $this->field_map[$name];
       }
       $progressive_crumb[] = $this->make_filter($field);
-      $options = array('query' => 'filters=' . implode(' ', $progressive_crumb));
+      $options = array('query' => 'filters=' . rawurlencode(implode(' ', $progressive_crumb)));
       if ($themed = theme("apachesolr_breadcrumb_" . $name, $field['#value'], $field['#exclude'])) {
         $breadcrumb[] = l($themed, $base, $options);
       }
