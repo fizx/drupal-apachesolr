@@ -223,3 +223,11 @@ hook_apachesolr_search_result_alter(&$doc)
 hook_apachesolr_sort_links_alter(&$sort_links)
 
   Called by the sort link block code. Allows other modules to modify, add or remove sorts.
+
+
+Themers
+----------------
+
+See inline docs in apachesolr_theme and apachesolr_search_theme functions 
+within apachesolr.module and apachesolr_search.module.
+
