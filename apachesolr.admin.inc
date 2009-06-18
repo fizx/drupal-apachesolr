@@ -9,10 +9,12 @@
 function apachesolr_settings() {
   $form = array();
 
-  //perform a check to ensure the server is there
-  $requirements = apachesolr_requirements('runtime');
-  $status = $requirements['apachesolr']['severity'] == 2 ? 'error' : 'status';
-  drupal_set_message($requirements['apachesolr']['value'], $status);
+  // Perform a check to ensure the server is there
+  if (empty($_POST)) {
+    $requirements = apachesolr_requirements('runtime');
+    $status = $requirements['apachesolr']['severity'] == 2 ? 'error' : 'status';
+    drupal_set_message($requirements['apachesolr']['value'], $status);
+  }
 
   $form['apachesolr_host'] = array(
     '#type' => 'textfield',
