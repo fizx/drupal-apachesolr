@@ -181,7 +181,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
 
   public function has_filter($name, $value) {
     foreach ($this->fields as $pos => $values) {
-      if (!empty($values['#name']) && !empty($values['#value']) && $values['#name'] == $name && $values['#value'] == $value) {
+      if (isset($values['#name']) && isset($values['#value']) && $values['#name'] == $name && $values['#value'] == $value) {
         return TRUE;
       }
     }
