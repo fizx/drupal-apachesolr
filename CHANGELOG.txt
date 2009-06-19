@@ -8,7 +8,8 @@ Apache Solr integration 6.x-1.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-1.0-xxx, xxxx-xx-xx
 ------------------------------
-#495012 by pwiolanin, fix Anonymous user and other 0-value facets.
+#495258 comment out timeAllowed params (partial roll-back of #490076)
+#495012 by pwolanin, fix Anonymous user and other 0-value facets.
 #463900 by pwolanin and JacobSingh, facet theme function clean-up.
 #405206 by pwolanin, allow Apache Solr to be the default, let core search index 0 nodes.
 #453310 by pwolanin, allow easier theming of username display.
