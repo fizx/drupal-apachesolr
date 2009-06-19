@@ -1359,7 +1359,6 @@ function apachesolr_l($text, $path, $options = array()) {
 
 
 function theme_apachesolr_unclick_link($facet_text, $path, $options = array()) {
-  $options['query'] = $querystring;
   if (empty($options['html'])) {
     $facet_text = check_plain($facet_text);
   }
