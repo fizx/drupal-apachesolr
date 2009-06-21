@@ -214,6 +214,8 @@ hook_apachesolr_node_exclude($node, $namespace)
 hook_apachesolr_update_index(&$document, $node)
 
   Allows a module to change the contents of the $document object before it is sent to the Solr Server.
+  To add a new field to the document, you should generally use one of the pre-defined dynamic fields. 
+  Follow the naming conventions for the type of data being added based on the schema.xml file.
 
 hook_apachesolr_search_result_alter(&$doc)
 
