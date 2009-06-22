@@ -631,7 +631,7 @@ function apachesolr_search_block($op = 'list', $delta = 0, $edit = array()) {
                 if (!$fielddisplay) {
                   $fielddisplay = $field['#value'];
                 }
-                $links[] = theme('apachesolr_unclick_link', $fielddisplay, $new_query->get_path(), $querystring);
+                $links[] = theme('apachesolr_unclick_link', $fielddisplay, $new_query->get_path(), $options);
               }
             }
             $content = theme('apachesolr_currentsearch', $response->response->numFound, $links);
