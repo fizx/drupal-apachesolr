@@ -35,7 +35,7 @@ function _apachesolr_strip_decode($text) {
   // Add spaces before stripping tags to avoid running words together.
   $text = filter_xss(str_replace(array('<', '>'), array(' <', '> '), $text), array());
   // Decode entities and then make safe any < or > characters.
-  return htmlspecialchars(html_entity_decode($text, ENT_NOQUOTES, 'UTF-8'), ENT_NOQUOTES, 'UTF-8', FALSE);
+  return htmlspecialchars(html_entity_decode($text, ENT_NOQUOTES, 'UTF-8'), ENT_NOQUOTES, 'UTF-8');
 }
 
 /**
