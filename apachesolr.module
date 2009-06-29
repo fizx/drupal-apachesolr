@@ -569,7 +569,7 @@ function apachesolr_block($op = 'list', $delta = 0, $edit = array()) {
         $sorts = $query->get_available_sorts();
 
         $solrsorts = array();
-        $sort_parameter = isset($_GET['solrsort']) ? check_plain($_GET['solrsort']) : FALSE;
+        $sort_parameter = $query->get_solrsort();
         foreach (explode(',', $sort_parameter) as $solrsort) {
           $parts = explode(' ', $solrsort);
           if (!empty($parts[0]) && !empty($parts[1])) {
@@ -1477,7 +1477,12 @@ interface Drupal_Solr_Query_Interface {
    * @param string raw string to set the sort to
    */
   function set_solrsort($sortstring);
-  
+
+  /**
+   * Get the solrsort.
+   */
+  function get_solrsort();
+
   /**
    * Return an array of all filters.
    */
