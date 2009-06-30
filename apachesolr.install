@@ -79,7 +79,7 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_path');
   variable_del('apachesolr_rows');
   variable_del('apachesolr_facet_query_limits');
-  variable_del('apachesolr_facet_query_limit_default');  
+  variable_del('apachesolr_facet_query_limit_default');
   variable_del('apachesolr_site_hash');
   variable_del('apachesolr_index_last');
   variable_del('apachesolr_mlt_blocks');

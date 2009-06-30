@@ -133,7 +133,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
   function __clone() {
     $this->id = ++self::$idCount;
   }
-  
+
   public function add_filter($field, $value, $exclude = FALSE) {
     $this->fields[] = array('#exclude' => $exclude, '#name' => $field, '#value' => trim($value));
   }
@@ -287,7 +287,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
   public function get_query_basic() {
     return $this->rebuild_query();
   }
-  
+
   /**
    * Return the search path.
    *
