@@ -172,7 +172,7 @@ hook_apachesolr_modify_query(&$query, &$params, $caller);
 
         function my_module_apachesolr_modify_query(&$query, &$params, $caller) {
           // I only want to see articles by the admin!
-          $query->add_field("uid", 1);         
+          $query->add_filter("uid", 1);         
         }        
     
 hook_apachesolr_cck_fields_alter(&$mappings)
