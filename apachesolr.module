@@ -338,7 +338,14 @@ function apachesolr_index_nodes($rows, $namespace = '', $callback = 'apachesolr_
       apachesolr_index_updated(time());
     }
     catch (Exception $e) {
-      watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+      $nids = array();
+      if (!empty($docs)) {
+        foreach ($docs as $doc) {
+          $nids[] = $doc->nid;
+        }
+      }
+      watchdog('Apache Solr', 'Indexing failed on one of the following nodes: @nids <br /> !message',
+               array('@nids' => implode(', ', $nids), '!message' => nl2br(strip_tags($e->getMessage()))), WATCHDOG_ERROR);
       return FALSE;
     }
   }
