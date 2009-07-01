@@ -38,7 +38,7 @@ function apachesolr_search_menu() {
   $items['admin/settings/apachesolr/query-fields'] = array(
     'title'            => 'Search fields',
     'page callback'    => 'apachesolr_search_settings_page',
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer search'),
     'weight'           => 1,
     'type'             => MENU_LOCAL_TASK,
     'file'             => 'apachesolr_search.admin.inc',
@@ -46,7 +46,7 @@ function apachesolr_search_menu() {
   $items['admin/settings/apachesolr/content-bias'] = array(
     'title'            => 'Content bias settings',
     'page callback'    => 'apachesolr_boost_settings_page',
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer search'),
     'weight'           => 1,
     'type'             => MENU_LOCAL_TASK,
     'file'             => 'apachesolr_search.admin.inc',

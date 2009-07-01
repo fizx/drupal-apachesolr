@@ -357,7 +357,7 @@ function apachesolr_delete_index_confirm_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/settings/apachesolr/index';
   try {
     apachesolr_delete_index();
-    // This form can't be seen by anyone without 'administer site configuration'
+    // This form can't be seen by anyone without 'administer search'
     // permission, so no need to check perms before displaying a run-cron link.
     drupal_set_message(t('The Apache Solr content index has been erased. You must now !run_cron until your entire site has been re-indexed.', array('!run_cron' => l(t('run cron'), 'admin/reports/status/run-cron', array('query' => array('destination' => 'admin/settings/apachesolr/index'))))));
   }

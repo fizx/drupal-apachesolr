@@ -16,7 +16,7 @@ function apachesolr_og_menu() {
       'description'      => 'Apache Solr OG facet settings for group posts.',
       'page callback'    => 'drupal_get_form',
       'page arguments'   => array('apachesolr_og_admin'),
-      'access arguments' => array('administer site configuration'),
+      'access arguments' => array('administer search'),
     ),
   );
 }
