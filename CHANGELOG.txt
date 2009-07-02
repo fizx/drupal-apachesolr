@@ -5,6 +5,8 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#508364 by pwolanin, Don't offer non-indexed fields as search options.
+#508548 by pwolanin, Don't implode params['fq'] if it's not set.
 
 Apache Solr integration 6.x-1.0-RC1, 2009-07-02
 ------------------------------
