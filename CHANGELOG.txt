@@ -8,6 +8,7 @@ Apache Solr integration 6.x-1.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-1.0-xxx, xxxx-xx-xx
 ------------------------------
+#502976 by pwolanin, Scott Reynolds, robertDouglass facet links and form submissions respect non ApacheSolr $_GET parameters.
 #507708 by pwolanin, fix sort parameters to use field aliases, validate in query object.
 #299539 by kleung11 and pwolanin, use 'administer search' for permission checking.
 #503644 by pwolanin and Jeremy, make sure we strip ctrl chars last, add logging.
