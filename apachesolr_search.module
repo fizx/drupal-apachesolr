@@ -219,7 +219,7 @@ function apachesolr_search_execute($keys, $filters, $solrsort, $base_path = '', 
     return array();
   }
 
-  if ('' == $keys) {
+  if (('' == $keys) && isset($params['fq'])) {
     // Move the fq params to the q.alt for better performance.
     $params['q.alt'] = implode(' ', $params['fq']);
     unset($params['fq']);
