@@ -53,7 +53,7 @@ function apachesolr_menu() {
     'type'               => MENU_CALLBACK,
   );
   $items['admin/reports/apachesolr'] = array(
-    'title'              => 'Apache Solr Search index',
+    'title'              => 'Apache Solr search index',
     'page callback'      => 'apachesolr_index_report',
     'access arguments'   => array('access site reports'),
     'file'               => 'apachesolr.admin.inc',
