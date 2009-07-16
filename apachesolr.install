@@ -24,7 +24,7 @@ function apachesolr_install() {
  */
 function apachesolr_enable() {
   // Make sure we don't have stale data.
-  variable_del('apachesolr_index_last');
+  apachesolr_clear_last_index();
   db_query("DELETE FROM {apachesolr_search_node}");
   // Populate table
   db_query("INSERT INTO {apachesolr_search_node} (nid, status, changed)
