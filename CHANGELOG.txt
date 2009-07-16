@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#515682 by robertDouglass, add confirmation form to re-index button.
 #509526 by pwolanin, {apachesolr_search_node} table should be rebuilt when index is deleted.
 #508364 by pwolanin, Don't offer non-indexed fields as search options.
 #508548 by pwolanin, Don't implode params['fq'] if it's not set.
