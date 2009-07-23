@@ -1,4 +1,4 @@
-// $ ID$
+// $Id$
 
 Drupal.behaviors.apachesolr = function(context) {
   $('.apachesolr-hidden-facet').hide();
