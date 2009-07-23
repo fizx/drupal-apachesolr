@@ -1225,7 +1225,7 @@ function apachesolr_cck_fields() {
 function apachesolr_theme() {
   return array(
     /**
-     * Returns a link for a facet term with the # of results clicking it will yeild (count)
+     * Returns a link for a facet term, with the number (count) of results for that term
      */
     'apachesolr_facet_link' => array(
       'arguments' => array('facet_text' => NULL, 'path' => NULL, 'options' => NULL, 'count' => NULL, 'active' => FALSE, 'num_found' => NULL),
