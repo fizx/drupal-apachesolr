@@ -1,3 +1,5 @@
+// $Id$
+
 $(document).ready(function() {
 
   $('.apachesolr-hidden-facet').hide();
