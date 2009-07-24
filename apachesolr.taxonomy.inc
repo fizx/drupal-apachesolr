@@ -6,6 +6,8 @@
  */
 function apachesolr_search_taxonomy_term_page($str_tids = '', $depth = 0, $op = 'page') {
 
+  drupal_add_feed(url('taxonomy/term/' . $str_tids . '/' . $depth . '/feed'), 'RSS - '. $title);
+  
   $vids_to_override = apachesolr_get_enabled_facets('apachesolr_search');
 
   $terms = taxonomy_terms_parse_string($str_tids);
