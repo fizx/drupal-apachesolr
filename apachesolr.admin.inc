@@ -52,6 +52,12 @@ function apachesolr_settings() {
     '#options' => $options,
     '#description' => t('The number of results that will be shown per page.'),
   );
+  $form['apachesolr_facetstyle'] = array(
+    '#type' => 'radios',
+    '#title' => t('Style of facet links'),
+    '#default_value' => variable_get('apachesolr_facetstyle', 'checkboxes'),
+    '#options' => array('links' => t('Links only'), 'checkboxes' => t('Links with checkboxes')),
+  );
   $form['apachesolr_failure'] = array(
     '#type' => 'select',
     '#title' => t('On failure'),

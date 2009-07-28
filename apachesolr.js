@@ -14,10 +14,12 @@ Drupal.behaviors.apachesolr = function(context) {
     return false;
   }).appendTo($('.block-apachesolr_search:has(.apachesolr-hidden-facet), .block-apachesolr:has(.apachesolr-hidden-facet)'));
   
-  // Find all facet links and give them a checkbox
-  $('.apachesolr-facet', context).each(Drupal.apachesolr.addCheckbox);
-  // Find all unclick links and turn them into checkboxes
-  $('.apachesolr-unclick', context).each(Drupal.apachesolr.makeCheckbox);
+  if (Drupal.settings.apachesolr_facetstyle == 'checkboxes') {
+    // Find all facet links and give them a checkbox
+    $('.apachesolr-facet', context).each(Drupal.apachesolr.addCheckbox);
+    // Find all unclick links and turn them into checkboxes
+    $('.apachesolr-unclick', context).each(Drupal.apachesolr.makeCheckbox);
+  }
 }
 
 Drupal.apachesolr = {}
