@@ -167,9 +167,9 @@ function apachesolr_og_block($op = 'list', $delta = 0, $edit = array()) {
       break;
 
     case 'configure':
-      return apachesolr_facetcount_form($delta);
+      return apachesolr_facetcount_form('apachesolr_og', $delta);
     case 'save':
-      apachesolr_facetcount_save($delta, $edit);
+      apachesolr_facetcount_save($edit);
       break;
   }
 }
