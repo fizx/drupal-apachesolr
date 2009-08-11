@@ -49,7 +49,7 @@ Instead of checking out, externals can be used too. Externals can be seen as
 (remote) symlinks in svn. This requires your own project in your own svn ]
 repository, off course. In the apachesolr module directory, issue the command:
 
-svn propedit svn:externals
+svn propedit svn:externals .
 
 Your editor will open. Add a line
 
