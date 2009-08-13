@@ -1528,6 +1528,19 @@ interface Drupal_Solr_Query_Interface {
   function get_path();
 
   /**
+   * Return the query's keywords.
+   */
+  function get_keys();
+
+  /**
+   * Set the query's keywords.
+   *
+   * @param string keys
+   *   The new keywords.
+   */
+  function set_keys($keys);
+
+  /**
    * Return an array of parameters for use in the l function.
    *
    * @see l()
