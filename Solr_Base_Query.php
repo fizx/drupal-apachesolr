@@ -212,6 +212,23 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     // We have to re-parse the filters.
     $this->parse_filters();
   }
+  
+  /**
+   * Set keywords in this query.
+   *
+   * @param $keys
+   *   New keywords
+   */
+  function set_keys($keys) {
+    $this->keys = $keys;
+  }
+  
+  /**
+   * Get this query's keywords.
+   */
+  function get_keys() {
+    return $this->keys;
+  }
 
   /**
    * A subquery is another instance of a Solr_Base_Query that should be joined
