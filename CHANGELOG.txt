@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#525980 by robertDouglass Clarify the API of apachesolr_index_updated.
 #530196 by pwolanin, fix facecount form function calls in apachesolr_og.
 #548102 by robertDouglass change wording on enabled filters page to improve usability.
 #529606 by Damien Tournoud update schema.xml with WhitespaceTokenizerFactory and SnowballPorterFilterFactory. Note that you need to stop solr, replace schema.xml, delete your index, and re-index your site.
