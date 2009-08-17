@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#551582 by robertDouglass make CCK breadcrumbs, facets, and current search show the value, not the key.
 #551278 by robertDouglass CCK mappings don't respect shared fields
 #535654 by drunken monkey Add apachesolr_server_status() function
 #543226 by drunken monkey validate port on settings form.
