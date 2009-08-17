@@ -61,7 +61,10 @@ function _apachesolr_nodeaccess_build_subquery($account) {
 /**
  * Implementation of hook_apachesolr_modify_query().
  */
-function apachesolr_nodeaccess_apachesolr_modify_query(&$query, &$params) {
+function apachesolr_nodeaccess_apachesolr_modify_query(&$query, &$params, $caller = 'apachesolr_search') {
+  if ($caller == 'apachesolr_views_query') {
+    return;
+  }
   global $user;
   try {
     $subquery = _apachesolr_nodeaccess_build_subquery($user);
