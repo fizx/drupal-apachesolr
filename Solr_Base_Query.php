@@ -374,7 +374,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
       $options = array('query' => 'filters=' . rawurlencode(implode(' ', $progressive_crumb)));
       $breadcrumb_name = "apachesolr_breadcrumb_" . $name;
       drupal_alter('apachesolr_theme_breadcrumb', $breadcrumb_name);
-      if ($themed = theme($breadcrumb_name, $field)) {
+      if ($themed = theme($breadcrumb_name, $field['#value'])) {
         $breadcrumb[] = l($themed, $base, $options);
       }
       else {

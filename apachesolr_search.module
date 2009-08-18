@@ -739,7 +739,7 @@ function apachesolr_search_block($op = 'list', $delta = 0, $edit = array()) {
                 $options['query'] = $new_query->get_url_queryvalues();
                 $breadcrumb_name = "apachesolr_breadcrumb_" . $field['#name'];
                 drupal_alter('apachesolr_theme_breadcrumb', $breadcrumb_name);
-                $fielddisplay = theme($breadcrumb_name, $field);
+                $fielddisplay = theme($breadcrumb_name, $field['#value']);
                 if (!$fielddisplay) {
                   $fielddisplay = $field['#value'];
                 }
