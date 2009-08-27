@@ -1359,7 +1359,7 @@ function apachesolr_cck_fields() {
  */
 function apachesolr_cck_text_field_callback($facet, $options) {
   if (function_exists('content_format')) {
-    return content_format($options['delta'], $facet);
+    return content_format($options['delta'], array('value' => $facet));
   }
   else {
     return $facet;

@@ -201,7 +201,8 @@ function apachesolr_og_theme() {
 /**
  * Theme the breadcrumb.
  */
-function theme_apachesolr_breadcrumb_im_og_gid($group_id) {
+function theme_apachesolr_breadcrumb_im_og_gid($field) {
+  $group_id = $field['#value'];
   if (!is_numeric($group_id)) {
     return t('No group');
   }
