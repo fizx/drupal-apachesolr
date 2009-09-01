@@ -52,6 +52,14 @@ function apachesolr_menu() {
     'file'               => 'apachesolr.admin.inc',
     'type'               => MENU_CALLBACK,
   );
+  $items['admin/settings/apachesolr/index/batch/confirm'] = array(
+    'title'              => 'Confirm the batch re-indexing of all content',
+    'page callback'      => 'drupal_get_form',
+    'page arguments'     => array('apachesolr_batch_index_confirm'),
+    'access arguments'   => array('administer search'),
+    'file'               => 'apachesolr.admin.inc',
+    'type'               => MENU_CALLBACK,
+  );
   $items['admin/settings/apachesolr/index/delete/confirm'] = array(
     'title'              => 'Confirm index deletion',
     'page callback'      => 'drupal_get_form',
