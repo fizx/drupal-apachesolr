@@ -1344,9 +1344,25 @@ function apachesolr_cck_fields() {
           'display callback' => 'apachesolr_cck_nodereference_field_callback',
           'index_type' => 'integer',
         ),
+        'nodereference_select' => array(
+          'display callback' => 'apachesolr_cck_nodereference_field_callback',
+          'index_type' => 'integer',
+        ),
+        'nodereference_autocomplete' => array(
+          'display callback' => 'apachesolr_cck_nodereference_field_callback',
+          'index_type' => 'integer',
+        ),
       );
       $mappings['userreference'] = array(
         'userreference_buttons' => array(
+          'display callback' => 'apachesolr_cck_userreference_field_callback',
+          'index_type' => 'integer',
+        ),
+        'userreference_select' => array(
+          'display callback' => 'apachesolr_cck_userreference_field_callback',
+          'index_type' => 'integer',
+        ),
+        'userreference_autocomplete' => array(
           'display callback' => 'apachesolr_cck_userreference_field_callback',
           'index_type' => 'integer',
         ),
