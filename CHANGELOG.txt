@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#457826 by janusman Make the behavior of empty searches configurable.
 #573038 by robertDouglass Automatically create facets for user and node reference CCK fields.
 #570476 by robertDouglass add initial Drush support with commands drush solr delete index and drush solr reindex.
 #570476 by robertDouglass allow for deleting or reindexing single content types.
