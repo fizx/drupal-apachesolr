@@ -289,7 +289,6 @@ function theme_apachesolr_browse_blocks($blocks) {
  * @throws Exception
  */
 function apachesolr_search_execute($keys, $filterstring, $solrsort, $base_path = '', $page = 0, $caller = 'apachesolr_search') {
-  dsm($keys);
   $params = array();
   // This is the object that knows about the query coming from the user.
   $query = apachesolr_drupal_query($keys, $filterstring, $solrsort, $base_path);
