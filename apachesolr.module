@@ -1643,7 +1643,7 @@ function theme_apachesolr_mlt_recommendation_block($docs) {
   $links = array();
   foreach ($docs as $result) {
     // Suitable for single-site mode.
-    $links[] = l($result->title, $result->path);
+    $links[] = l($result->title, $result->path, array('html' => TRUE));
   }
   return theme('item_list', $links);
 }
