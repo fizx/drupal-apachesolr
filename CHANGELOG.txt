@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#552152 by robertDouglass OR operator for facet blocks.
 #576092 by robertDouglass use Drush to search the site using Solr.
 #576040 by robertDouglass use Drush to download the SolrPhpClient: drush solr phpclient
 #457826 by janusman Make the behavior of empty searches configurable.
