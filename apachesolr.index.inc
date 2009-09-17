@@ -29,7 +29,7 @@ function apachesolr_clean_text($text) {
 }
 
 /**
- * Given a node ID, return a document representing that node.
+ * Given a node, return a document representing that node.
  */
 function apachesolr_node_to_document($node, $namespace) {
   $document = FALSE;
