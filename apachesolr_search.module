@@ -207,6 +207,25 @@ function apachesolr_search_view($type = NULL) {
 }
 
 /**
+ * Implementation of hook_apachesolr_document_handlers.
+ *
+ * @param string $type
+ *   Entity type. 'node', 'comment', and so forth. Used to evaluate whether this module
+ *   should be interested in creating documents.
+ * @param string $namespace
+ *   Usually the name of the module that is initiating indexing. In this case
+ *   we want to register a handler if the namespace is 'apachesolr_search'.
+ * @return array $handlers
+ *   An array of strings that are function names. Each function returns a $document from
+ *   an entity (of type $type).
+ */
+function apachesolr_search_apachesolr_document_handlers($type, $namespace) {
+  if ($type == 'node' && $namespace == 'apachesolr_search') {
+    return array('apachesolr_node_to_document');
+  }
+}
+
+/**
  * Execute an empty search (match all documents) and show a listing of all enabled facets.
  */
 function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $base_path = '') {
