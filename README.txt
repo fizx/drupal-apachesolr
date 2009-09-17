@@ -142,6 +142,9 @@ behavior:
    with the Apache Solr server.
 
  - apachesolr_query_class: the default query class to use.
+ 
+ - apachesolr_index_comments_with_node: TRUE | FALSE. Whether to index comments
+   along with each node.
 
 Troubleshooting
 --------------
