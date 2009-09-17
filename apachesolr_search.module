@@ -326,6 +326,7 @@ function apachesolr_search_execute($keys, $filterstring, $solrsort, $base_path =
   // This is the object that does the communication with the solr server.
   $solr = apachesolr_get_solr();
   $params += apachesolr_search_basic_params($query);
+
   if ($keys) {
     $params += apachesolr_search_highlighting_params($query);
     $params += apachesolr_search_spellcheck_params($query);

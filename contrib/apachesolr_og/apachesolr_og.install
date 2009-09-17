@@ -26,7 +26,7 @@ function apachesolr_og_update_6000() {
   apachesolr_clear_last_index();
   $ret[] = array('success' => TRUE, 'query' => 'Called function apachesolr_clear_last_index(). All content will be re-indexed');
   $facet_missing = variable_get('apachesolr_facet_missing', array());
-  $facet_missing['apachesolr_og'][_apachesolr_og_gid_key()] = 1;
+  $facet_missing['apachesolr_og'][apachesolr_og_gid_key()] = 1;
   variable_set('apachesolr_facet_missing', $facet_missing);
   return $ret;
 }
