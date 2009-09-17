@@ -166,6 +166,14 @@ function apachesolr_search_view($type = NULL) {
 
       // Collect the search results:
       $content = apachesolr_search_search('search', $keys);
+      if (isset($content) && is_array($content) && count($content)) {
+        if (module_hook($type, 'search_page')) {
+          return module_invoke($type, 'search_page', $content);
+        }
+        else {
+          return theme('search_results', $content, $type);
+        }
+      }
 
       if ($content) {
         $content = theme('box', t('Search results'), $content);
