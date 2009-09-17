@@ -7,15 +7,6 @@
  */
 
 /**
- * Add a document to the $documents array based on a node ID.
- */
-function apachesolr_add_node_document(&$documents, $nid, $namespace) {
-  if ($document = apachesolr_node_to_document($nid, $namespace)) {
-    $documents[] = $document;
-  }
-}
-
-/**
  * Strip control characters that cause Jetty/Solr to fail.
  */
 function apachesolr_strip_ctl_chars($text) {
@@ -40,13 +31,7 @@ function apachesolr_clean_text($text) {
 /**
  * Given a node ID, return a document representing that node.
  */
-function apachesolr_node_to_document($nid, $namespace) {
-  // Set reset = TRUE to avoid static caching of all nodes that get indexed.
-  $node = node_load($nid, NULL, TRUE);
-  if (empty($node)) {
-    return FALSE;
-  }
-
+function apachesolr_node_to_document($node, $namespace) {
   $document = FALSE;
   // Let any module exclude this node from the index.
   $build_document = TRUE;
