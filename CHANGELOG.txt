@@ -3,6 +3,10 @@
 Apache Solr integration x.x-x.x, xxxx-xx-xx
 ------------------------------
 
+Apache Solr integration 5.x-2.x, 2009-09-22
+------------------------------
+#557152 by claudiu.cristea Backporting 6.x-1.x to 5.x-2.x
+
 Apache Solr integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
 #557382 by Josh Waihi, Scott Reynolds mlt blocks were double encoding titles.
