@@ -21,7 +21,7 @@ function apachesolr_og_enable() {
 /**
  * Re-index so as to use new missing field query.
  */
-function apachesolr_og_update_6000() {
+function apachesolr_og_update_5000() {
   $ret = array();
   apachesolr_clear_last_index();
   $ret[] = array('success' => TRUE, 'query' => 'Called function apachesolr_clear_last_index(). All content will be re-indexed');

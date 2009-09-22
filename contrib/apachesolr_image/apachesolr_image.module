@@ -50,17 +50,6 @@ function theme_apachesolr_image_snippet($item){
 }
 
 /**
- * Implementation of hook_theme().
- */
-function apachesolr_image_theme() {
-  return array(
-    'apachesolr_image_snippet' => array(
-      'arguments' => array('item' => NULL),
-    ),
-  );
-}
-
-/**
  * Implementation of hook_enable().
  */
 function apachesolr_image_enable() {

@@ -160,7 +160,7 @@ site address.
 Developers
 --------------
 
-Exposed Hooks in 6.x:
+Exposed Hooks in 5.x:
 
 hook_apachesolr_modify_query(&$query, &$params, $caller);
 
