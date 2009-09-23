@@ -55,6 +55,7 @@ function apachesolr_node_to_document($nid, $namespace) {
     if (!empty($exclude)) {
       $build_document = FALSE;
     }
+    $extra = array();
   }
 
   if ($build_document) {
