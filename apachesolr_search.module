@@ -338,7 +338,6 @@ function apachesolr_search_execute($keys, $filterstring, $solrsort, $base_path =
   $has_or = apachesolr_search_add_facet_params($params, $query);
   apachesolr_search_add_boost_params($params, $query, $solr);
 
-  $params['start'] = $page * $params['rows'];
 
   // Cache the built query. Since all the built queries go through
   // this process, all the hook_invocations will happen later
@@ -346,6 +345,8 @@ function apachesolr_search_execute($keys, $filterstring, $solrsort, $base_path =
 
   // This hook allows modules to modify the query and params objects.
   apachesolr_modify_query($query, $params, $caller);
+  $params['start'] = $page * $params['rows'];
+
   if (!$query) {
     return array();
   }
