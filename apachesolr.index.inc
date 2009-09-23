@@ -55,7 +55,6 @@ function apachesolr_node_to_document($nid, $namespace) {
     if (!empty($exclude)) {
       $build_document = FALSE;
     }
-    $extra = array();
   }
 
   if ($build_document) {
@@ -67,8 +66,13 @@ function apachesolr_node_to_document($nid, $namespace) {
 
     $text = $node->body;
 
-    // Fetch extra data normally not visible, including comments.
-    $extra = node_invoke_nodeapi($node, 'update index');
+    // Fetch extra data normally not visible, including comments.      
+    $extra = array();
+    foreach (module_implements('nodeapi') as $module) {
+      if ($output = module_invoke($module, 'nodeapi', $node, 'update index')) {
+        $extra[$module] = $output;
+      }
+    }
     $text .= "\n\n" . implode(' ', $extra);
     $text = apachesolr_strip_ctl_chars($text);
 
