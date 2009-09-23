@@ -55,6 +55,7 @@ function apachesolr_node_to_document($node, $namespace) {
     // We do this manually (with module_implements instead of node_invoke_nodeapi)
     // because we want a keyed array to come back. Only in this way can we decide
     // whether to index comments or not.
+    $extra = array();
     foreach (module_implements('nodeapi') as $module) {
       if ($output = module_invoke($module, 'nodeapi', $node, 'update index')) {
         $extra[$module] = $output;
