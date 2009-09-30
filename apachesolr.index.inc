@@ -69,7 +69,7 @@ function apachesolr_node_to_document($nid, $namespace) {
     // Fetch extra data normally not visible, including comments.      
     $extra = array();
     foreach (module_implements('nodeapi') as $module) {
-      if ($output = module_invoke($module, 'nodeapi', $node, 'update index')) {
+      if ($output = module_invoke($module, 'nodeapi', $node, 'update index', FALSE, FALSE)) {
         $extra[$module] = $output;
       }
     }
