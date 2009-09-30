@@ -57,7 +57,7 @@ function apachesolr_node_to_document($node, $namespace) {
     // whether to index comments or not.
     $extra = array();
     foreach (module_implements('nodeapi') as $module) {
-      if ($output = module_invoke($module, 'nodeapi', $node, 'update index')) {
+      if ($output = module_invoke($module, 'nodeapi', $node, 'update index', FALSE, FALSE)) {
         $extra[$module] = $output;
       }
 

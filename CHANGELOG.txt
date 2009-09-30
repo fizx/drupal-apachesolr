@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#590982 by swentel fix warnings on indexing.
 #554136 by emackn, Jaza make results-per-page alterable.
 #580764 by robertDougalss Add a new contrib module that allows searching on just comments.
 #548160 by robertDouglass get rid of functions that begin with underscore. Yuck.
