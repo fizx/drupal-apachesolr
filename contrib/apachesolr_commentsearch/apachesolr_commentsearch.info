@@ -2,6 +2,7 @@
 name = Apache Solr comment search
 description = Treats comments as a content type allowing you to search them separately.
 dependencies[] = apachesolr_search
+dependencies[] = comment
 package = Apache Solr
 core = "6.x"
 php = 5.1.4
