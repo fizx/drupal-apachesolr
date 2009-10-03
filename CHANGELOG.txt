@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#591278 by robertDouglass fix bug that was preventing hook_apachesolr_modify_query from working correctly.
 #590982 by swentel fix warnings on indexing.
 #554136 by emackn, Jaza make results-per-page alterable.
 #580764 by robertDougalss Add a new contrib module that allows searching on just comments.
