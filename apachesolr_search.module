@@ -100,9 +100,11 @@ function apachesolr_search_menu_alter(&$menu) {
  * Implementation of hook_update_index().
  */
 function apachesolr_search_update_index() {
-  $cron_limit = variable_get('apachesolr_cron_limit', 50);
-  $rows = apachesolr_get_nodes_to_index('apachesolr_search', $cron_limit);
-  apachesolr_index_nodes($rows, 'apachesolr_search');
+  if (!variable_get('apachesolr_disallow_indexing', FALSE)) {
+    $cron_limit = variable_get('apachesolr_cron_limit', 50);
+    $rows = apachesolr_get_nodes_to_index('apachesolr_search', $cron_limit);
+    apachesolr_index_nodes($rows, 'apachesolr_search');
+  }
 }
 
 /**
