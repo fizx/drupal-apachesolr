@@ -68,7 +68,12 @@ function apachesolr_node_to_document($nid, $namespace) {
 
     // Fetch extra data normally not visible, including comments.      
     $extra = array();
+    $exclude_comments = in_array($node->type, variable_get('apachesolr_exclude_comments_types', array()), TRUE);
     foreach (module_implements('nodeapi') as $module) {
+      if ($exclude_comments && $module == 'comment') {
+        // Don't add comments.
+        continue;
+      }
       if ($output = module_invoke($module, 'nodeapi', $node, 'update index', FALSE, FALSE)) {
         $extra[$module] = $output;
       }

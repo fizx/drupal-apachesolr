@@ -128,6 +128,9 @@ behavior:
  - apachesolr_tags_to_index: the list of HTML tags that the module will index
    (see apachesolr_add_tags_to_document()).
 
+ - apachesolr_exclude_comments_types: an array of node types.  Any type listed
+   will have any attached comments excluded from the index.
+
  - apachesolr_ping_timeout: the timeout (in seconds) after which the module will
    consider the Apache Solr server unavailable.
 
