@@ -177,7 +177,23 @@ hook_apachesolr_modify_query(&$query, &$params, $caller);
           // I only want to see articles by the admin!
           $query->add_filter("uid", 1);         
         }        
-    
+
+hook_apachesolr_prepare_query(&$query, &$params, $caller);
+
+  This is pretty much the same as hook_apachesolr_modify_query() but runs earlier
+  and before the query is statically cached. It can e.g. be used to add
+  available sorts to the query.
+
+  Example:
+
+        function my_module_apachesolr_prepare_query(&$query) {
+          // Add a sort on the node ID.
+          $query->set_available_sort('nid', array(
+            'title' => t('Node ID'),
+            'default' => 'asc',
+          ));
+        }
+
 hook_apachesolr_cck_fields_alter(&$mappings)
 
   Add or alter index mappings for CCK types.  The default mappings array handles just 
