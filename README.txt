@@ -149,6 +149,10 @@ behavior:
  - apachesolr_index_comments_with_node: TRUE | FALSE. Whether to index comments
    along with each node.
 
+ - apachesolr_cron_mass_limit: update or delete at most this many documents in
+   each Solr request, such as when making {apachesolr_search_node} consistent
+   with {node}.
+
 Troubleshooting
 --------------
 Problem:
