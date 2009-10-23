@@ -218,7 +218,7 @@ function apachesolr_enabled_facets_form_submit($form_id, $form_values) {
   foreach ($form_values['apachesolr_enabled_facets'] as $module => $facets) {
     $enabled[$module] = array_filter($facets);
   }
-  variable_set('apachesolr_enabled_facets', $enabled);
+  apachesolr_save_enabled_facets($enabled);
   drupal_set_message($form_values['submit_message'], 'warning');
 }
 
