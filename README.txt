@@ -146,6 +146,10 @@ behavior:
 
  - apachesolr_query_class: the default query class to use.
 
+ - apachesolr_cron_mass_limit: update or delete at most this many documents in
+   each Solr request, such as when making {apachesolr_search_node} consistent
+   with {node}.
+
 Troubleshooting
 --------------
 Problem:
