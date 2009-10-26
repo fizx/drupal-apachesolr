@@ -1041,6 +1041,10 @@ function apachesolr_facetcount_save($edit) {
  * }
  */
 function apachesolr_modify_query(&$query, &$params, $caller) {
+  if (empty($query)) {
+    // This should only happen if Solr is not set up - avoids fatal errors.
+    return;
+  }
 
   foreach (module_implements('apachesolr_modify_query') as $module) {
     $function_name = $module . '_apachesolr_modify_query';
