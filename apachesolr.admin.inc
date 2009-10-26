@@ -406,17 +406,25 @@ function apachesolr_delete_index_confirm_submit($form, &$form_state) {
   catch (Exception $e) {
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
   }
-}
+}           
 
 /**
  * Utility function to delete the index and reset all index counters.
  *
+ * @param $type
+ *   a single content type to be deleted from the index.
+ *
  * @throws Exception
  */
-function apachesolr_delete_index() {
+function apachesolr_delete_index($type = NULL) {
   // Instantiate a new Solr object.
   $solr = apachesolr_get_solr();
-  $query = '*:*';
+  if ($type) {
+    $query = 'type:' . $type;
+  }
+  else {
+    $query = '*:*';
+  }
   // Allow other modules to modify the delete query.
   // For example, use the site hash so that you only delete this site's
   // content:  $query = 'hash:' . apachesolr_site_hash()
@@ -427,6 +435,7 @@ function apachesolr_delete_index() {
   apachesolr_rebuild_index_table();
   apachesolr_index_updated(time());
 }
+
 
 /**
  * Try to map a schema field name to a human-readable description.
