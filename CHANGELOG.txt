@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------                                                 
+#622120 by robertDouglass make the "Show more" block selection dynamic to accommodate other modules.
 #621922 by robertDouglass make the "Show more" js more robust.
 #612024 by pwolanin, Add method to allow requests to additional Solr servelets.
 #561082 by pwolanin, consolidate Solr delete queries on cron.
