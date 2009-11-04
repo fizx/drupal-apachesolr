@@ -569,6 +569,10 @@ function apachesolr_search_process_response($response, $query, $params) {
       $extra['comments'] = format_plural($doc->comment_count, '1 comment', '@count comments');
       // Allow modules to alter each document and its extra information.
       drupal_alter('apachesolr_search_result', $doc, $extra);
+      $fields = array();
+      foreach ($doc->getFieldNames() as $field_name) {
+        $fields[$field_name] = $doc->getField($field_name);
+      }
       $results[] = array(
         'link' => url($doc->path),
         'type' => apachesolr_search_get_type($doc->type),
@@ -579,6 +583,7 @@ function apachesolr_search_process_response($response, $query, $params) {
         'extra' => $extra,
         'score' => $doc->score,
         'snippet' => $snippet,
+        'fields' => $fields,
       );
     }
 
