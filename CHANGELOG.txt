@@ -5,6 +5,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search integration 5.x-2.x, 2009-10-23
 ------------------------------
+#612024 by pwolanin, Add method to allow requests to additional Solr servelets.
 #614048 by claudiu.cristea, Node access not working (only for 5.x-2.x).
 #621922 by robertDouglass make the "Show more" js more robust.
 #611670 by pwolanin, Allow modules to abort the building of documents for indexing.
