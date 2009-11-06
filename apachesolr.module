@@ -1200,8 +1200,10 @@ function apachesolr_modify_query(&$query, &$params, $caller) {
   // Add array of fq parameters.
   if ($query && ($fq = $query->get_fq())) {
     foreach ($fq as $delta => $values) {
-      foreach ($values as $value) {
-        $params['fq'][$delta][] = $value;
+      if (is_array($values) || is_object($values)) {
+        foreach ($values as $value) {
+          $params['fq'][$delta][] = $value;
+        }
       }
     }
   }
