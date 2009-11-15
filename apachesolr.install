@@ -45,9 +45,9 @@ function apachesolr_requirements($phase) {
   // All phases
   $title = $t('Apache Solr PHP CLient Library');
   if ($file_exists) {
-    $expected_revision = '$Revision$';
+    $expected_revision = 'Revision: 22';
     require_once 'SolrPhpClient/Apache/Solr/Service.php';
-    $revision = defined('Apache_Solr_Service::SVN_REVISION') ? Apache_Solr_Service::SVN_REVISION : '';
+    $revision = defined('Apache_Solr_Service::SVN_REVISION') ? trim(Apache_Solr_Service::SVN_REVISION, ' $') : '';
     if ($revision == $expected_revision) {
       $severity = REQUIREMENT_OK;
       $value = $t('Correct version "@expected".', array('@expected' => $expected_revision));
