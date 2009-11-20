@@ -43,7 +43,7 @@ function apachesolr_requirements($phase) {
     );
   }
   // All phases
-  $title = $t('Apache Solr PHP CLient Library');
+  $title = $t('Apache Solr PHP Client Library');
   if ($file_exists) {
     $expected_revision = '$Revision$';
     require_once 'SolrPhpClient/Apache/Solr/Service.php';
