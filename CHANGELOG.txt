@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------                                                 
+#628080 by pwolanin, update to use Solr PHP library r22 and check for it in hook_requirements.
 #638236 by mkalkbrenner and robertDouglass, undocumented dependency on taxonomy module.
 #562458 by janusman, fix typo preventing menu_rebuild regarding taxonomy hijack.
 #630798 by joshk, robertDouglass make cache_apachesolr table to facilitate better memcache utilization.
