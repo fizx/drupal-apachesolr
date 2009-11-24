@@ -149,7 +149,6 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_mlt_blocks');
   variable_del('apachesolr_cron_limit');
   variable_del('apachesolr_enabled_facets');
-  variable_del('apachesolr_mlt_blocks');
   // Remove tables.
   drupal_uninstall_schema('apachesolr');
 }
