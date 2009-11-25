@@ -897,13 +897,13 @@ function apachesolr_search_get_username($facet) {
  */
 function apachesolr_search_get_type($facet) {
   if ($type = node_get_types('name', $facet)) {
-    // Do nothing.
+
   }
   else if ($facet == 'comment') {
     $type = t('Comment');
   }
   // A disabled or missing node type returns FALSE.
-  return ($type === FALSE) ? $facet : t($type);
+  return ($type === FALSE) ? $facet : $type;
 }
 
 /**
