@@ -12,7 +12,7 @@
  */
 function apachesolr_search_uninstall() {
   $stored = variable_get('apachesolr_index_last', array());
-  unset($stored[$namespace]);
+  unset($stored['apachesolr_search']);
   variable_set('apachesolr_index_last', $stored);
 }
 
