@@ -6,8 +6,8 @@
  *   Integration with the Apache Solr search application.
  */
 
-define(APACHESOLR_READ_WRITE, 0);
-define(APACHESOLR_READ_ONLY, 1);
+define('APACHESOLR_READ_WRITE', 0);
+define('APACHESOLR_READ_ONLY', 1);
 
 /**
  * Implementation of hook_menu().
