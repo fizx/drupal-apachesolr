@@ -11,10 +11,13 @@ function apachesolr_settings() {
 
   // Perform a check to ensure the server is there
   if (empty($_POST)) {
+    if (!defined('REQUIREMENT_OK')) {
+      define('REQUIREMENT_OK', 0);
+      define('REQUIREMENT_WARNING', 1);
+      define('REQUIREMENT_ERROR', 2);
+    }
     module_load_include('install', 'apachesolr');
 
-    // Load the install.inc so REQUIREMENT_ERROR is defined.
-    require_once './includes/install.inc';
     foreach (apachesolr_requirements('runtime') as $requirement) {
       $status = $requirement['severity'] == REQUIREMENT_ERROR ? 'error' : 'status';
       drupal_set_message($requirement['title'] . ': ' . $requirement['value'], $status);
