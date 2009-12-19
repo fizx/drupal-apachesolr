@@ -628,7 +628,7 @@ function apachesolr_search_block($op = 'list', $delta = 0, $edit = array()) {
             }
           }
           $vid = substr($delta, 7);
-          $vocab = taxonomy_vocabulary_load($vid);
+          $vocab = taxonomy_get_vocabulary($vid);
           if (is_numeric($vid) && is_array($terms) && isset($terms[$vid]) && is_array($terms[$vid])) {
             ksort($terms[$vid]);
             $limit = isset($initial_limits['apachesolr_search'][$delta]) ? $initial_limits['apachesolr_search'][$delta] : $limit_default;
