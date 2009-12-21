@@ -5,6 +5,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#664572 by pwolanin, add schema and core name to admin screen.
 
 Apache Solr Search Integration 6.x-1.0-RC4, 2009-12-17
 ------------------------------
