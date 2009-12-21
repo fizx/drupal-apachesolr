@@ -1471,7 +1471,7 @@ function apachesolr_field_name_map($field_name) {
       }
     }
     foreach (apachesolr_cck_fields() as $name => $field) {
-      $map[apachesolr_index_key($field)] = t('CCK @type field %label', array('@type' => $field['index_type'], '%name' => $field['label']));
+      $map[apachesolr_index_key($field)] = t('CCK @type field %label', array('@type' => $field['index_type'], '%label' => $field['label']));
     }
     drupal_alter('apachesolr_field_name_map', $map);
   }
