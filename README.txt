@@ -63,10 +63,7 @@ download, which includes all the items which are not in Drupal.org CVS due to
 CVS use policy. See the download link here: 
 http://acquia.com/documentation/acquia-search/activation
 
-Download Solr trunk (candidate 1.4.x build) from a nightly build or build it
-from svn.  http://people.apache.org/builds/lucene/solr/nightly/
-
-Once Solr 1.4 is released, you will be able to download from:
+Download Solr 1.4 from:
 http://www.apache.org/dyn/closer.cgi/lucene/solr/
 
 Unpack the tarball somewhere not visible to the web (not in your apache docroot
