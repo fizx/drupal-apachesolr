@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------                                                 
+#664572 by pwolanin: Added Add schema and core name to admin screen.
 #664860 by pounard: Fixed Wrong t() usage in apachesolr_field_name_map().
 #528086 by pwolanin, better (but still problematic) handling of entities.
 #662232 by pwolanin, index zxx as the Language neutral code.
