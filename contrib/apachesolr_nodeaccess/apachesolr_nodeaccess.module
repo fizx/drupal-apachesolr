@@ -4,7 +4,7 @@
 /**
  * Implementation of apachesolr_update_index
  */
-function apachesolr_nodeaccess_apachesolr_update_index(&$document, $node) {
+function apachesolr_nodeaccess_apachesolr_update_index(&$document, $node, $namespace) {
   static $account;
 
   if (!isset($account)) {
