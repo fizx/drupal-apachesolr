@@ -922,9 +922,9 @@ function apachesolr_search_language_name($lang) {
     if (function_exists('locale_language_list')) {
       $list = locale_language_list();
     }
-    $list['zxx'] = t('Language neutral');
-    // TODO - remove this line - only present for rc3 to rc4 update.
-    $list['[* TO *]'] = $list['zxx'];
+    $list['und'] = t('Language neutral');
+    // TODO - remove this line - only present for rc4 update.
+    $list['zxx'] = $list['und'];
   }
   return ($lang && isset($list[$lang])) ? $list[$lang] : $lang;
 }
