@@ -272,7 +272,7 @@ function apachesolr_cron_check_node_table() {
     $node_lists[] = $nodes;
   }
   foreach ($node_lists as $nodes) {
-    watchdog('apachesolr', 'On cron running apachesolr_nodeapi_mass_update() on nids @nids', array('@nids' => implode(',', array_keys($nodes))), WATCHDOG_WARNING);
+    watchdog('Apache Solr', 'On cron running apachesolr_nodeapi_mass_update() on nids @nids', array('@nids' => implode(',', array_keys($nodes))), WATCHDOG_WARNING);
     if (!apachesolr_nodeapi_mass_update($nodes)) {
       // Solr query failed - so stop trying.
       break;
@@ -294,7 +294,7 @@ function apachesolr_cron_check_node_table() {
     $node_lists[] = $nodes;
   }
   foreach ($node_lists as $nodes) {
-    watchdog('apachesolr', 'On cron running apachesolr_nodeapi_mass_delete() on nids @nids', array('@nids' => implode(',', array_keys($nodes))), WATCHDOG_WARNING);
+    watchdog('Apache Solr', 'On cron running apachesolr_nodeapi_mass_delete() on nids @nids', array('@nids' => implode(',', array_keys($nodes))), WATCHDOG_WARNING);
     if (!apachesolr_nodeapi_mass_delete($nodes)) {
       // Solr query failed - so stop trying.
       break;
@@ -324,7 +324,7 @@ function apachesolr_nodeapi_mass_update($nodes) {
     return TRUE;
   }
   catch (Exception $e) {
-    watchdog('apachesolr', '!e', array('!e' => nl2br(check_plain($e->getMessage()))), WATCHDOG_ERROR);
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
     return FALSE;
   }
 }
@@ -348,7 +348,7 @@ function apachesolr_nodeapi_mass_delete($nodes) {
     return TRUE;
   }
   catch (Exception $e) {
-    watchdog('apachesolr', '!e', array('!e' => nl2br(check_plain($e->getMessage()))), WATCHDOG_ERROR);
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
     return FALSE;
   }
 }
