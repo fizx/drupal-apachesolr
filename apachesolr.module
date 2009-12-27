@@ -581,7 +581,7 @@ function apachesolr_set_stats_message($text, $type = 'status', $repeat = FALSE) 
     drupal_set_message(t($text, $stats_summary), $type, FALSE);
   }
   catch (Exception $e) {
-    watchdog('apachesolr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
   }
 }
 
