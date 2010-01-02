@@ -113,8 +113,8 @@ function apachesolr_node_to_document($node, $namespace) {
     foreach ($cck_fields as $key => $cck_info) {
       if (isset($node->$key)) {
         // Got a CCK field. See if it is to be indexed.
-        $function = $cck_info['indexing callback'];
-        if ($cck_info['indexing callback'] && function_exists($function)) {
+        $function = $cck_info['indexing_callback'];
+        if ($cck_info['indexing_callback'] && function_exists($function)) {
           $field = $function($node, $key);
         }
         else {
