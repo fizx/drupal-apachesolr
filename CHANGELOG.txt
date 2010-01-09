@@ -5,6 +5,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#679522 by pwolanin, Add gettableFiles to solr admin intefrace config.
 
 Apache Solr Search Integration 6.x-1.0-RC5, 2010-01-04
 ------------------------------
