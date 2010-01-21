@@ -11,9 +11,11 @@ function apachesolr_settings() {
 
   // Perform a check to ensure the server is there
   if (empty($_POST)) {
-    $requirements = apachesolr_requirements('runtime');
-    $status = $requirements['apachesolr']['severity'] == 2 ? 'error' : 'status';
-    drupal_set_message($requirements['apachesolr']['value'], $status);
+    include_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.install');
+    foreach (apachesolr_requirements('runtime') as $requirement) {
+      $status = $requirement['severity'] == REQUIREMENT_ERROR ? 'error' : 'status';
+      drupal_set_message($requirement['title'] . ': ' . $requirement['value'], $status);
+    }
   }
 
   $form['apachesolr_host'] = array(
