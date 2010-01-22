@@ -17,7 +17,7 @@ function apachesolr_search_settings_page() {
     $output .= drupal_get_form('apachesolr_search_settings_form', $fields);
   }
   catch (Exception $e) {
-    watchdog('apachesolr', nl2br(check_plain($e->getMessage())));
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), WATCHDOG_ERROR);
     drupal_set_message(nl2br(check_plain($e->getMessage())), "warning");
     $output .= t('Cannot get information about the fields in the index at this time.');
   }
