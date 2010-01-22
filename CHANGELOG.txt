@@ -5,6 +5,9 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 5.x-2.x, 2010-xx-xx
 ------------------------------
+
+Apache Solr Search Integration 5.x-2.0-rc2, 2010-01-22
+------------------------------
 #672882 by David Lesieur: Fixed Broken 'Show more' link on taxonomy facets.
 #672530 by robertDouglass: Fixed Change array key names from display callback to display_callback() and indexing callback to indexing_callback().
 #551582 by drewish: Fixed Show value instead of key in CCK facets.
