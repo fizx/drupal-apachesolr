@@ -12,6 +12,9 @@ function apachesolr_settings() {
   // Perform a check to ensure the server is there
   if (empty($_POST)) {
     include_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.install');
+
+    // Load the install.inc so REQUIREMENT_ERROR is defined.
+    require_once './includes/install.inc';
     foreach (apachesolr_requirements('runtime') as $requirement) {
       $status = $requirement['severity'] == REQUIREMENT_ERROR ? 'error' : 'status';
       drupal_set_message($requirement['title'] . ': ' . $requirement['value'], $status);
