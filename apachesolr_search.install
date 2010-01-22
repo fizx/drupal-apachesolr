@@ -11,7 +11,9 @@
  * Update to namespace tracking.
  */
 function apachesolr_search_uninstall() {
-  apachesolr_clear_last_index('apachesolr_search');
+  $stored = variable_get('apachesolr_index_last', array());
+  unset($stored['apachesolr_search']);
+  variable_set('apachesolr_index_last', $stored);
 }
 
 /**
