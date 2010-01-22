@@ -15,7 +15,7 @@ include_once(drupal_get_path('module', 'apachesolr_search') .'/apachesolr_search
 function apachesolr_search_help($section) {
   switch ($section) {
     case 'admin/settings/apachesolr/index':
-      if (variable_get('apachesolr_read_only', 0)) {
+      if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE)) {
         return t('Operating in read-only mode; updates are disabled.');
       }
       $remaining = 0;
