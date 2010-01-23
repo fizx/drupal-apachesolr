@@ -841,7 +841,7 @@ function apachesolr_search_nested_facet_items($query, $facets, $num_found, $sort
  */
 function apachesolr_search_get_username($facet) {
   if (is_numeric($facet)) {
-    return theme('apachesolr_breadcrumb_uid', $facet);
+    return theme('apachesolr_breadcrumb_uid', array('#value' => $facet));
   }
   return '';
 }
