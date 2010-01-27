@@ -7,7 +7,10 @@
  *   Apache Solr search application.
  */
 
-include_once(drupal_get_path('module', 'apachesolr_search') .'/apachesolr_search.admin.inc');
+// Include admin functions only on the admin pages.
+if (arg(0) == 'admin' && arg(1) == 'settings' && arg(2) == 'apachesolr') {
+  include_once(drupal_get_path('module', 'apachesolr_search') .'/apachesolr_search.admin.inc');
+}
 
 /**
  * Implementation of hook_help().
