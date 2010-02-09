@@ -1,7 +1,7 @@
 // $Id$
 
 Drupal.behaviors.apachesolr = function(context) {
-  $('.apachesolr-hidden-facet').hide();
+  $('.apachesolr-hidden-facet', context).hide();
   $('<a href="#" class="apachesolr-showhide"></a>').text(Drupal.settings.apachesolr.showMore).click(function() {
     if ($(this).parent().find('.apachesolr-hidden-facet:visible').length == 0) {
       $(this).parent().find('.apachesolr-hidden-facet').show();
@@ -12,5 +12,5 @@ Drupal.behaviors.apachesolr = function(context) {
       $(this).text(Drupal.settings.apachesolr.showMore);
     }
     return false;
-  }).appendTo($('.block-apachesolr_search:has(.apachesolr-hidden-facet), .block-apachesolr:has(.apachesolr-hidden-facet)'));
+  }).appendTo($('.block-apachesolr_search:has(.apachesolr-hidden-facet), .block-apachesolr:has(.apachesolr-hidden-facet)', context));
 }
