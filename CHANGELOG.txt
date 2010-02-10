@@ -2,6 +2,7 @@
 
 Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 ------------------------------
+#664994 by pounard, claudiu.cristea: Cache CCK fields and small API improvement.
 
 Apache Solr Search Integration 5.x-2.x, 2010-xx-xx
 ------------------------------
