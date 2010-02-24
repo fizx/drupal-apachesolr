@@ -431,6 +431,11 @@ function apachesolr_process_response($response, $query, $params) {
       drupal_alter('apachesolr_search_result', $doc);
       // Copy code from comment_nodeapi().
       $extra[] = format_plural($doc->comment_count, '1 comment', '@count comments');
+      $fields = array();
+      foreach ($doc->getFieldNames() as $field_name) {
+        $fields[$field_name] = $doc->$field_name;
+      }
+
       $results[] = array(
         'link' => url($doc->path, array('absolute' => TRUE)),
         'type' => apachesolr_search_get_type($doc->type),
@@ -443,6 +448,7 @@ function apachesolr_process_response($response, $query, $params) {
         'extra' => $extra,
         'score' => $doc->score,
         'snippet' => $snippet,
+        'fields' => $fields,
       );
     }
 
