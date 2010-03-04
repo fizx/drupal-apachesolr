@@ -1537,7 +1537,8 @@ function theme_apachesolr_facet_list($items, $display_limit = 0) {
       if (!is_array($hidden_item)) {
         $hidden_item = array('data' => $hidden_item);
       }
-      $items[] = $hidden_item + array('class' => 'apachesolr-hidden-facet');
+      $hidden_item['class'] = isset($hidden_item['class']) ? $hidden_item['class'] . ' apachesolr-hidden-facet' : 'apachesolr-hidden-facet';
+      $items[] = $hidden_item;
     }
   }
   $admin_link = '';
