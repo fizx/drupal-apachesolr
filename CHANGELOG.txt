@@ -5,6 +5,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#708424 by janusman: Changed Change gmdate() to Drupal format_date() in date facets to support localization.
 
 Apache Solr Search Integration 6.x-1.0, 2010-03-03
 ------------------------------
