@@ -12,6 +12,7 @@ Apache Solr Search Integration 5.x-2.x, 2010-xx-xx
 #666936 by justindodge, pwolanin make Drupal.behaviors.apachesolr respect context.
 #708812 by claudiu.cristea: "Show more" link is missed from facet blocks.
 #696758 by claudiu.cristea: Don't include admin files in normal pages.
+#708424 by janusman: Changed Change gmdate() to Drupal format_date() in date facets to support localization.
 
 Apache Solr Search Integration 5.x-2.0-rc2, 2010-01-22
 ------------------------------
