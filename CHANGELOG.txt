@@ -5,6 +5,10 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+
+
+Apache Solr integration 6.x-2.0-ALPHA3, 2010-03-22
+------------------------------
 #610656 by pwolanin, claudiu.cristea | Scott Reynolds: Fixed Facets requests for non-enabled modules.
 #686390 by pwolanin | rjbrown99: Fixed Wrong number of initial items in taxonomy facet under certain conditions.
 #573734 by drewish | robertDouglass: Added Index controls should be radio buttons with one form submission button.
