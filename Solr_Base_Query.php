@@ -322,7 +322,9 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
         $queryvalues['filters'] .= ' ' . implode(' ', $values);
       }
     }
-    $queryvalues['filters'] = isset($queryvalues['filters']) ? trim($queryvalues['filters']) : '';
+    if (isset($queryvalues['filters'])) {
+      $queryvalues['filters'] = trim($queryvalues['filters']);
+    }
     $solrsort = $this->solrsort;
     if ($solrsort && ($solrsort['#name'] != 'score' || $solrsort['#direction'] != 'asc')) {
       if (isset($this->field_map[$solrsort['#name']])) {
