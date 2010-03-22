@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#736540 by drewish | Scott Reynolds: Changed Minimize UPDATE queries in apachesolr_nodeapi_mass_update().
 #687738 by David Lesieur | anantagati: Fixed Avoid introducing empty 'filters' query string.
 #733116 by pwolanin | drewish: Changed Implement hook_flush_caches().
 #719356 by robertDouglass, mathieu | flk: Fixed Indexing cron triggers sigsegv in apachesolr.module line 387.
