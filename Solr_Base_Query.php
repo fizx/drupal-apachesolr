@@ -409,7 +409,6 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
 
     // Gets information about the fields already in solr index.
     $index_fields = $this->solr->getFields();
-
     foreach ((array) $index_fields as $name => $data) {
       // Look for a field alias.
       $alias = isset($this->field_map[$name]) ? $this->field_map[$name] : $name;
