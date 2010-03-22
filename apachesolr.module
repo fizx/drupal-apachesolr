@@ -539,6 +539,13 @@ function apachesolr_cron() {
 }
 
 /**
+ * Implementation of hook_flush_caches().
+ */
+function apachesolr_flush_caches() {
+  return array('cache_apachesolr');
+}
+
+/**
  * Implementation of hook_nodeapi().
  */
 function apachesolr_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
