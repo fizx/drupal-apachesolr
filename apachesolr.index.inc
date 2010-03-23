@@ -154,6 +154,22 @@ function apachesolr_node_to_document($node, $namespace) {
   return $document;
 }
 
+function apachesolr_cck_text_indexing_callback($node, $field_name, $cck_info) {
+  $fields = array();
+  if (isset($node->{$field_name})) {
+    $index_key = apachesolr_index_key($cck_info);
+    foreach ($node->$field_name as $field) {
+      if ($index_value =  (isset($field['safe']) && strlen($field['safe'])) ? $field['safe'] : FALSE) {
+        $fields[] = array(
+          'key' => $index_key,
+          'value' => $index_value,
+        );
+      }
+    }
+  }
+  return $fields;
+}
+
 function apachesolr_cck_nodereference_indexing_callback($node, $field_name, $cck_info) {
   $fields = array();
   if (isset($node->{$field_name})) {

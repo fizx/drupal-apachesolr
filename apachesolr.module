@@ -1610,10 +1610,12 @@ function apachesolr_cck_fields() {
       $mappings['text'] = array(
         'optionwidgets_select' => array(
           'display_callback' => 'apachesolr_cck_text_field_callback',
+          'indexing_callback' => 'apachesolr_cck_text_indexing_callback',
           'index_type' => 'string',
         ),
         'optionwidgets_buttons' => array(
           'display_callback' => 'apachesolr_cck_text_field_callback',
+          'indexing_callback' => 'apachesolr_cck_text_indexing_callback',
           'index_type' => 'string',
         ),
       );
@@ -1637,6 +1639,7 @@ function apachesolr_cck_fields() {
       $mappings['userreference'] = array(
         'userreference_buttons' => array(
           'display_callback' => 'apachesolr_cck_userreference_field_callback',
+          'indexing_callback' => 'apachesolr_cck_userreference_indexing_callback',
           'index_type' => 'integer',
         ),
         'userreference_select' => array(
