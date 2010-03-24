@@ -5,7 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
-
+#649038 by brunodbo, slip | robertDouglass: Fixed Search not working on 404 page.
 
 Apache Solr integration 6.x-2.0-ALPHA3, 2010-03-22
 ------------------------------
