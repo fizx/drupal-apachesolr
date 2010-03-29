@@ -5,6 +5,8 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#751420 by pwolanin, skwashd | Damien Tournoud, Scott Reynolds: Fixed apachesolr_site_hash() calls md5() twice.
+
 
 Apache Solr integration 6.x-2.0-BETA1, 2010-03-24
 ------------------------------
