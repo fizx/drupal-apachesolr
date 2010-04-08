@@ -248,10 +248,9 @@ function apachesolr_enabled_facets_form_submit($form, &$form_state) {
   foreach ($form_state['values']['apachesolr_enabled_facets'] as $module => $facets) {
     $enabled[$module] = array_filter($facets);
   }
-  // This cache being stale can prevent new facet filters from working.
-  $solr = apachesolr_get_solr();
-  $solr->clearCache();
   apachesolr_save_enabled_facets($enabled);
+  // This cache being stale can prevent new facet filters from working.
+  apachesolr_clear_cache();
   drupal_set_message($form_state['values']['submit_message'], 'warning');
 }
 

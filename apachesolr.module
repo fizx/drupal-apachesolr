@@ -543,7 +543,8 @@ function apachesolr_flush_caches() {
  * require clearing Luke cache etc.
  */
 function apachesolr_clear_cache() {
-  cache_clear_all(NULL, 'cache_apachesolr');
+  $solr = apachesolr_get_solr();
+  $solr->clearCache();
 }
 
 /**
