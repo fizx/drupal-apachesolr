@@ -1179,7 +1179,7 @@ function theme_apachesolr_search_snippets($doc, $snippets) {
 }
 
 
-function apacehsolr_get_parent_terms($tids) {
+function apachesolr_get_parent_terms($tids) {
   // Find the starting tid terms and then all their parents.
   $parent_terms = array();
   $new_tids = $tids;
@@ -1227,7 +1227,7 @@ function apachesolr_search_currentsearch_block($response, $query) {
     }
     if ($facets) {
       // Get all term hierarchy information.
-      $all_terms = apacehsolr_get_parent_terms(array_keys($facets));
+      $all_terms = apachesolr_get_parent_terms(array_keys($facets));
       foreach ($all_terms as $tid => $term) {
         if (!isset($facets[$tid])) {
           // This is a parent that is missing from the query.  E.g. we started
