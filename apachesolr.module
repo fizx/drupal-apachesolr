@@ -1722,10 +1722,17 @@ function apachesolr_cck_fields() {
           $row->index_type           = $field['index_type'];
           $row->indexing_callback    = $field['indexing_callback'];
           $row->display_callback     = $field['display_callback'];
-          $row->facet_block_callback = $field['facet_block_callback'];
+          if (isset($field['facet_block_callback'])) {
+            $row->facet_block_callback = $field['facet_block_callback'];
+          }
           $row->multiple             = (bool) $row->multiple;
 
-          $fields[$row->field_name] = array_merge((array) $fields[$row->field_name], (array) $row);
+          if (isset($fields[$row->field_name])) {
+            $fields[$row->field_name] = array_merge((array) $fields[$row->field_name], (array) $row);
+          }
+          else {
+            $fields[$row->field_name] = (array) $row;
+          }
           $fields[$row->field_name]['content_types'][] = $row->content_type;
           unset($fields[$row->field_name]['content_type']);
         }
