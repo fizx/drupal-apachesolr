@@ -363,6 +363,8 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
    * Build additional breadcrumb elements relative to $base.
    */
   public function get_breadcrumb($base = NULL) {
+    $breadcrumb = array();
+
     $progressive_crumb = array();
     if (!isset($base)) {
       $base = $this->get_path();
@@ -392,9 +394,12 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
         $breadcrumb[] = l($field['#value'], $base, $options);
       }
     }
-    // The last breadcrumb is the current page, so it shouldn't be a link.
-    $last = count($breadcrumb) - 1;
-    $breadcrumb[$last] = strip_tags($breadcrumb[$last]);
+
+    if (!empty($breadcrumb)) {
+      // The last breadcrumb is the current page, so it shouldn't be a link.
+      $last = count($breadcrumb) - 1;
+      $breadcrumb[$last] = strip_tags($breadcrumb[$last]);
+    }
 
     return $breadcrumb;
   }
