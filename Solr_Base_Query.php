@@ -318,11 +318,10 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
    public function get_url_queryvalues() {
     $queryvalues = array();
     if ($fq = $this->rebuild_fq(TRUE)) {
+      $queryvalues['filters'] = '';
       foreach ($fq as $delta => $values) {
         $queryvalues['filters'] .= ' ' . implode(' ', $values);
       }
-    }
-    if (isset($queryvalues['filters'])) {
       $queryvalues['filters'] = trim($queryvalues['filters']);
     }
     $solrsort = $this->solrsort;
