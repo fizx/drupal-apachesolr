@@ -383,7 +383,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
       }
       $progressive_crumb[] = $this->make_filter($field);
       $options = array('query' => 'filters=' . rawurlencode(implode(' ', $progressive_crumb)));
-      $breadcrumb_name = "apachesolr_breadcrumb_" . $name;
+      $breadcrumb_name = 'apachesolr_breadcrumb_' . $name;
       // Modules utilize this alter to consolidate several fields into one
       // theme function. This is how CCK breadcrumbs are handled.
       drupal_alter('apachesolr_theme_breadcrumb', $breadcrumb_name);
