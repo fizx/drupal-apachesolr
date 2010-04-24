@@ -136,7 +136,7 @@ function apachesolr_index_page() {
     $data->fields = array();
   }
 
-  $output  = '';
+  $output = '';
   if (isset($data->index->numDocs)) {
     $pending_docs = $delay_msg = $delete_msg = '';
     try {

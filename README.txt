@@ -106,7 +106,7 @@ The 'Zend' directory should normally be under the apachesolr
 directory, but may be elsewhere if you set that location to be
 in your PHP include path.
 
-Now, you should  enable the "Apache Solr framework" and "Apache Solr search" 
+Now, you should enable the "Apache Solr framework" and "Apache Solr search" 
 modules. Check that you can connect to Solr at ?q=admin/setting/apachesolr
 Now run cron on your Drupal site until your content is indexed. You
 can monitor the index at ?q=admin/settings/apachesolr/index
