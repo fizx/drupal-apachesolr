@@ -102,7 +102,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
   protected $available_sorts;
 
   // Makes sure we always have a valid sort.
-  protected $solrsort = array('#name' => 'score', '#direction' => 'asc');
+  protected $solrsort = array('#name' => 'score', '#direction' => 'desc');
 
   /**
    * @param $solr
@@ -259,7 +259,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $sortstring = strtr($this->sortstring, array_flip($this->field_map));
     // Score is a special case - it's the default sort for Solr.
     if ('' == $sortstring) {
-      $this->set_solrsort('score', 'asc');
+      $this->set_solrsort('score', 'desc');
     }
     else {
       // Validate and set sort parameter
@@ -304,7 +304,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
   protected function default_sorts() {
     // The array keys must always be real Solr index fields.
     return array(
-      'score' => array('title' => t('Relevancy'), 'default' => 'asc'),
+      'score' => array('title' => t('Relevancy'), 'default' => 'desc'),
       'sort_title' => array('title' => t('Title'), 'default' => 'asc'),
       'type' => array('title' => t('Type'), 'default' => 'asc'),
       'sort_name' => array('title' => t('Author'), 'default' => 'asc'),
@@ -325,7 +325,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
       $queryvalues['filters'] = trim($queryvalues['filters']);
     }
     $solrsort = $this->solrsort;
-    if ($solrsort && ($solrsort['#name'] != 'score' || $solrsort['#direction'] != 'asc')) {
+    if ($solrsort && ($solrsort['#name'] != 'score' || $solrsort['#direction'] != 'desc')) {
       if (isset($this->field_map[$solrsort['#name']])) {
         $solrsort['#name'] = $this->field_map[$solrsort['#name']];
       }

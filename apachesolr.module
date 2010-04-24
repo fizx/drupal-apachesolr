@@ -725,7 +725,7 @@ function apachesolr_block($op = 'list', $delta = 0, $edit = array()) {
           $active = $solrsort['#name'] == $name;
           if ($name == 'score') {
             $direction = '';
-            $new_direction = 'asc'; // We only sort by ascending score.
+            $new_direction = 'desc'; // We only sort by descending score.
           }
           elseif ($active) {
             $direction = $solrsort['#direction'];
@@ -1385,7 +1385,7 @@ function apachesolr_modify_query(&$query, &$params, $caller) {
     $sort = $query->get_solrsort();
     $sortstring = $sort['#name'] .' '. $sort['#direction'];
     // We don't bother telling Solr to do its default sort.
-    if ($sortstring != 'score asc') {
+    if ($sortstring != 'score desc') {
       $params['sort'] = $sortstring;
     }
   }
