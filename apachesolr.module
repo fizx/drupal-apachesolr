@@ -746,7 +746,7 @@ function apachesolr_block($op = 'list', $delta = 0, $edit = array()) {
           if ($name == 'score') {
             // Set a solrsort parameter so we can distinguish between a user
             // selecting "score desc" and the page defaulting to "score desc".
-            $sort_links[$name]['options'] = array('query' => array('solrsort' => 'score desc'));
+            $sort_links[$name]['options']['query']['solrsort'] = 'score desc';
           }
         }
         // Allow other modules to add or remove sorts.
