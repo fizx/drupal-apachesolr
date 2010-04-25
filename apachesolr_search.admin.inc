@@ -14,7 +14,7 @@ function apachesolr_search_settings_page() {
   try {
     $solr = apachesolr_get_solr();
     $fields = $solr->getFields();
-    $output .= drupal_get_form('apachesolr_search_settings_form', $fields);
+    $output = drupal_get_form('apachesolr_search_settings_form', $fields);
   }
   catch (Exception $e) {
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
