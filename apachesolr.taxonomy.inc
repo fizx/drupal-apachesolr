@@ -41,7 +41,7 @@ function apachesolr_search_taxonomy_term_page($str_tids = '', $depth = 0, $op = 
       $data = apachesolr_search_execute('', $filters, $solrsort, 'search/apachesolr_search', $page);
       $results = theme('search_results', $data, $type);
     }
-    catch (Exception $e){
+    catch (Exception $e) {
       watchdog('apachesolr', t('Error running search'));
     }
 

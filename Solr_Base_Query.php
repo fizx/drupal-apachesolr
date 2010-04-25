@@ -16,7 +16,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $patterns[] = '/(^| |-)'. $name .':([^ ]*)/';
     foreach ($patterns as $p) {
       if (preg_match_all($p, $filterstring, $matches, PREG_SET_ORDER)) {
-        foreach($matches as $match) {
+        foreach ($matches as $match) {
           $filter = array();
           $filter['#query'] = $match[0];
           $filter['#exclude'] = ($match[1] == '-');
