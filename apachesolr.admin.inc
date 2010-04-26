@@ -66,6 +66,11 @@ function apachesolr_settings() {
     '#default_value' => variable_get('apachesolr_facetstyle', 'checkboxes'),
     '#options' => array('links' => t('Links only'), 'checkboxes' => t('Links with checkboxes')),
   );
+  $form['apachesolr_logging'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Log search requests'),
+    '#default_value' => variable_get('apachesolr_logging', TRUE),
+  );
   $form['apachesolr_failure'] = array(
     '#type' => 'select',
     '#title' => t('On failure'),
