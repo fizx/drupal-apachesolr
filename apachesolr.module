@@ -1416,6 +1416,11 @@ function theme_apachesolr_sort_list($items) {
  */
 interface Drupal_Solr_Query_Interface {
   /**
+   * Removes the keywords from the query.
+   */
+  function remove_keys();
+
+  /**
    * Return the search path.
    *
    * @param string $new_keywords

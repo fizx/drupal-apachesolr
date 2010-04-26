@@ -134,6 +134,10 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $this->id = ++self::$idCount;
   }
 
+  public function remove_keys() {
+    $this->keys = '';
+  }
+
   public function get_filters($name = NULL) {
     if (empty($name)) {
       return $this->fields;
