@@ -151,6 +151,8 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_enabled_facets');
   // Remove tables.
   drupal_uninstall_schema('apachesolr');
+  // Remove blocks.
+  db_query('DELETE FROM {blocks} WHERE module = "apachesolr"');
 }
 
 /**
