@@ -864,14 +864,12 @@ function apachesolr_date_determine_gap($start, $end) {
   $start = strtotime($start);
   $end = strtotime($end);
 
-  if ($end - $start >= 86400*365) {
+  if ($end - $start >= 86400 * 365) {
     return 'YEAR';
   }
-
-  if (date('m', $start) != date('m', $end)) {
+  if (date('Ym', $start) != date('Ym', $end)) {
     return 'MONTH';
   }
-
   if ($end - $start > 86400) {
     return 'DAY';
   }
