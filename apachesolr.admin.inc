@@ -755,7 +755,7 @@ function apachesolr_batch_index_nodes(&$context) {
       return FALSE;
     }
 
-    $status = module_invoke('apachesolr_search', 'search', 'status');
+    $status = apachesolr_index_status('apachesolr_search');
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = $status['remaining'];
   }
