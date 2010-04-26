@@ -1162,7 +1162,7 @@ function apachesolr_date_format_iso_by_gap($gap, $iso) {
   // information.  However, we'd need to do that per-field and I'm not
   // our callers always have field information handy.
   $unix = strtotime($iso);
-  if ($unix > 0) {
+  if ($unix !== FALSE) {
     switch ($gap) {
       case 'YEAR':
         return format_date($unix, 'custom', 'Y', 0);
