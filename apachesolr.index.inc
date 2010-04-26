@@ -36,6 +36,7 @@ function apachesolr_node_to_document($node, $namespace) {
     $node = node_build_content($node, FALSE, FALSE);
     $node->body = drupal_render($node->content);
     $node->title = apachesolr_clean_text($node->title);
+    $node->teaser = apachesolr_clean_text($node->teaser);
 
     // Fetch extra data normally not visible, including comments.
     // We do this manually (with module_implements instead of node_invoke_nodeapi)
@@ -68,6 +69,7 @@ function apachesolr_node_to_document($node, $namespace) {
     $document->nid = $node->nid;
     $document->uid = $node->uid;
     $document->title = $node->title;
+    $document->teaser = $node->teaser;
     $document->status = $node->status;
     $document->sticky = $node->sticky;
     $document->promote = $node->promote;

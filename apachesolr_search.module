@@ -771,7 +771,7 @@ function apachesolr_search_block($op = 'list', $delta = 0, $edit = array()) {
         }
 
         // Handle taxonomy vocabulary facets
-        if ((strpos($delta, 'im_vid_') === 0)) {
+        if (strpos($delta, 'im_vid_') === 0) {
           return apachesolr_search_taxonomy_facet_block($response, $query, $delta);
         }
 
