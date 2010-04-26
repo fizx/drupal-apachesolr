@@ -216,6 +216,10 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $this->keys = $keys;
   }
 
+  public function remove_keys() {
+    $this->keys = '';
+  }
+
   public function add_subquery(Drupal_Solr_Query_Interface $query, $fq_operator = 'OR', $q_operator = 'AND') {
     $this->subqueries[$query->id] = array('#query' => $query, '#fq_operator' => $fq_operator, '#q_operator' => $q_operator);
   }
