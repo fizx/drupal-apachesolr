@@ -121,7 +121,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
    *   Visible string telling solr how to sort - added to GET query params.
    *
    * @param $base_path
-   *   The search base path (without the keywords) for this query.
+   *   The search base path (without the keywords) for this query, without trailing slash.
    */
   function __construct($solr, $keys, $filterstring, $sortstring, $base_path) {
     $this->solr = $solr;
