@@ -5,3 +5,5 @@ dependencies[] = apachesolr
 dependencies[] = og
 package = Apache Solr
 core = "6.x"
+
+
