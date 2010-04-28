@@ -2,6 +2,14 @@
 // $Id$
 
 /**
+ * Implementation of hook_uninstall().
+ */
+function apachesolr_og_uninstall() {
+  // Remove blocks.
+  db_query('DELETE FROM {blocks} WHERE module = "apachesolr_og"');
+}
+
+/**
  * Implementation of hook_enable().
  */
 function apachesolr_og_enable() {
