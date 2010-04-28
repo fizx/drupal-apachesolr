@@ -733,12 +733,9 @@ function apachesolr_search_language_name($lang) {
       $list = locale_language_list();
     }
     $list['und'] = t('Language neutral');
-    // TODO - remove this line - only present for rc4 update.
-    $list['zxx'] = $list['und'];
   }
   return ($lang && isset($list[$lang])) ? $list[$lang] : $lang;
 }
-
 
 /**
  * Recursive function that returns a nested array of facet values for use with
