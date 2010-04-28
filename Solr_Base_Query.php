@@ -8,6 +8,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
    */
   public function filter_extract(&$filterstring, $name) {
     $extracted = array();
+    $name = preg_quote($name, '/');
     // Range queries.  The "TO" is case-sensitive.
     $patterns[] = '/(^| |-)'. $name .':([\[\{](\S+) TO (\S+)[\]\}])/';
     // Match quoted values.
