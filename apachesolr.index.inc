@@ -82,12 +82,12 @@ function apachesolr_node_to_document($nid, $namespace) {
     $document->moderate = $node->moderate;
     $document->tnid = $node->tnid;
     $document->translate = $node->translate;
-    if (!empty($node->language)) {
-      $document->language = $node->language;
-    }
-    else {
+    if (empty($node->language)) {
       // 'und' is the language-neutral code in Drupal 7.
       $document->language = 'und';
+    }
+    else {
+      $document->language = $node->language;
     }
     $document->body = apachesolr_clean_text($text);
     $document->type  = $node->type;
