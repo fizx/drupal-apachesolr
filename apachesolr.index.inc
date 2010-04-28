@@ -87,7 +87,6 @@ function apachesolr_node_to_document($nid, $namespace) {
     }
     else {
       // 'und' is the language-neutral code in Drupal 7.
-      // Note - this was changed from 'zxx'.
       $document->language = 'und';
     }
     $document->body = apachesolr_clean_text($text);
