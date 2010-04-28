@@ -186,7 +186,7 @@ function apachesolr_update_6000() {
   db_create_table($ret, 'apachesolr_search_node', $schema['apachesolr_search_node']);
   // Populate table
   $ret[] = update_sql("INSERT INTO {apachesolr_search_node} (nid, status, changed)
-                       SELECT n.nid, n.status, GREATEST(n.created, n.changed, c.last_comment_timestamp) AS changed
+                       SELECT n.nid, n.status, GREATEST(n.created, n.changed, COALESCE(c.last_comment_timestamp, 0)) AS changed
                        FROM {node} n LEFT JOIN {apachesolr_search_node} asn ON n.nid = asn.nid
                        LEFT JOIN {node_comment_statistics} c ON n.nid = c.nid
                        WHERE asn.changed IS NULL");
