@@ -206,7 +206,6 @@ function apachesolr_search_noresults() {
  * @throws Exception
  */
 function apachesolr_search_execute($keys, $filters, $solrsort, $base_path = '', $page = 0, $caller = 'apachesolr_search') {
-
   $params = array();
   // This is the object that knows about the query coming from the user.
   $query = apachesolr_drupal_query($keys, $filters, $solrsort, $base_path);
