@@ -62,7 +62,8 @@ function apachesolr_node_to_document($nid, $namespace) {
         // Don't add comments.
         continue;
       }
-      if ($output = module_invoke($module, 'nodeapi', $node, 'update index', FALSE, FALSE)) {
+      $function = $module .'_nodeapi';
+      if ($output = $function($node, 'update index', FALSE, FALSE)) {
         $extra[$module] = $output;
       }
     }
