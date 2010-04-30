@@ -877,7 +877,6 @@ function apachesolr_form_content_field_edit_form_alter(&$form, $form_state) {
   $form['#submit'][] = 'apachesolr_clear_cache';
 }
 
-
 /**
  * Implementation of hook_form_[form_id]_alter().
  *
