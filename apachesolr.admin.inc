@@ -115,6 +115,7 @@ function apachesolr_settings_validate($form, &$form_state) {
  * Gets information about the fields already in solr index.
  */
 function apachesolr_index_page() {
+  $data = (object) array();
   try {
     $solr = apachesolr_get_solr();
     // TODO: possibly clear this every page view if we are running multi-site.
@@ -129,7 +130,7 @@ function apachesolr_index_page() {
     $data->fields = array();
   }
 
-  $output  = '';
+  $output = '';
   if (isset($data->index->numDocs)) {
     $pending_docs = $delay_msg = $delete_msg = '';
     try {

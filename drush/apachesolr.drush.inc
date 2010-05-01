@@ -124,7 +124,7 @@ function apachesolr_drush_solr_reindex() {
 
 function apachesolr_drush_solr_phpclient() {
   $args = func_get_args();
-  if ($args[0]) {
+  if (isset($args[0])) {
     $path = $args[0];
   }
   else {
