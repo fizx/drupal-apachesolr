@@ -1356,7 +1356,7 @@ function apachesolr_pager_init($total, $limit = 10, $element = 0) {
  *
  * Example:
  *
- * function my_module_apachesolr_modify_query(&$query, &$params) {
+ * function my_module_apachesolr_modify_query(&$query, &$params, $caller) {
  *   // I only want to see articles by the admin!
  *   $query->add_filter("uid", 1);
  *

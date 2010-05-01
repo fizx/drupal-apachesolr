@@ -175,7 +175,7 @@ function apachesolr_cck_nodereference_indexing_callback($node, $field_name, $cck
   if (isset($node->{$field_name})) {
     $index_key = apachesolr_index_key($cck_info);
     foreach ($node->$field_name as $field) {
-      if ($index_value =  (isset($field['nid']) && strlen($field['nid'])) ? $field['nid'] : FALSE) {
+      if ($index_value = (isset($field['nid']) && strlen($field['nid'])) ? $field['nid'] : FALSE) {
         $fields[] = array(
           'key' => $index_key,
           'value' => $index_value,
@@ -191,7 +191,7 @@ function apachesolr_cck_userreference_indexing_callback($node, $field_name, $cck
   if (isset($node->$field_name)) {
     $index_key = apachesolr_index_key($cck_info);
     foreach ($node->{$field_name} as $field) {
-      if ($index_value =  (isset($field['uid']) && strlen($field['uid'])) ? $field['uid'] : FALSE) {
+      if ($index_value = (isset($field['uid']) && strlen($field['uid'])) ? $field['uid'] : FALSE) {
         $fields[] = array(
           'key' => $index_key,
           'value' => $index_value,
