@@ -395,8 +395,8 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
       if (count($extracted)) {
         foreach ($extracted as $filter) {
           $pos = strpos($this->filterstring, $filter['#query']);
-          // $solr_keys and $solr_crumbs are keyed on $pos so that query order
-          // is maintained. This is important for breadcrumbs.
+          // $fields are keyed on $pos so that query order is maintained. This
+          // is important for breadcrumbs.
           $filter['#name'] = $name;
           $this->fields[$pos] = $filter;
         }
