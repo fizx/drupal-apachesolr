@@ -44,7 +44,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     // If the field value has spaces, or : in it, wrap it in double quotes.
     // unless it is a range query.
     if (preg_match('/[ :]/', $filter['#value']) && !isset($filter['#start']) && !preg_match('/[\[\{]\S+ TO \S+[\]\}]/', $filter['#value'])) {
-      $filter['#value'] = '"'. $filter['#value']. '"';
+      $filter['#value'] = '"' . $filter['#value'] . '"';
     }
     $prefix = empty($filter['#exclude']) ? '' : '-';
     return $prefix . $filter['#name'] . ':' . $filter['#value'];

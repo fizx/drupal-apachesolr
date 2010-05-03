@@ -16,7 +16,7 @@
  * Notice how this structure closely resembles how
  * you define menu hooks.
  *
- * @See drush_parse_command() for a list of recognized keys.
+ * @see drush_parse_command() for a list of recognized keys.
  *
  * @return
  *   An associative array describing your command(s).
