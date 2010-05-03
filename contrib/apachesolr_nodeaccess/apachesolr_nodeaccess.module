@@ -20,7 +20,7 @@ function apachesolr_nodeaccess_apachesolr_update_index(&$document, $node, $names
     session_save_session(FALSE);
     $user = $anonymous_account;
   }
-  
+
   if (!node_access('view', $node)) {
     // Get node access grants.
     $result = db_query('SELECT * FROM {node_access} WHERE (nid = 0 OR nid = %d) AND grant_view = 1', $node->nid);
