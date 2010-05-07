@@ -24,7 +24,7 @@ function apachesolr_search_help($section) {
       $remaining = 0;
       $total = 0;
       // Collect the stats
-      $status = module_invoke('apachesolr_search', 'search', 'status');
+      $status = apachesolr_index_status('apachesolr_search');
       $remaining += $status['remaining'];
       $total += $status['total'];
 
