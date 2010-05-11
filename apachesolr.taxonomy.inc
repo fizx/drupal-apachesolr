@@ -42,7 +42,7 @@ function apachesolr_search_taxonomy_term_page($str_tids = '', $depth = 0, $op = 
       $results = theme('search_results', $data, $type);
     }
     catch (Exception $e) {
-      watchdog('apachesolr', t('Error running search'));
+      watchdog('Apache Solr', t('Error running search'));
     }
 
     // Set the title to the term name like taxonomy does.
