@@ -18,7 +18,7 @@ function apachesolr_search_taxonomy_term_page($str_tids = '', $depth = 0, $op = 
   }
   else {
     // Check if term belongs to vocabulary selected by admin as an available filter
-    $term = taxonomy_get_term($terms['tids'][0]);
+    $term = taxonomy_term_load($terms['tids'][0]);
     $vocabulary_facet_name = 'im_vid_' . $term->vid;
 
     if (!in_array($vocabulary_facet_name, $vids_to_override)) {
@@ -38,7 +38,7 @@ function apachesolr_search_taxonomy_term_page($str_tids = '', $depth = 0, $op = 
     $_GET['retain-filters'] = 1;
 
     try {
-      $data = apachesolr_search_execute('', $filters, $solrsort, 'search/apachesolr_search', $page);
+      $data = apachesolr_search_run('', $filters, $solrsort, 'search/apachesolr_search', $page);
       $results = theme('search_results', $data, $type);
     }
     catch (Exception $e) {

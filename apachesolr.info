@@ -3,12 +3,10 @@ name = Apache Solr framework
 description = Framework for searching with Solr
 dependencies[] = search
 package = Apache Solr
-core = "7.x"
+core = 7.x
 
-; Files
+files[] = apachesolr.install
 files[] = apachesolr.module
 files[] = apachesolr.admin.inc
 files[] = apachesolr.index.inc
-files[] = apachesolr.install
-files[] = apachesolr.taxonomy.inc 
-
+files[] = apachesolr.taxonomy.inc

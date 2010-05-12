@@ -65,7 +65,7 @@ class DrupalApacheSolrNodeAccess extends DrupalWebTestCase {
     node_access_write_grants($author_restricted_node, array($author_grant), 'nodeaccess_author');
 
     $include_path = get_include_path();
-    set_include_path('./'. drupal_get_path('module', 'apachesolr') .'/SolrPhpClient/');
+    set_include_path(DRUPAL_ROOT . '/' . drupal_get_path('module', 'apachesolr') .'/SolrPhpClient/');
     include_once('Apache/Solr/Service.php');
     set_include_path($include_path);
 

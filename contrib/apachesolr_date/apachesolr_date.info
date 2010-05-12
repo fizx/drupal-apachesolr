@@ -5,6 +5,6 @@ dependencies[] = apachesolr
 dependencies[] = apachesolr_search
 dependencies[] = date
 package = Apache Solr
-core = "7.x"
+core = 7.x
 
 files[] = apachesolr_date.module

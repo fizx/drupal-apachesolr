@@ -4,6 +4,6 @@ description = Integrates Organic Groups and Apache Solr Search
 dependencies[] = apachesolr
 dependencies[] = og
 package = Apache Solr
-core = "7.x"
+core = 7.x
 
 files = apachesolr_og.module

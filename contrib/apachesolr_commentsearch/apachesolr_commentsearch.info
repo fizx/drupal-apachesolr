@@ -4,6 +4,6 @@ description = Treats comments as a content type allowing you to search them sepa
 dependencies[] = apachesolr_search
 dependencies[] = comment
 package = Apache Solr
-core = "7.x"
+core = 7.x
 
 files[] = apachesolr_commentsearch.module
