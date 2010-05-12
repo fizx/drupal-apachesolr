@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  * Update to namespace tracking.
  */
 function apachesolr_search_uninstall() {
