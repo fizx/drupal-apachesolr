@@ -1,0 +1,7 @@
+; $Id$
+name = Apache Solr comment search
+description = Treats comments as a content type allowing you to search them separately.
+dependencies[] = apachesolr_search
+dependencies[] = comment
+package = Apache Solr
+core = "7.x"

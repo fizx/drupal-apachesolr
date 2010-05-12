@@ -1,0 +1,8 @@
+; $Id$
+name = Apache Solr Date
+description = Index and facet on CCK date fields.
+dependencies[] = apachesolr
+dependencies[] = apachesolr_search
+dependencies[] = date
+package = Apache Solr
+core = "7.x"
