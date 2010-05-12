@@ -8,7 +8,7 @@
  */
 
 /**
- * Implementation of hook_apachesolr_facets().
+ * Implements hook_apachesolr_facets().
  * Only handles end date facets.
  * Start date facet definitions are handled later.
  * @see apachesolr_date_apachesolr_cck_fields_alter()
@@ -40,7 +40,7 @@ function apachesolr_date_apachesolr_facets() {
 }
 
 /**
- * Implementation of hook_block().
+ * Implements hook_block().
  */
 function apachesolr_date_block($op = 'list', $delta = 0, $edit = array()) {
   switch ($op) {
@@ -99,7 +99,7 @@ function apachesolr_date_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 /**
- * Implementation of hook_apachesolr_prepare_query().
+ * Implements hook_apachesolr_prepare_query().
  * Adds sorts for enabled date facets to the sorting block.
  */
 function apachesolr_date_apachesolr_prepare_query(&$query) {
@@ -121,7 +121,7 @@ function apachesolr_date_apachesolr_prepare_query(&$query) {
 }
 
 /**
- * Implementation of hook_apachesolr_cck_fields_alter().
+ * Implements hook_apachesolr_cck_fields_alter().
  * This function adds the CCK date fields' definitions to let
  * them be recognized as facets.
  */

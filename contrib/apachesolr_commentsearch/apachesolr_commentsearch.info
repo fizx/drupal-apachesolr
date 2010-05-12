@@ -5,3 +5,5 @@ dependencies[] = apachesolr_search
 dependencies[] = comment
 package = Apache Solr
 core = "7.x"
+
+files[] = apachesolr_commentsearch.module
