@@ -773,9 +773,9 @@ function apachesolr_batch_index_nodes(&$context) {
 
   // With each pass through the callback, retrieve the next group of nids.
   $rows = apachesolr_get_nodes_to_index('apachesolr_search', $limit);
-  apachesolr_index_nodes($rows, 'apachesolr_search');
+  $pos = apachesolr_index_nodes($rows, 'apachesolr_search');
 
-  $context['sandbox']['progress'] += count($rows);
+  $context['sandbox']['progress'] += $pos['nodes_processed'];
   $context['message'] = t('Indexed @current of @total nodes', array('@current' => $context['sandbox']['progress'], '@total' => $context['sandbox']['max']));
 
   // Inform the batch engine that we are not finished, and provide an
