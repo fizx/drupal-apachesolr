@@ -3,8 +3,9 @@
 Apache Solr integration x.x-x.x, xxxx-xx-xx
 ------------------------------
 
-Apache Solr integration 6.x-2.x, xxxx-xx-xx
+Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#795912 by tjwallace, dmitry_bezer, jpmckinney, pwolanin: inital Drupal 7 port.
 
 Apache Solr integration 6.x-2.0-BETA1, 2010-04-08
 ------------------------------
