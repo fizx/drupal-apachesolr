@@ -433,7 +433,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
             $subqueries[] = $value;
           }
         }
-        $fq['subqueries'][] =  " {$data['#q_operator']} (" . implode(" $operator " , $subqueries) . ")";
+        $fq['subqueries'][$id] =  " {$data['#q_operator']} (" . implode(" $operator " , $subqueries) . ")";
       }
     }
     return $fq;
