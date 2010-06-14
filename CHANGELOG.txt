@@ -5,6 +5,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#824534 backport from 6.x-2.x of method to replace keywords in query object.
 #824154 by pwolanin: update schema.xml to add preserveOriginal="1" to WordDelimiterFilterFactory.
 #818608 by nofun: fix 5.3 warning on get_object_vars() 
         by jpmckinney: Fix whitespace. Respect coding standards. Fix watchdog argument. Redo apachesolr_facet_block refactorings from 6.x-2.x

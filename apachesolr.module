@@ -1742,6 +1742,24 @@ interface Drupal_Solr_Query_Interface {
   function remove_filter($field, $value = NULL);
 
   /**
+   * Get the query's keywords.
+   */
+  function get_keys();
+
+  /**
+   * Set the query's keywords.
+   *
+   * @param string $keys
+   *   The new keywords.
+   */
+  function set_keys($keys);
+
+  /**
+   * Removes the query's keywords.
+   */
+  function remove_keys();
+
+  /**
    * Return the search path (including the search keywords).
    */
   function get_path();
