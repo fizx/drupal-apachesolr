@@ -1137,6 +1137,7 @@ function apachesolr_get_parent_terms($tids) {
 function apachesolr_search_currentsearch_block($response, $query) {
   $fields = $query->get_filters();
   $links = array();
+  $facets = array();
 
   // If current search has keys, offer current search without them
   if ($keys = $query->get_query_basic()) {
