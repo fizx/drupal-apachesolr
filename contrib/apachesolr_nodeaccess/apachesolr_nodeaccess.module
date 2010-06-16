@@ -31,6 +31,8 @@ function apachesolr_nodeaccess_apachesolr_update_index(&$document, $node, $names
  * Creates a Solr query for a given user
  *
  * @param $account an account to get grants for and build a solr query
+ *
+ * @throws Exception
  */
 function _apachesolr_nodeaccess_build_subquery($account) {
   if (!user_access('access content', $account)) {
