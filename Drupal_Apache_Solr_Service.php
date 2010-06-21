@@ -46,7 +46,8 @@ class Drupal_Apache_Solr_Service extends Apache_Solr_Service {
     $response = new Apache_Solr_Response($data, $headers);
 
     if ($response->getHttpStatus() == 200) {
-      return microtime(TRUE) - $start;
+      // Add 0.1 ms to the ping time so we never return 0.0.
+      return microtime(TRUE) - $start + 0.0001;
     }
     else {
       return FALSE;
