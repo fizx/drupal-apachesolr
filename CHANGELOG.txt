@@ -5,6 +5,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#614644 by pwolanin: Improved compatibility with other forms (based on Drupal 7 core).
 #348832 by pwolanin: Increase maxFieldLength to 20000, rationalize version strings.
 #704190 by pwolanin: Add page callbacks to display conf files in the index in reports.
 #835850 by pwolanin: add more replicated files to solrconfig.xml master section.
