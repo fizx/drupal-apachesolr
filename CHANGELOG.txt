@@ -5,6 +5,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#853564 by pwolanin: fix regression from #614644 - still need to see if there is POST data.
 #592522 by pwolanin, quaoar: use multi-table sytax for MySQL to avoid killer sub-selects.
 #614644 by pwolanin: Improved compatibility with other forms (based on Drupal 7 core).
 #348832 by pwolanin: Increase maxFieldLength to 20000, rationalize version strings.
