@@ -149,6 +149,9 @@ function apachesolr_node_to_document($nid, $namespace) {
     apachesolr_add_tags_to_document($document, $text);
     apachesolr_add_taxonomy_to_document($document, $node);
 
+    if (isset($node->files) && is_array($node->files)) {
+      $document->is_upload_count = count($node->files);
+    }
     // Let modules add to the document.
     foreach (module_implements('apachesolr_update_index') as $module) {
       $function = $module .'_apachesolr_update_index';
