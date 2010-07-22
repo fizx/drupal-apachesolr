@@ -156,7 +156,7 @@ function apachesolr_search_view($type = NULL) {
   // We did not redirect, so run the search if needed.
   $results = '';
   $filters = '';
-  if ($type == 'apachesolr_search' && isset($_GET['filters'])) {
+  if (isset($_GET['filters'])) {
     $filters = trim($_GET['filters']);
   }
   // Only perform search if there is non-whitespace search term or filters:
