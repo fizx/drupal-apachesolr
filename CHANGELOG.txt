@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#847040 by Agileware: Allow other modules to use facet only searching.
 #536990 by pwolanin | jpmckinney, janusman: always index content as an anonymous user.
 #592522 by pwolanin, quaoar: use multi-table sytax for MySQL to avoid killer sub-selects.
 #835850 by pwolanin: add more replicated files to solrconfig.xml master section.
