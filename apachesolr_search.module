@@ -128,7 +128,7 @@ function apachesolr_search_view($type = NULL) {
     }
     $keys = trim(search_get_keys());
     $filters = '';
-    if ($type == 'apachesolr_search' && isset($_GET['filters'])) {
+    if (isset($_GET['filters'])) {
       $filters = trim($_GET['filters']);
     }
     // Only perform search if there is non-whitespace search term or filters:
