@@ -185,6 +185,13 @@ hook_apachesolr_modify_query(&$query, &$params, $caller);
           $query->add_filter("uid", 1);         
         }        
 
+CALLER_finalize_query(&$query, &$params);
+
+  The module calling apachesolr_do_query() may implement a function that is run after
+  hook_apachesolr_modify_query() and allows the caller to make final changes to the
+  query and params before the query is sent to Solr.  The function name is built
+  from the $caller parameter to apachesolr_do_query().
+
 hook_apachesolr_prepare_query(&$query, &$params, $caller);
 
   This is pretty much the same as hook_apachesolr_modify_query() but runs earlier
