@@ -3,8 +3,12 @@
 Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 ------------------------------
 
-Apache Solr Search Integration 6.x-1.2, xxxx-xx-xx
+Apache Solr Search Integration 6.x-1.3, xxxx-xx-xx
 ------------------------------
+
+Apache Solr Search Integration 6.x-1.2, 2010-08-11
+------------------------------
+#880488 by pwolanin: security hardening: don't use unserialize on untrusted data.
 #867448 by B-Prod | jpmckinney: Fixed Apache taxonomy search does not include the search.pages.inc file.
 
 Apache Solr Search Integration 6.x-1.1, 2010-07-25
