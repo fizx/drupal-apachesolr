@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#880488 by pwolanin: security hardening: don't use unserialize on untrusted data.
 #867448 by B-Prod | jpmckinney: Fixed Apache taxonomy search does not include the search.pages.inc file.
 #864160 by pwolanin: Allow the caller a last chance to modify the query and params.
 #847040 by Agileware: Allow other modules to use facet only searching.
