@@ -147,8 +147,8 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_mlt_blocks');
   variable_del('apachesolr_cron_limit');
   variable_del('apachesolr_enabled_facets');
-  // Remove blocks.  
-  db_delete('blocks')->condition('module', 'apachesolr')->execute();   
+  // Remove blocks.
+  db_delete('block')->condition('module', 'apachesolr')->execute();
 }
 
 /**
