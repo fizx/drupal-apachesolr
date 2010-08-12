@@ -79,7 +79,7 @@ function apachesolr_search_update_6003() {
   return $ret;
 }
 
-function apachesolr_search_update_7000() {
+function Xapachesolr_search_update_7000() {
   // TODO - possibly rename block deltas, etc.
   // TODO: if apachesolr was the default - make sure it's the default search module
 }
