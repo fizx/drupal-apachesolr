@@ -299,15 +299,16 @@ class Drupal_Apache_Solr_Service extends Apache_Solr_Service {
   }
 
   protected function _makeHttpRequest($url, $method = 'GET', $headers = array(), $content = '', $timeout = FALSE) {
-    // Set a response timeout
-    if ($timeout) {
-      $default_socket_timeout = ini_set('default_socket_timeout', $timeout);
+    $requestOptions = array(
+      'headers' => $headers,
+      'method' => $method,
+      'data' => $content
+    );
+    //Set timeout
+    if($timeout){
+      $requestOptions['timeout'] = $timeout;
     }
-    $result = drupal_http_request($url, $headers, $method, $content);
-    // Restore the response timeout
-    if ($timeout) {
-      ini_set('default_socket_timeout', $default_socket_timeout);
-    }
+    $result = drupal_http_request($url, $requestOptions);
 
     // This will no longer be needed after http://drupal.org/node/345591 is committed
     $responses = array(
