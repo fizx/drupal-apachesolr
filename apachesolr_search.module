@@ -190,6 +190,38 @@ function apachesolr_search_apachesolr_document_handlers($type, $namespace) {
 }
 
 /**
+ * Handle OR facets.
+ */
+function apachesolr_search_finalize_query($query) {
+  $ors = array();
+  $facet_info = apachesolr_get_facet_definitions();
+  foreach ($facet_info as $infos) {
+    foreach ($infos as $delta => $facet) {
+      if ($facet['operator'] == 'OR') {
+        $ors[] = $delta;
+      }
+    }
+  }
+
+  if (isset($query->params['fq'])) {
+    $filter_queries = $query->params['fq'];
+    foreach ($filter_queries as $delta => $values) {
+      $fq = $tag = '';
+      $op = 'AND';
+      $fields = array($delta);
+
+      if (array_intersect($fields, $ors)) {
+        $tag = "{!tag=$delta}";
+        $op = 'OR';
+      }
+      $fq = implode(" $op ", $query->params['fq'][$delta]);
+      $query->params['fq'][] = $tag . $fq;
+      unset($query->params['fq'][$delta]);
+    }
+  }
+}
+
+/**
  * Execute an empty search (match all documents) and show a listing of all enabled facets.
  */
 function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $base_path = '') {
