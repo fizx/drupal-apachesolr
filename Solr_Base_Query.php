@@ -61,6 +61,11 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
   public $id;
 
   /**
+   * The parameters that get sent to Solr.
+   */
+  public $params = array('start' => 0, 'rows' => 10);
+
+  /**
    * A keyed array where the key is a position integer and the value
    * is an array with #name and #value properties.  Each value is a
    * used for filter queries, e.g. array('#name' => 'uid', '#value' => 0)
@@ -449,5 +454,16 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
       }
     }
     return $query;
+  }
+
+  function search($keys = NULL) {
+    if (!isset($keys)) {
+      $keys = $this->rebuild_query();
+    }
+    return $this->solr->search($keys, $this->params['start'], $this->params['rows'], $this->params);
+  }
+
+  function solr($method) {
+    return $this->solr->$method();
   }
 }
