@@ -1219,7 +1219,7 @@ function apachesolr_get_solr($host = NULL, $port = NULL, $path = NULL) {
  *
  * @throws Exception
  */
-function apachesolr_do_query($caller, $current_query, $params = array('rows' => 10), $page = 0) {
+function apachesolr_do_query($caller, $current_query, &$params = array('rows' => 10), $page = 0) {
   // Allow modules to alter the query prior to statically caching it.
   // This can e.g. be used to add available sorts.
   foreach (module_implements('apachesolr_prepare_query') as $module) {
