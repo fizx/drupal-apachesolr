@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#373824 by pwolanin | David Stosik: Fixed Attachment count is not displayed in search results.
 #896324 by ahankinson | jpmckinney: Fixed module_invoke() called too late.
 #901720 by robertDouglass: Fixed Highlighting snippets in search results not flexible enough, and logic improvement.
 #899590 by robertDouglass: Changed CCK facet definitions needs to expand its role and have a 'facets' param.
