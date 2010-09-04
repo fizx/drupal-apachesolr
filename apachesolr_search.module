@@ -1008,7 +1008,7 @@ function apachesolr_search_nested_facet_items($query, $facets, $num_found, $sort
 function apachesolr_search_taxonomy_get_term($tid) {
   if (function_exists('taxonomy_get_term')) {
     $term = taxonomy_get_term($tid);
-    return $term['name'];
+    return $term->name;
   }
 }
 
