@@ -584,6 +584,7 @@ function apachesolr_search_process_response($response, $query, $params) {
         'node' => $doc,
         'extra' => $extra,
         'score' => $doc->score,
+        'snippets' => $snippets,
         'snippet' => $snippet,
         'fields' => $fields,
       );
