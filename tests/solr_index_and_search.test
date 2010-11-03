@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Tests for the apachsolr module: index and search
+ */
+
 class DrupalSolrMatchTestCase extends DrupalWebTestCase {
   /**
    * Implementation of getInfo().

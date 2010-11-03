@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ * Install, update and uninstall functions for the apachesolr_og module.
+ */
+
+/**
  * Implementation of hook_uninstall().
  */
 function apachesolr_og_uninstall() {

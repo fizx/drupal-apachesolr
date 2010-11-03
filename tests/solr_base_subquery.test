@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Tests for the apachsolr module: base subquery
+ */
+
 class DrupalSolrSubQueryTests extends DrupalWebTestCase {
   function getInfo() {
     return array('name' => 'Subquery handling',
