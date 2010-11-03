@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ *   Administrative pages for the Apache Solr framework regarding taxonomy.
+ */
+
+/**
  * Overrides taxonomy/term/X links
  */
 function apachesolr_search_taxonomy_term_page($str_tids = '', $depth = 0, $op = 'page') {

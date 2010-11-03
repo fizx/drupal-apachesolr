@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ *   Tests for the apachsolr_nodeaccess module.
+ */
+
 class DrupalApacheSolrNodeAccess extends DrupalWebTestCase {
   function getInfo() {
     return array(

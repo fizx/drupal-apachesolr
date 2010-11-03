@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ *   Install and related hooks for the apachesolr_date module.
+ */
+
+/**
  * Implementation of hook_uninstall().
  */
 function apachesolr_date_uninstall() {

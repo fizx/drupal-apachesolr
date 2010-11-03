@@ -1,13 +1,15 @@
 <?php
 // $Id$
 
-
-/***
- * JacobSingh: Warning! This test is totally broken because of the addition of the "hash" in apachesolr_search.module.
- * Needs to be moved out.
- *
+/**
+ * @file
+ *   Tests for the apachsolr module: base query.
  */
 
+/**
+ * JacobSingh: Warning! This test is totally broken because of the addition of the "hash" in apachesolr_search.module.
+ * Needs to be moved out.
+ */
 
 class DrupalSolrQueryTests extends DrupalWebTestCase {
   function getInfo() {
