@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Tests for the apachsolr module: base query
+ *   Tests for the apachsolr module: base query.
  */
 
 /**
