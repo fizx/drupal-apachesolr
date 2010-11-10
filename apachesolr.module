@@ -1521,10 +1521,17 @@ function apachesolr_cck_fields() {
     if (module_exists('content')) {
       module_load_include('inc', 'content', 'includes/content.crud');
       $cck_field_instances = content_field_instance_read();
-      // A single default mapping for all text fields.
+      // A single default mapping for all text fields using optionwidgets.
       $mappings['text'] = array(
         'optionwidgets_select' => array('callback' => '', 'index_type' => 'string'),
-        'optionwidgets_buttons' => array('callback' => '', 'index_type' => 'string')
+        'optionwidgets_buttons' => array('callback' => '', 'index_type' => 'string'),
+        'optionwidgets_onoff' => array('callback' => '', 'index_type' => 'string'),
+      );
+      // A single default mapping for all integer fields using optionwidgets.
+      $mappings['number_integer'] = array(
+        'optionwidgets_select' => array('callback' => '', 'index_type' => 'sint'),
+        'optionwidgets_buttons' => array('callback' => '', 'index_type' => 'sint'),
+        'optionwidgets_onoff' => array('callback' => '', 'index_type' => 'sint'),
       );
       // A field-specific mapping would look like:
       // $mappings['per-field']['field_model_name'] = array('callback' => '', 'index_type' => 'string');
