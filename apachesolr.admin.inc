@@ -3,9 +3,14 @@
 
 /**
  * @file
- *   Administrative pages for the Apache Solr framework.
+ * Administrative pages for the Apache Solr framework.
  */
 
+/**
+ * Configuration settings form
+ *
+ * @see apachesolr_settings_validate()
+ */
 function apachesolr_settings() {
   $form = array();
 
@@ -111,6 +116,8 @@ function apachesolr_settings() {
 
 /**
  * Validation function for the apachesolr_settings form.
+ *
+ * @see apachesolr_settings()
  */
 function apachesolr_settings_validate($form, &$form_state) {
   if (isset($form['apachesolr_port'])) {
@@ -230,10 +237,12 @@ function apachesolr_index_report() {
 /**
  * Indicates what order the specified facets should be listed in.  This function is used in a usort
  * invocation.
+ *
  * @param $a
  *   The first facet.
  * @param $b
  *   The second facet.
+ *
  * @return
  *   A signed integer that indicates which of the specified facets should come first.
  */
@@ -266,6 +275,8 @@ function apachesolr_enabled_facets_form_submit($form, &$form_state) {
  * Only enabled facets are sent to solr.  Fewer enabled facets can reduce the
  * load on the search server.  Blocks are only offered for enabled facets, so
  * this also reduces the clutter on the blocks admin page.
+ *
+ *  @see apachesolr_enabled_facets_form_submit()
  */
 function apachesolr_enabled_facets_form() {
   $facets = array();
@@ -337,6 +348,8 @@ function apachesolr_enabled_facets_form() {
 
 /**
  * Create a form for deleting the contents of the Solr index.
+ *
+ * @see apachesolr_index_action_form_submit()
  */
 function apachesolr_index_action_form() {
   $form = array();
@@ -384,6 +397,8 @@ function apachesolr_index_action_form() {
 
 /**
  * Submit function for the index action form.
+ *
+ * @see apachesolr_index_action_form()
  */
 function apachesolr_index_action_form_submit($form, &$form_state) {
   switch ($form_state['values']['action']) {
@@ -403,6 +418,7 @@ function apachesolr_index_action_form_submit($form, &$form_state) {
 
 /**
  * Confirmation form for "Re-index all content" button
+ *
  * @see apachesolr_clear_index_submit()
  */
 function apachesolr_clear_index_confirm() {
@@ -423,6 +439,7 @@ function apachesolr_clear_index_confirm_submit($form, &$form_state) {
 
 /**
  * Confirmation form for "Delete the index" button
+ *
  * @see apachesolr_delete_index_submit()
  */
 function apachesolr_delete_index_confirm() {
@@ -450,7 +467,7 @@ function apachesolr_delete_index_confirm_submit($form, &$form_state) {
  * Utility function to delete the index and reset all index counters.
  *
  * @param $type
- *   a single content type to be deleted from the index.
+ *   A single content type to be deleted from the index.
  *
  * @throws Exception
  */
@@ -476,8 +493,9 @@ function apachesolr_delete_index($type = NULL) {
 
 /**
  * MoreLikeThis administration and utility functions.
+ *
+ * @see apachesolr_mlt_add_block_form_submit()
  */
-
 function apachesolr_mlt_add_block_form() {
   $form = apachesolr_mlt_block_form();
   $form['submit'] = array(
@@ -488,6 +506,11 @@ function apachesolr_mlt_add_block_form() {
   return $form;
 }
 
+/**
+ * Form submission handler for apachesolr_mlt_add_block_form
+ *
+ * @see apachesolr_mlt_add_block_form()
+ */
 function apachesolr_mlt_add_block_form_submit($form, &$form_state) {
   apachesolr_mlt_save_block($form_state['values']);
   drupal_set_message('New content recommendation block created.  Drag it into a region to enable it');
@@ -548,9 +571,12 @@ function apachesolr_config_file($name) {
 /**
  * Form to edit moreLikeThis block settings.
  *
- * @param int $delta If editing, the id of the block to edit.
+ * @param int $delta
+ *   If editing, the id of the block to edit.
  *
- * @return array The form used for editing.
+ * @return array
+ *   The form used for editing.
+ *
  * TODO:
  *   Add term boost settings.
  *   Enable the user to specify a query, rather then forcing suggestions based
@@ -701,7 +727,8 @@ function apachesolr_mlt_block_defaults($block = array()) {
 /**
  * Constructs a list of field names used on the settings form.
  *
- * @return array An array containing a the fields in the solr instance.
+ * @return array
+ *   An array containing a the fields in the solr instance.
  */
 function apachesolr_mlt_get_fields() {
   $solr = apachesolr_get_solr();
@@ -722,10 +749,10 @@ function apachesolr_mlt_get_fields() {
  * If passed a block delta, the function will update block settings. If it is
  * not passed a block delta, the function will create a new block.
  *
- * @param array $block_settings An array containing the settings required to form
- * a moreLikeThis request.
- *
- * @param int $delta The id of the block you wish to update.
+ * @param array $block_settings
+ *   An array containing the settings required to form a moreLikeThis request.
+ * @param int $delta
+ *   The id of the block you wish to update.
  */
 function apachesolr_mlt_save_block($block_settings = array(), $delta = NULL) {
   $blocks = variable_get('apachesolr_mlt_blocks', array());

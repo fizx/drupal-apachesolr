@@ -3,7 +3,7 @@
 
 /**
  * @file
- *   Install and related hooks for apachesolr_search.
+ * Install, update and uninstall functions for the apachesolr module.
  */
 
 /**
