@@ -6,7 +6,119 @@
  *   Administrative pages for the Apache Solr framework.
  */
 
-function apachesolr_settings() {
+/**
+ * Form builder for adding/editing a Solr server used as a menu callback.
+ */
+function apachesolr_server_edit_form(&$form, &$form_state, $server = NULL) {
+  if (empty($server)) {
+    $server = array('asid' => NULL, 'server_id' => '', 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
+  }
+
+  $form['asid'] = array(
+    '#type' => 'value',
+    '#value' => $server['asid'],
+  );
+  $form['host'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Solr host name'),
+    '#default_value' => $server['host'],
+    '#description' => t('Host name of your Solr server, e.g. <code>localhost</code> or <code>example.com</code>.'),
+    '#required' => TRUE,
+  );
+  $form['port'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Solr port'),
+    '#size' => 5,
+    '#maxlength' => 5,
+    '#default_value' => $server['port'],
+    '#description' => t('Port on which the Solr server listens. The Jetty example server is 8983, while Tomcat is 8080 by default.'),
+    '#required' => TRUE,
+  );
+  $form['path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Solr path'),
+    '#default_value' => $server['path'],
+    '#description' => t('Path that identifies the Solr request handler to be used.'),
+    '#required' => TRUE,
+  );
+  $is_default = $server['server_id'] == variable_get('apachesolr_default_server', 'solr');
+  $form['make_default'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Make this Solr server the default'),
+    '#default_value' => $is_default,
+    '#disabled' => $is_default,
+    '#description' => $is_default ? t('Select this option for a different server to make this one non-default.') : '',
+  );
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Description'),
+    '#default_value' => $server['name'],
+    '#description' => t('Short description of your Solr server.'),
+    '#required' => TRUE,
+  );
+  $form['server_id'] = array(
+    '#type' => 'machine_name',
+    '#title' => t('Server id'),
+    '#machine_name' => array(
+      'exists' => 'apachesolr_server_id_load',
+    ),
+    '#default_value' => $server['server_id'],
+    '#description' => t('Unique, machine-readable identifier Solr server.'),
+    '#required' => TRUE,
+  );
+  $form['save'] = array(
+    '#type' => 'submit',
+    '#validate' =>array('apachesolr_server_save_validate'),
+    '#submit' =>array('apachesolr_server_save_submit'),
+    '#value' => t('Save'),
+  );
+  if (!empty($server['asid']) && !$is_default) {
+    $form['delete'] = array(
+      '#type' => 'submit',
+      '#validate' =>array('apachesolr_server_delete_validate'),
+      '#submit' =>array('apachesolr_server_delete_submit'),
+      '#value' => t('Delete'),
+    );
+  }
+  return $form;
+}
+
+function apachesolr_server_delete_validate($form, &$form_state) {
+  drupal_set_message(__FUNCTION__);
+}
+
+function apachesolr_server_delete_submit($form, &$form_state) {
+  drupal_set_message(__FUNCTION__);
+  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  $form_state['redirect'] = 'admin/config/search/apachesolr';
+}
+
+function apachesolr_server_save_validate($form, &$form_state) {
+  // Normalize the path to have just a leading slash.
+  $form_state['values']['path'] = '/' . trim($form_state['values']['path'], '/');
+  if (isset($form['port']) && isset($form_state['values']['port'])) {
+    $port = $form_state['values']['port'];
+    // TODO: Port range should be 0-65535, but 0 crashes apachesolr
+    if (!ctype_digit($port) || $port < 1 || $port > 65535) {
+      form_set_error('port', t('The port has to be an integer between 1 and 65535.'));
+    }
+  }
+  $asid = db_query('SELECT asid FROM {apachesolr_server} WHERE host = :host AND port = :port AND path = :path', array(':host' => $form_state['values']['host'], ':port' => $form_state['values']['port'], ':path' => $form_state['values']['path']))->fetchField();
+  if ($asid && $asid != $form_state['values']['asid']) {
+    form_set_error('host', t('This combination of host, port, and path is already defined as one of your servers.'));
+  }
+}
+
+function apachesolr_server_save_submit($form, &$form_state) {
+  apachesolr_server_save($form_state['values']);
+  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  $form_state['redirect'] = 'admin/config/search/apachesolr';
+}
+
+/**
+ * Form builder for general settings used as a menu callback.
+ */
+function apachesolr_settings($form, &$form_state) {
   $form = array();
   $collapse_host = TRUE;
 
@@ -36,28 +148,30 @@ function apachesolr_settings() {
     '#collapsible' => TRUE,
     '#collapsed' => $collapse_host,
   );
-
-  $form['apachesolr_host_settings']['apachesolr_host'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Solr host name'),
-    '#default_value' => variable_get('apachesolr_host', 'localhost'),
-    '#description' => t('Host name of your Solr server, e.g. <code>localhost</code> or <code>example.com</code>.'),
-    '#required' => TRUE,
+  $id = variable_get('apachesolr_default_server', 'solr');
+  $servers = apachesolr_load_all_servers();
+  $rows = array();
+  $headers = NULL;
+  // @todo - make this pretty.
+  foreach ($servers as $server_id => $data) {
+    if (!$headers) {
+      $headers = array_keys($data);
+    }
+    foreach ($data as $key => $value) {
+      $data[$key] = check_plain($value);
+    }
+    $data['asid'] = l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['asid'] .'/edit');
+    $rows[] = array_values($data);
+  }
+  $form['apachesolr_host_settings']['table'] = array(
+    '#theme' => 'table',
+    '#header' => $headers,
+    '#rows' => $rows,
   );
-  $form['apachesolr_host_settings']['apachesolr_port'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Solr port'),
-    '#default_value' => variable_get('apachesolr_port', '8983'),
-    '#description' => t('Port on which the Solr server listens. The Jetty example server is 8983, while Tomcat is 8080 by default.'),
-    '#required' => TRUE,
+  $form['apachesolr_host_settings']['add'] = array(
+    '#markup' => l(t('Add new server'), 'admin/config/search/apachesolr/server/add'),
   );
-  $form['apachesolr_host_settings']['apachesolr_path'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Solr path'),
-    '#default_value' => variable_get('apachesolr_path', '/solr'),
-    '#description' => t('Path that identifies the Solr request handler to be used.'),
-  );
-
+  
   $numbers = drupal_map_assoc(array(1, 5, 10, 20, 50, 100, 200));
   $form['apachesolr_cron_limit'] = array(
     '#type' => 'select',
@@ -116,6 +230,7 @@ function apachesolr_settings() {
     '#options' => array(APACHESOLR_READ_WRITE => t('Read and write (normal)'), APACHESOLR_READ_ONLY => t('Read only')),
     '#description' => t('<em>Read only</em> stops this site from sending updates to your search index. Useful for development sites.'),
   );
+  $form['#submit'][] = 'apachesolr_settings_submit';
   return system_settings_form($form);
 }
 
@@ -123,13 +238,14 @@ function apachesolr_settings() {
  * Validation function for the apachesolr_settings form.
  */
 function apachesolr_settings_validate($form, &$form_state) {
-  if (isset($form['apachesolr_port'])) {
-    $port = $form_state['values']['apachesolr_port'];
-    // TODO: Port range should be 0-65535, but 0 crashes apachesolr
-    if (!ctype_digit($port) || $port < 1 || $port > 65535) {
-      form_set_error('apachesolr_port', t('The port has to be an integer between 1 and 65535.'));
-    }
-  }
+}
+
+/**
+ * Validation function for the apachesolr_settings form.
+ */
+function apachesolr_settings_submit($form, &$form_state) {
+  apachesolr_server_save($form_state['values']['apachesolr_host_settings']);
+  unset($form_state['values']['apachesolr_host_settings']);
 }
 
 /**

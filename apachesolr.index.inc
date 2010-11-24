@@ -7,16 +7,6 @@
  */
 
 /**
- * Strip html tags and also control characters that cause Jetty/Solr to fail.
- */
-function apachesolr_clean_text($text) {
-  // Add spaces before stripping tags to avoid running words together.
-  $text = filter_xss(str_replace(array('<', '>'), array(' <', '> '), $text), array());
-  // Decode entities and then make safe any < or > characters.
-  return htmlspecialchars(html_entity_decode($text, ENT_NOQUOTES, 'UTF-8'), ENT_NOQUOTES, 'UTF-8');
-}
-
-/**
  * Given a node, return a document representing that node.
  */
 function apachesolr_node_to_document($node, $namespace) {
@@ -113,7 +103,7 @@ function apachesolr_node_to_document($node, $namespace) {
     }
 
     // Handle fields including taxonomy.
-    $indexed_fields = apachesolr_node_fields();
+    $indexed_fields = apachesolr_entity_fields('node');
     foreach ($indexed_fields as $index_key => $field_info) {
       $field_name = $field_info['field']['field_name'];
       // See if the node has fields that can be indexed
@@ -221,10 +211,10 @@ function apachesolr_vocab_name($vid) {
 /**
  * Callback that converts list module field into an array
  */
-function apachesolr_fields_list_indexing_callback($node, $field_name, $index_key, $field_info) {
+function apachesolr_fields_list_indexing_callback($entity, $field_name, $index_key, $field_info) {
   $fields = array();
-  if (!empty($node->{$field_name})) {
-    $field = $node->$field_name;
+  if (!empty($entity->{$field_name})) {
+    $field = $entity->$field_name;
     list($lang, $values) = each($field);
     foreach ($values as $fval) {
       $fields[] = array(

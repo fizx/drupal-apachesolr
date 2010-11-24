@@ -152,24 +152,6 @@ function apachesolr_search_conditions() {
   return $conditions;
 }
 
-function apachesolr_search_theme_search_results($search_result, $type){
-  if (isset($search_result) && is_array($search_result) && count($search_result)) {
-    if (module_hook($type, 'search_page')) {
-      $content = module_invoke($type, 'search_page', $search_result);
-    }
-    else {
-      $content = theme('search_results', array('results' => $search_result, 'type' => $type));
-    }
-  }
-  else if ($search_result) {
-    $content = theme('search_results_listing', array('title' => t('Search results'), 'content' => $search_result));
-  }
-  else {
-    $content = theme('search_results_listing', array('title' => t('Your search yielded no results'), 'content' => theme('apachesolr_search_noresults')));
-  }
-
-  return $content;
-}
 /**
  * Implements hook_apachesolr_document_handlers().
  *
@@ -368,7 +350,7 @@ function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '',
 // TODO: Why does this take the $query object?
 function apachesolr_search_basic_params($query = NULL) {
   $params = array(
-    'fl' => 'id,nid,title,comment_count,type,created,changed,score,path,url,uid,name',
+    'fl' => 'id,entity_id,entity,bundle,bundle_name,nid,title,comment_count,type,created,changed,score,path,url,uid,name',
     'rows' => variable_get('apachesolr_rows', 10),
     'facet' => 'true',
     'facet.mincount' => 1,
@@ -549,10 +531,10 @@ function apachesolr_search_process_response($response, $query) {
 
       // Find the nicest available snippet.
       if (isset($response->highlighting->{$doc->id}->$hl_fl)) {
-        $snippet = theme('apachesolr_search_snippets', array('doc' => $doc, 'snippets' => $response->highlighting->{$doc->id}->$hl_fl));
+        $snippet = theme('apachesolr_search_snippets__'. $doc->entity . '__' . $doc->bundle, array('doc' => $doc, 'snippets' => $response->highlighting->{$doc->id}->$hl_fl));
       }
       elseif (isset($doc->teaser)) {
-        $snippet = theme('apachesolr_search_snippets', array('doc' => $doc, 'snippets' => array(truncate_utf8($doc->teaser, 256, TRUE))));
+        $snippet = theme('apachesolr_search_snippets__'. $doc->entity . '__' . $doc->bundle, array('doc' => $doc, 'snippets' => array(truncate_utf8($doc->teaser, 256, TRUE))));
       }
       else {
         $snippet = '';
@@ -561,30 +543,50 @@ function apachesolr_search_process_response($response, $query) {
       if (!isset($doc->body)) {
         $doc->body = $snippet;
       }
-      $doc->created = strtotime($doc->created);
-      $doc->changed = strtotime($doc->changed);
+
+      // Normalize common dates so that we can use Drupal's normal date and
+      // time handling.
+      if (isset($doc->created)) {
+        $doc->created = strtotime($doc->created);
+      }
+      if (isset($doc->changed)) {
+        $doc->changed = strtotime($doc->changed);
+      }
+
       $extra = array();
-      $extra['comments'] = format_plural($doc->comment_count, '1 comment', '@count comments');
+
       // Allow modules to alter each document and its extra information.
       drupal_alter('apachesolr_search_result', $doc, $extra);
+
       $fields = array();
       foreach ($doc->getFieldNames() as $field_name) {
         $fields[$field_name] = $doc->getField($field_name);
       }
-      $results[] = array(
+
+      $result = array(
+        // link is a required field, so handle it centrally.
         'link' => url($doc->path, array('absolute' => TRUE)),
-        'type' => apachesolr_search_get_type($doc->type),
         // template_preprocess_search_result() runs check_plain() on the title
         // again.  Decode to correct the display.
         'title' => htmlspecialchars_decode($doc->title, ENT_QUOTES),
-        'user' => theme('username', array('account' => $doc)),
-        'date' => $doc->created,
-        'node' => $doc,
-        'extra' => $extra,
+        // These values are not required by the search module but are provided
+        // to give entity callbacks and themers more flexibility.
         'score' => $doc->score,
         'snippet' => $snippet,
         'fields' => $fields,
+        'entity_type' => $doc->entity,
+        'bundle' => $doc->bundle,
       );
+
+      // Call entity-type-specific callbacks for extra handling.
+      $function = apachesolr_entity_get_callback($doc->entity, 'result callback');
+      if (function_exists($function)) {
+        $function($doc, $result, $extra);
+      }
+
+      $result['extra'] = $extra;
+
+      $results[] = $result;
     }
 
     // Hook to allow modifications of the retrieved results
@@ -594,6 +596,76 @@ function apachesolr_search_process_response($response, $query) {
     }
   }
   return $results;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function apachesolr_search_entity_info_alter(&$entity_info) {
+
+  // First set defaults so that we needn't worry about NULL keys.
+  foreach (array_keys($entity_info) as $type) {
+    $entity_info[$type] += array('apachesolr' => array());
+    $entity_info[$type]['apachesolr'] += array(
+      'result callback' => '',
+    );
+  }
+
+  // Now set those values that we know.  Other modules can do so
+  // for their own entities if they want.
+  $entity_info['node']['apachesolr']['result callback'] = 'apachesolr_search_node_result';
+}
+
+/**
+ * Callback function for node search results.
+ *
+ * @param Apache_Solr_Document $doc
+ *   The result document from Apache Solr.
+ * @param array $result
+ *   The result array for this record to which to add.
+ */
+function apachesolr_search_node_result(Apache_Solr_Document $doc, &$result, &$extra) {
+  $result += array(
+    'type' => apachesolr_search_get_type($doc->type),
+    'user' => theme('username', array('account' => $doc)),
+    'date' => $doc->created,
+    'node' => $doc,
+  );
+
+  if (isset($doc->comment_count)) {
+    $extra['comments'] = format_plural($doc->comment_count, '1 comment', '@count comments');
+  }
+}
+
+/**
+ * Template preprocess for apachesolr search results.
+ *
+ * We need to add additional entity/bundle-based templates
+ */
+function apachesolr_search_preprocess_search_result(&$variables) {
+  // If this search result is coming from our module, we want to improve the
+  // template potential to make life easier for themers.
+  if ($variables['module'] == 'apachesolr_search') {
+    $result = $variables['result'];
+    $variables['theme_hook_suggestions'][] = 'search_result__' . $variables['module'] . '__' . $result['entity_type'] . '__' . $result['bundle'];
+  }
+}
+
+function apachesolr_search_preprocess_search_results(&$variables) {
+  // If this is a solr search, expose more data to themes to play with.
+  if ($variables['module'] == 'apachesolr_search') {
+    $variables['response'] = apachesolr_static_response_cache();
+    $variables['query'] = apachesolr_current_query();
+
+    $total = $variables['response']->response->numFound;
+    $params = $variables['query']->params;
+
+    $variables['description'] = t('Showing items @start through @end of @total.', array(
+      '@start' => $params['start'] + 1,
+      '@end' => $params['start'] + $params['rows'] - 1,
+      '@total' => $total,
+    ));
+  }
 }
 
 function apachesolr_search_date_range($query, $facet_field) {
@@ -684,12 +756,12 @@ function apachesolr_search_apachesolr_facets() {
   }
 
   // Get field facets.
-  $fields = apachesolr_node_fields();
+  $fields = apachesolr_entity_fields('node');
   foreach ($fields as $index_key => $field_info) {
     $facets[$index_key] = array(
         'info' => t('@module_name Field: Filter by @field_dname (@field_name)', array('@module_name' => $field_info['module_name'], '@field_name' => $field_info['field']['field_name'], '@field_dname' => $field_info['display_name'])),
         'facet_field' => $index_key,
-        'content_types' => $field_info['content_types'],
+        'content_types' => $field_info['bundles'],
     );
   }
 
@@ -755,7 +827,7 @@ function apachesolr_search_block_view($delta = ''){
       case 'created':
         return apachesolr_date_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by post date'));
       default:
-        if ($fields = apachesolr_node_fields()) {
+        if ($fields = apachesolr_entity_fields('node')) {
           if (isset($fields[$delta])) {
             // The $delta is the index key.
             $field_info = $fields[$delta];
@@ -1322,7 +1394,7 @@ function theme_apachesolr_breadcrumb_field($vars) {
     }
 
     //$mappings = apachesolr_cck_fields();
-    $mappings = apachesolr_node_fields();
+    $mappings = apachesolr_entity_fields('node');
     if (isset($mappings[$match]['display_callback'])) {
       $function = $mappings[$match]['display_callback'];
       if (function_exists($function)) {

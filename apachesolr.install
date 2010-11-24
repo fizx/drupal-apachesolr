@@ -83,8 +83,9 @@ function apachesolr_install() {
   // Create one MLT block.
   require_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.admin.inc');
   apachesolr_mlt_save_block(array('name' => t('More like this')));
-
-  drupal_set_message(t('Search is enabled. Your site is <a href="!index_settings_link">currently 0% indexed</a>.', array('!index_settings_link' => url('admin/config/search/apachesolr/index'))));
+  db_insert('apachesolr_server')->fields(array('server_id' => 'solr', 'name' => 'Apache Solr server', 'host' => 'localhost', 'port' => '8983', 'path' => '/solr'))->execute();
+  variable_set('apachesolr_default_server', 'solr');
+  drupal_set_message(t('Apache Solr is enabled. Visit the <a href="!settings_link">settings page</a>.', array('!settings_link' => url('admin/config/search/apachesolr'))));
 }
 
 /**
@@ -129,6 +130,70 @@ function apachesolr_schema() {
   $table['description'] = 'Cache table for apachesolr to store Luke data and indexing information.';
   $schema['cache_apachesolr'] = $table;
 
+  $schema['apachesolr_server'] = array(
+    'description' => 'The Solr server table.',
+    'fields' => array(
+      'asid' => array(
+        'description' => 'Integer primary key.',
+        'type' => 'serial',
+        'not null' => TRUE
+      ),
+     'server_id' => array(
+        'description' => 'Unique identifier for the server',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Human-readable name for the server',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'scheme' => array(
+        'description' => 'Preferred scheme for the registered server',
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => 'http'
+      ),
+      'host' => array(
+        'description' => 'Host name for the registered server',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'port' => array(
+        'description' => 'Port number for the registered server',
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'path' => array(
+        'description' => 'Path to the registered server',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'service_class' => array(
+        'description' => 'Optional class name to use for connection',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+    ),
+    'primary key' => array('asid'),
+    'unique keys' => array(
+      'server_id' => array('server_id'),
+      'host_post_path' => array('host', 'port', 'path'),
+    ),
+  );
+
   return $schema;
 }
 
@@ -136,9 +201,7 @@ function apachesolr_schema() {
  * Implements hook_uninstall().
  */
 function apachesolr_uninstall() {
-  variable_del('apachesolr_host');
-  variable_del('apachesolr_port');
-  variable_del('apachesolr_path');
+  variable_del('apachesolr_default_server');
   variable_del('apachesolr_rows');
   variable_del('apachesolr_facet_query_limits');
   variable_del('apachesolr_facet_query_limit_default');
@@ -258,4 +321,89 @@ function apachesolr_update_6005() {
   $table['description'] = 'Cache table for apachesolr to store Luke data and indexing information.';
   db_create_table($ret, 'cache_apachesolr', $table);
   return $ret;
+}
+
+/**
+ * Add a table to track Solr servers.
+ */
+function apachesolr_update_7000() {
+
+  $schema['apachesolr_server'] = array(
+    'description' => 'The Solr server table.',
+    'fields' => array(
+      'asid' => array(
+        'description' => 'Integer primary key (for possible use with Fields and Entity APIs)',
+        'type' => 'serial',
+        'not null' => TRUE
+      ),
+     'server_id' => array(
+        'description' => 'Unique identifier for the server',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Human-readable name for the server',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'scheme' => array(
+        'description' => 'Preferred scheme for the registered server',
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => 'http'
+      ),
+      'host' => array(
+        'description' => 'Host name for the registered server',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'port' => array(
+        'description' => 'Port number for the registered server',
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'path' => array(
+        'description' => 'Path to the registered server',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'service_class' => array(
+        'description' => 'Optional class name to use for connection',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+    ),
+    'primary key' => array('asid'),
+    'unique keys' => array(
+      'server_id' => array('server_id'),
+      'host_post_path' => array('host', 'port', 'path'),
+    ),
+  );
+  db_create_table('apachesolr_server', $schema['apachesolr_server']);
+  // Insert into the table the current single server record.
+  $host = variable_get('apachesolr_host', 'localhost');
+  $port = variable_get('apachesolr_port', '8983');
+  $path = variable_get('apachesolr_path', '/solr');
+  db_insert('apachesolr_server')->fields(array('server_id' => 'solr', 'name' => 'Apache Solr server', 'host' => $host, 'port' => $port, 'path' => $path))->execute();
+  variable_set('apachesolr_default_server', 'solr');
+  variable_del('apachesolr_host');
+  variable_del('apachesolr_port');
+  variable_del('apachesolr_path');
+  $value = variable_get('apachesolr_service_class', NULL);
+  if (is_array($value)) {
+    list($module, $filepath, $class) = $value;
+    variable_set('apachesolr_service_class', $class);
+  }
 }
