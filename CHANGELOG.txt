@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#795912 by pwolanin patch 61, fix up server add/edit/delete funcitonality.
 #795912 by pwolanin, crell patch 60 - makes Field API handling more generic, adds a framework
         for handling multiple Solr servers, and moves the nodeaccess module out of the contrib dir.
 #885950 by pwolanin, csevb10 preserve added/removed filters when filterstring is re-parsed.

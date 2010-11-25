@@ -1,0 +1,18 @@
+/* $Id$ */
+
+table.admin-apachesolr td.icon {
+  background: no-repeat center;
+  width: 16px;
+}
+table.admin-apachesolr td.operation {
+  width: 16px;
+}
+tr.apachesolr-ok td.icon {
+  background-image: url(/misc/message-16-ok.png);
+}
+tr.apachesolr-warning td.icon {
+  background-image: url(/misc/message-16-warning.png);
+}
+tr.apachesolr-error td.icon {
+  background-image: url(/misc/message-16-error.png);
+}

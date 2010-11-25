@@ -9,6 +9,39 @@
 /**
  * Form builder for adding/editing a Solr server used as a menu callback.
  */
+function apachesolr_server_delete_page($server) {
+  $is_default = $server['server_id'] == variable_get('apachesolr_default_server', 'solr');
+  if ($is_default) {
+    return MENU_ACCESS_DENIED;
+  }
+  return drupal_get_form('apachesolr_server_delete_form', $server);
+}
+
+function apachesolr_server_delete_form($form, &$form_state, $server) {
+  $form['asid'] = array(
+    '#type' => 'value',
+    '#value' => $server['asid'],
+  );
+  return confirm_form(
+    $form,
+    t('Are you sure you want to delete server %name?', array('%name' => $server['name'])),
+    'admin/config/search/apachesolr',
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+
+function apachesolr_server_delete_form_submit($form, &$form_state) {
+  if (apachesolr_server_asid_delete($form_state['values']['asid'])) {
+    drupal_set_message(t('The server was deleted'));
+  }
+  $form_state['redirect'] = 'admin/config/search/apachesolr';
+}
+
+/**
+ * Form builder for adding/editing a Solr server used as a menu callback.
+ */
 function apachesolr_server_edit_form(&$form, &$form_state, $server = NULL) {
   if (empty($server)) {
     $server = array('asid' => NULL, 'server_id' => '', 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
@@ -151,25 +184,52 @@ function apachesolr_settings($form, &$form_state) {
   $id = variable_get('apachesolr_default_server', 'solr');
   $servers = apachesolr_load_all_servers();
   $rows = array();
-  $headers = NULL;
-  // @todo - make this pretty.
+  $headers = array(
+    t('Default'),
+    array('data' => t('Operations'), 'colspan' => 2),
+    t('Name'),
+    t('Host'),
+    t('Port'),
+    t('Path'),
+  );
   foreach ($servers as $server_id => $data) {
-    if (!$headers) {
-      $headers = array_keys($data);
+    $is_default = $server_id == variable_get('apachesolr_default_server', 'solr');
+    if ($is_default) {
+      $type = 'ok';
+      $delete_link = '';
     }
-    foreach ($data as $key => $value) {
-      $data[$key] = check_plain($value);
+    else {
+      $type = 'none';
+      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr/server/' . $data['asid'] .'/delete'));
     }
-    $data['asid'] = l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['asid'] .'/edit');
-    $rows[] = array_values($data);
+    $rows[] = array('data' =>
+      array(
+        // Cells
+        array('class' => 'icon'),
+        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['asid'] .'/edit')),
+        $delete_link,
+        check_plain($data['name']),
+        check_plain($data['host']),
+        check_plain($data['port']),
+        check_plain($data['path']),
+      ),
+      // Attributes for tr
+      'class' => array(drupal_html_class('apachesolr-' . $type)),
+    );
   }
+  $actions[] = array(
+    '#theme' => 'menu_local_action',
+    '#link' => array('title' => t('Add new server'), 'href' => 'admin/config/search/apachesolr/server/add', 'options' => array()),
+  );
+
+  $form['apachesolr_host_settings']['actions'] = array(
+    '#markup' => '<ul class="action-links">' . drupal_render($actions) . '</ul>',
+  );
   $form['apachesolr_host_settings']['table'] = array(
     '#theme' => 'table',
     '#header' => $headers,
     '#rows' => $rows,
-  );
-  $form['apachesolr_host_settings']['add'] = array(
-    '#markup' => l(t('Add new server'), 'admin/config/search/apachesolr/server/add'),
+    '#attributes' => array('class' => array('admin-apachesolr')),
   );
   
   $numbers = drupal_map_assoc(array(1, 5, 10, 20, 50, 100, 200));
@@ -230,22 +290,7 @@ function apachesolr_settings($form, &$form_state) {
     '#options' => array(APACHESOLR_READ_WRITE => t('Read and write (normal)'), APACHESOLR_READ_ONLY => t('Read only')),
     '#description' => t('<em>Read only</em> stops this site from sending updates to your search index. Useful for development sites.'),
   );
-  $form['#submit'][] = 'apachesolr_settings_submit';
   return system_settings_form($form);
-}
-
-/**
- * Validation function for the apachesolr_settings form.
- */
-function apachesolr_settings_validate($form, &$form_state) {
-}
-
-/**
- * Validation function for the apachesolr_settings form.
- */
-function apachesolr_settings_submit($form, &$form_state) {
-  apachesolr_server_save($form_state['values']['apachesolr_host_settings']);
-  unset($form_state['values']['apachesolr_host_settings']);
 }
 
 /**

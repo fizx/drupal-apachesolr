@@ -30,6 +30,13 @@ function apachesolr_menu() {
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
   );
+  $items['admin/config/search/apachesolr/server/%apachesolr_server_asid/delete'] = array(
+    'title'              => 'Apache Solr search server delete',
+    'page callback'      => 'apachesolr_server_delete_page',
+    'page arguments'     => array(5),
+    'access arguments'   => array('administer search'),
+    'file'               => 'apachesolr.admin.inc',
+  );
   $items['admin/config/search/apachesolr/server/add'] = array(
     'title'              => 'Apache Solr search server add',
     'description'        => 'Add Apache Solr server.',
@@ -106,6 +113,16 @@ function apachesolr_menu() {
     'type'               => MENU_CALLBACK,
   );
   return $items;
+}
+
+/**
+ * Implements hook_init().
+ */
+function apachesolr_init() {
+  if (arg(0) == 'admin') {
+    // Add the CSS for this module
+    drupal_add_css(drupal_get_path('module', 'apachesolr') . '/apachesolr.css');
+  }
 }
 
 /**
@@ -1601,6 +1618,14 @@ function apachesolr_server_asid_load($asid) {
   return db_query('SELECT * FROM {apachesolr_server} WHERE asid = :asid', array(':asid' => (int) $asid))->fetchAssoc();
 }
 
+function apachesolr_server_asid_delete($asid) {
+  $result =  db_delete('apachesolr_server')
+    ->condition('asid', $asid)
+    ->execute();
+  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  return $result;
+}
+
 function apachesolr_server_save($server) {
   $default = array('asid' => NULL, 'server_id' => '', 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
   // Remove any unexpected fields.
@@ -1622,6 +1647,7 @@ function apachesolr_server_save($server) {
       ->key(array('server_id' => $server_id))
       ->execute();
   }
+  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
 }
 
 /**
