@@ -16,13 +16,15 @@ use the Core Searches module in tandem with this module.
 When used in combination with core search module, Apache Solr is not the default
 search. Access it via a new tab on the default search page, called "Search".
 
+Updating from 6.x
+-----------------
+Make sure that you have first updated to the latest 6.x version on the relevant
+branch and that you have run all schema updates.
+
 Installation
 ------------
 
-Prerequisite: Java 5 or higher (a.k.a. 1.5.x).  PHP 5.1.4 or higher.
-
-Those with PHP < 5.2.0 must install the PECL json module or download
-the Json code from the Zend Framework (see below).
+Prerequisite: Java 5 or higher (a.k.a. 1.5.x).  PHP 5.2.4 or higher.
 
 Install the Apache Solr Drupal module as you would any Drupal module.
 
