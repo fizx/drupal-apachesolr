@@ -105,10 +105,15 @@ function apachesolr_server_edit_form(&$form, &$form_state, $server = NULL) {
     '#submit' =>array('apachesolr_server_save_submit'),
     '#value' => t('Save'),
   );
+  $form['test'] = array(
+    '#type' => 'submit',
+    '#validate' =>array('apachesolr_server_save_validate'),
+    '#submit' =>array('apachesolr_server_test_submit'),
+    '#value' => t('Test connection'),
+  );
   if (!empty($server['asid']) && !$is_default) {
     $form['delete'] = array(
       '#type' => 'submit',
-      '#validate' =>array('apachesolr_server_delete_validate'),
       '#submit' =>array('apachesolr_server_delete_submit'),
       '#value' => t('Delete'),
     );
@@ -116,14 +121,31 @@ function apachesolr_server_edit_form(&$form, &$form_state, $server = NULL) {
   return $form;
 }
 
-function apachesolr_server_delete_validate($form, &$form_state) {
-  drupal_set_message(__FUNCTION__);
+function apachesolr_server_delete_submit($form, &$form_state) {
+  $form_state['redirect'] = 'admin/config/search/apachesolr/server/' . $form_state['values']['asid'] . '/delete';
 }
 
-function apachesolr_server_delete_submit($form, &$form_state) {
-  drupal_set_message(__FUNCTION__);
-  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
-  $form_state['redirect'] = 'admin/config/search/apachesolr';
+function apachesolr_server_test_submit($form, &$form_state) {
+  extract($form_state['values']);
+  if (empty($class)) {
+    $class = variable_get('apachesolr_service_class', 'Drupal_Apache_Solr_Service');
+  }
+  $ping = FALSE;
+  try {
+    // Takes advantage of auto-loading.
+    $solr = new $class($host, $port, $path);
+    $ping = @$solr->ping(variable_get('apachesolr_ping_timeout', 4));
+  }
+  catch (Exception $e) {
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+  }
+  if ($ping) {
+    drupal_set_message(t('Your site has contacted the Apache Solr server.'));
+  }
+  else {
+    drupal_set_message(t('Your site was unable to contact the Apache Solr server.'), 'error');
+  }
+  $form_state['rebuild'] = TRUE;
 }
 
 function apachesolr_server_save_validate($form, &$form_state) {
