@@ -337,12 +337,14 @@ function apachesolr_rebuild_index_table($type = NULL) {
     $sel_query = db_select('node', 'n')
       ->fields('n', array('nid', 'status'));
 
-    $insert_fields = array('nid', 'status');
+    $insert_fields = array('nid', 'status', 'changed');
     // Check if the module is enabled, if so use the timestamp from the latest comment
     if (module_exists('comment')) {
       $sel_query->leftJoin('node_comment_statistics', 'c', 'n.nid = c.nid');
       $sel_query->addExpression('GREATEST(n.created, n.changed, COALESCE(c.last_comment_timestamp, 0))', 'changed');
-      $insert_fields[] = 'changed';
+    }
+    else {
+      $sel_query->addExpression('GREATEST(n.created, n.changed)', 'changed');
     }
 
     db_insert('apachesolr_search_node')->fields($insert_fields)

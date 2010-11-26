@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#904100 by das-peter, pwolanin: prevent missing table error when comment module not enabled.
 #795912 by pwolanin patch 62, requirements fixes, add a button to test server settings.
 #795912 by pwolanin patch 61, fix up server add/edit/delete funcitonality.
 #795912 by pwolanin, crell patch 60 - makes Field API handling more generic, adds a framework
