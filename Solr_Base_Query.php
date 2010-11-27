@@ -248,12 +248,12 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
     return $this;
   }
 
-  public function add_subquery(Drupal_Solr_Query_Interface $query, $fq_operator = 'OR', $q_operator = 'AND') {
+  public function add_subquery(DrupalSolrQueryInterface $query, $fq_operator = 'OR', $q_operator = 'AND') {
     $this->subqueries[$query->id] = array('#query' => $query, '#fq_operator' => $fq_operator, '#q_operator' => $q_operator);
     return $this;
   }
 
-  public function remove_subquery(Drupal_Solr_Query_Interface $query) {
+  public function remove_subquery(DrupalSolrQueryInterface $query) {
     unset($this->subqueries[$query->id]);
     return $this;
   }
