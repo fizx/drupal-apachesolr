@@ -56,6 +56,7 @@ function apachesolr_node_to_document($node, $namespace) {
     $document->site = url(NULL, array('absolute' => TRUE));
     $document->hash = apachesolr_site_hash();
     $document->entity = 'node';
+    $document->entity_id = $node->nid;
     $document->nid = $node->nid;
     $document->uid = $node->uid;
     $document->title = $node->title;
@@ -78,8 +79,8 @@ function apachesolr_node_to_document($node, $namespace) {
     else {
       $document->teaser = truncate_utf8($document->body, 300, TRUE);
     }
-    $document->type = $node->type;
-    $document->type_name = node_type_get_name($node);
+    $document->bundle = $node->type;
+    $document->bundle_name = node_type_get_name($node);
     $document->created = apachesolr_date_iso($node->created);
     $document->changed = apachesolr_date_iso($node->changed);
     $last_change = (isset($node->last_comment_timestamp) && $node->last_comment_timestamp > $node->changed) ? $node->last_comment_timestamp : $node->changed;
