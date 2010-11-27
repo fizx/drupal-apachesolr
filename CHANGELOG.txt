@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#982846 by pwolanin: split out (and deprecate) the taxonomy path hijack feature.
 #982840 by pwolanin: OO cleanup for Drupal 7 coding standards.
 #982490 by pwolanin: rip out Drupal 6.x update functions, update README.
 #904100 by das-peter, pwolanin: prevent missing table error when comment module not enabled.

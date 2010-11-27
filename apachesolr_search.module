@@ -335,7 +335,7 @@ function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '',
   }
   else {
     // No highlighting, use the teaser as a snippet.
-    $params['fl'] .= ',teaser';
+    $query->params['fl'] .= ',teaser';
   }
   apachesolr_search_add_facet_params($query);
   apachesolr_search_add_boost_params($query);
