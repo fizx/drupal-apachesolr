@@ -11,4 +11,5 @@ files[] = apachesolr.admin.inc
 files[] = apachesolr.index.inc
 files[] = apachesolr.taxonomy.inc
 files[] = Drupal_Apache_Solr_Service.php
+files[] = Solr_Base_Query.php
 files[] = SolrPhpClient/Apache/Solr/Service.php

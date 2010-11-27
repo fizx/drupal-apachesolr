@@ -99,6 +99,10 @@ function apachesolr_server_edit_form(&$form, &$form_state, $server = NULL) {
     '#description' => t('Unique, machine-readable identifier Solr server.'),
     '#required' => TRUE,
   );
+  $form['service_class'] = array(
+    '#type' => 'value',
+    '#value' => '',
+  );
   $form['save'] = array(
     '#type' => 'submit',
     '#validate' =>array('apachesolr_server_save_validate'),
@@ -127,18 +131,7 @@ function apachesolr_server_delete_submit($form, &$form_state) {
 
 function apachesolr_server_test_submit($form, &$form_state) {
   extract($form_state['values']);
-  if (empty($class)) {
-    $class = variable_get('apachesolr_service_class', 'Drupal_Apache_Solr_Service');
-  }
-  $ping = FALSE;
-  try {
-    // Takes advantage of auto-loading.
-    $solr = new $class($host, $port, $path);
-    $ping = @$solr->ping(variable_get('apachesolr_ping_timeout', 4));
-  }
-  catch (Exception $e) {
-    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
-  }
+  $ping = apachesolr_server_status($host, $port, $path, $service_class);
   if ($ping) {
     drupal_set_message(t('Your site has contacted the Apache Solr server.'));
   }

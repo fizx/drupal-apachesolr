@@ -316,7 +316,9 @@ function theme_apachesolr_browse_blocks($vars) {
  * @param integer $page
  *   For pagination.
  * @param $caller
+ *
  * @return Apache_Solr_Response $response
+ *
  * @throws Exception
  */
 function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '', $page = 0, $caller = 'apachesolr_search') {
@@ -1125,16 +1127,6 @@ function apachesolr_search_get_type($facet) {
   }
   // A disabled or missing node type returns FALSE.
   return ($type === FALSE) ? $facet : $type;
-}
-
-/**
- * Implements hook_form_[form_id]_alter().
- *
- * This adds the 0 option to the search admin form.
- */
-function apachesolr_search_form_search_admin_settings_alter(&$form, $form_state) {
-  $form['indexing_throttle']['search_cron_limit']['#options']['0'] = '0';
-  ksort($form['indexing_throttle']['search_cron_limit']['#options']);
 }
 
 /**

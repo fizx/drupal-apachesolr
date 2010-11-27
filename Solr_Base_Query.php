@@ -1,7 +1,7 @@
 <?php
 // $Id$
 
-class Solr_Base_Query implements Drupal_Solr_Query_Interface {
+class SolrBaseQuery implements DrupalSolrQueryInterface {
 
   /**
    * Extract all uses of one named field from a filter string e.g. 'type:book'
@@ -173,6 +173,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $filter = array('#exclude' => $exclude, '#name' => $field, '#value' => trim($value), '#callbacks' => $callbacks);
     $this->fields[] = $filter;
     $this->fields_added[] = $filter;
+    return $this;
   }
 
   public function remove_filter($name, $value = NULL) {
@@ -186,6 +187,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $this->unset_filter($this->fields, $name, $value);
     // Remove from the list of filters added with add_filter()
     $this->unset_filter($this->fields_added, $name, $value);
+    return $this;
   }
 
   protected function unset_filter(&$fields, $name, $value) {
@@ -210,45 +212,55 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
    *
    * @param $field_map
    *   An array keyed with real Solr index field names, with value being the alias.
+   *
+   * @return SolrBaseQuery
+   *   The called object.
    */
-  function add_field_aliases($field_map) {
+  public function add_field_aliases($field_map) {
     $this->field_map = array_merge($this->field_map, $field_map);
     // We have to re-parse the filters.
     $this->parse_filters();
+    return $this;
   }
 
-  function get_field_aliases() {
+  public function get_field_aliases() {
     return $this->field_map;
   }
 
-  function clear_field_aliases() {
+  public function clear_field_aliases() {
     $this->field_map = array();
     // We have to re-parse the filters.
     $this->parse_filters();
+    return $this;
   }
 
-  function get_keys() {
+  public function get_keys() {
     return $this->keys;
   }
 
-  function set_keys($keys) {
+  public function set_keys($keys) {
     $this->keys = $keys;
+    return $this;
   }
 
   public function remove_keys() {
     $this->keys = '';
+    return $this;
   }
 
   public function add_subquery(Drupal_Solr_Query_Interface $query, $fq_operator = 'OR', $q_operator = 'AND') {
     $this->subqueries[$query->id] = array('#query' => $query, '#fq_operator' => $fq_operator, '#q_operator' => $q_operator);
+    return $this;
   }
 
   public function remove_subquery(Drupal_Solr_Query_Interface $query) {
     unset($this->subqueries[$query->id]);
+    return $this;
   }
 
   public function remove_subqueries() {
     $this->subqueries = array();
+    return $this;
   }
 
   protected function parse_sortstring() {
@@ -291,12 +303,14 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     $this->available_sorts[$name] = $sort;
     // Re-parse the sortstring.
     $this->parse_sortstring();
+    return $this;
   }
 
   public function remove_available_sort($name) {
     unset($this->available_sorts[$name]);
     // Re-parse the sortstring.
     $this->parse_sortstring();
+    return $this;
   }
 
   public function get_solrsort() {
@@ -307,6 +321,7 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     if (isset($this->available_sorts[$name])) {
       $this->solrsort = array('#name' => $name, '#direction' => $direction);
     }
+    return $this;
   }
 
   /**

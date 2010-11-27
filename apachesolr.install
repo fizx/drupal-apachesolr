@@ -314,3 +314,4 @@ function apachesolr_update_7000() {
     variable_set('apachesolr_service_class', $class);
   }
 }
+

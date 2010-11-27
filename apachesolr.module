@@ -1585,7 +1585,7 @@ function apachesolr_get_solr($id = NULL) {
   if (empty($solr_cache['instances'][$server][$path])) {
     // Use the default class if none is specified.
     if (empty($class)) {
-      $class = variable_get('apachesolr_service_class', 'Drupal_Apache_Solr_Service');
+      $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
     }
     // Takes advantage of auto-loading.
     $solr = new $class($host, $port, $path);
@@ -1657,24 +1657,18 @@ function apachesolr_server_save($server) {
  *
  * @return boolean TRUE if the server can be pinged, FALSE otherwise.
  */
-function apachesolr_server_status($host = NULL, $port = NULL, $path = NULL) {
-  if (empty($host)) {
-    $host = variable_get('apachesolr_host', 'localhost');
+function apachesolr_server_status($host, $port, $path, $class = NULL) {
+  if (empty($class)) {
+    $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
   }
-  if (empty($port)) {
-    $port = variable_get('apachesolr_port', '8983');
-  }
-  if (empty($path)) {
-    $path = variable_get('apachesolr_path', '/solr');
-  }
-
   $ping = FALSE;
   try {
-    $solr = apachesolr_get_solr($host, $port, $path);
+    // Takes advantage of auto-loading.
+    $solr = new $class($host, $port, $path);
     $ping = @$solr->ping(variable_get('apachesolr_ping_timeout', 4));
   }
   catch (Exception $e) {
-    watchdog('Apache Solr', check_plain($e->getMessage()), NULL, WATCHDOG_ERROR);
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
   }
   return $ping;
 }
@@ -1783,11 +1777,10 @@ function apachesolr_static_response_cache($response = NULL, $namespace = 'apache
  *   The search base path (without the keywords) for this query.
  *
  * @param $solr
- *   An instance of Drupal_Apache_Solr_Service.
+ *   An instance of DrupalApacheSolrService.
  */
 function apachesolr_drupal_query($keys = '', $filters = '', $solrsort = '', $base_path = '', $solr = NULL) {
-  list($module, $class) = variable_get('apachesolr_query_class', array('apachesolr', 'Solr_Base_Query'));
-  include_once drupal_get_path('module', $module) .'/'. $class .'.php';
+  $class = variable_get('apachesolr_query_class', 'SolrBaseQuery');
 
   if (empty($solr)) {
     $solr = apachesolr_get_solr();
@@ -2500,12 +2493,14 @@ function theme_apachesolr_sort_list($vars) {
 /**
  * The interface for all 'query' objects.
  */
-interface Drupal_Solr_Query_Interface {
+interface DrupalSolrQueryInterface {
   /**
    * Get all filters, or the subset of filters for one field.
    *
    * @param $name
    *   Optional name of a Solr field.
+   *
+   * @return an array of filters. 
    */
   function get_filters($name = NULL);
 
@@ -2514,9 +2509,10 @@ interface Drupal_Solr_Query_Interface {
    *
    * @param string $field
    * the facet field to check
-   *
    * @param string $value
    * The facet value to check against
+   *
+   * @return TRUE or FALSE
    */
   function has_filter($field, $value);
 
@@ -2525,14 +2521,15 @@ interface Drupal_Solr_Query_Interface {
    *
    * @param string $field
    *   the facet field to apply to this query
-   *
    * @param string value
    *   the value of the facet to apply
-   *
    * @param boolean $exclude
    *   Optional paramter.  If TRUE, the filter will be negative,
    *   meaning that matching values will be excluded from the
    *   result set.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
   function add_filter($field, $value, $exclude = FALSE);
 
@@ -2541,10 +2538,12 @@ interface Drupal_Solr_Query_Interface {
    *
    * @param string $field
    * the facet field to remove
-   *
    * @param string $value
    * The facet value to remove
    * This value can be NULL
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
   function remove_filter($field, $value = NULL);
 
@@ -2558,11 +2557,17 @@ interface Drupal_Solr_Query_Interface {
    *
    * @param string $keys
    *   The new keywords.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
   function set_keys($keys);
 
   /**
    * Removes the query's keywords.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
   function remove_keys();
 
@@ -2590,6 +2595,9 @@ interface Drupal_Solr_Query_Interface {
 
   /**
    * Make a sort available.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
   function set_available_sort($field, $sort);
 
@@ -2606,39 +2614,48 @@ interface Drupal_Solr_Query_Interface {
    *
    * @param $field
    *  The name of a field in the solr index that's an allowed sort.
-   *
    * @param $direction
    *  'asc' or 'desc'
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
   function set_solrsort($field, $direction);
 
   /**
    * Add a subquery to the query.
    *
-   * @param Drupal_Solr_Query_Interface $query
+   * @param DrupalSolrQueryInterface $query
    *   The query to add to the orginal query - may have keywords or filters.
-   *
    * @param string $fq_operator
    *   The operator to use within the filter part of the subquery
-   *
    * @param string $q_operator
    *   The operator to use in joining the subquery to
    *   the main keywords.  Note - this is unlikely to work
    *   with the Dismax handler when the main query is only
    *   keywords.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
-  function add_subquery(Drupal_Solr_Query_Interface $query, $fq_operator = 'OR', $q_operator = 'AND');
+  function add_subquery(DrupalSolrQueryInterface $query, $fq_operator = 'OR', $q_operator = 'AND');
 
   /**
    * Remove a specific subquery.
    *
-   * @param Drupal_Solr_Query_Interface $query
+   * @param DrupalSolrQueryInterface $query
    * the query to remove
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
-  function remove_subquery(Drupal_Solr_Query_Interface $query);
+  function remove_subquery(DrupalSolrQueryInterface $query);
 
   /**
    * Remove all subqueries.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
    */
   function remove_subqueries();
 
@@ -2650,7 +2667,7 @@ interface Drupal_Solr_Query_Interface {
    *   instance variables. The params for the search are taken from
    *   the public $query->params array.
    *
-   * @return
+   * @return Apache_Solr_Response
    *   A response object.
    */
   function search($keys = NULL);
