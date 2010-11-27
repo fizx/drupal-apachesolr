@@ -7,8 +7,16 @@
  */
 
 /**
+ * Implements hook_enable().
+ */
+function apachesolr_search_enable() {
+  $active = variable_get('search_active_modules', array('node', 'user'));
+  $active[] = 'apachesolr_search';
+  variable_set('search_active_modules', array_unique($active));
+}
+
+/**
  * Implements hook_uninstall().
- * Update to namespace tracking.
  */
 function apachesolr_search_uninstall() {
   $stored = variable_get('apachesolr_index_last', array());
@@ -16,11 +24,26 @@ function apachesolr_search_uninstall() {
   variable_set('apachesolr_index_last', $stored);
   // Remove blocks.
   db_delete('block')->condition('module', 'apachesolr_search')->execute();
+  $active = variable_get('search_active_modules', array('node', 'user'));
+  $idx = array_search('apachesolr_search', $active);
+  if ($idx !== FALSE) {
+    unset($active[$idx]);
+    variable_set('search_active_modules', $active);
+  }
 }
 
-function Xapachesolr_search_update_7000() {
+/**
+ * Various updates for Drupal 7.
+ */
+function apachesolr_search_update_7000() {
+  $taxo_links = variable_get('apachesolr_search_taxonomy_links', 0);
+  // TODO - enable the new contrib module?
+  variable_del('apachesolr_search_taxonomy_links');
   // TODO - possibly rename block deltas, etc.
+  $active = variable_get('search_active_modules', array('node', 'user'));
+  $active[] = 'apachesolr_search';
+  variable_set('search_active_modules', array_unique($active));
   // TODO: if apachesolr was the default - make sure it's the default search module
+  variable_del('apachesolr_search_make_default');
 }
 
-// TODO: hook_enable?

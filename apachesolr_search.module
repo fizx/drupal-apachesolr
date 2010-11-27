@@ -55,27 +55,6 @@ function apachesolr_search_menu() {
   return $items;
 }
 
- /**
- * Implements hook_menu_alter().
- */
-function apachesolr_search_menu_alter(&$menu) {
-
-  if (variable_get('apachesolr_search_make_default', 0)) {
-    if (isset($menu['search/node/%menu_tail'])) {
-      // Hide the node search tab.
-      $menu['search/node/%menu_tail']['type'] = MENU_CALLBACK;
-      $menu['search/node/%menu_tail']['title'] = 'Search';
-    }
-  }
-  if (variable_get('apachesolr_search_taxonomy_links', 0)) {
-    if (isset($menu['taxonomy/term/%taxonomy_term'])) {
-      $menu['taxonomy/term/%taxonomy_term']['page callback'] = 'apachesolr_search_taxonomy_term_page';
-      $menu['taxonomy/term/%taxonomy_term']['file path'] = drupal_get_path('module', 'apachesolr_search');
-      $menu['taxonomy/term/%taxonomy_term']['file'] = 'apachesolr.taxonomy.inc';
-    }
-  }
-}
-
 /**
  * Implements hook_cron(). Indexes nodes.
  */
@@ -101,7 +80,7 @@ function apachesolr_search_apachesolr_types_exclude($namespace) {
 function apachesolr_search_search_info() {
   return variable_get('apachesolr_search_search_info', array(
     'title' => 'Search',
-    'path' => 'content',
+    'path' => 'site',
     'conditions_callback' => 'apachesolr_search_conditions',
   ));
 }
@@ -700,7 +679,6 @@ function apachesolr_search_date_range($query, $facet_field) {
   return array("$start_iso/$gap", "$end_iso+1$gap/$gap", "+1$gap");
 }
 
-
 /**
  * Helper function, finds node types that are tagged by the specified vocabulary
  */
@@ -769,7 +747,6 @@ function apachesolr_search_apachesolr_facets() {
 
   return $facets;
 }
-
 
 /**
  * Implements hook_block_info().
@@ -846,7 +823,7 @@ function apachesolr_search_block_view($delta = ''){
 /**
  * Implements of hook_block_configure().
  */
-function apachesolr_search_block_configure($delta = ''){
+function apachesolr_search_block_configure($delta = '') {
   if ($delta != 'currentsearch') {
     return apachesolr_facetcount_form('apachesolr_search', $delta);
   }
@@ -855,7 +832,7 @@ function apachesolr_search_block_configure($delta = ''){
 /**
  * Implements of hook_block_save().
  */
-function apachesolr_search_block_save($delta = '', $edit = array()){
+function apachesolr_search_block_save($delta = '', $edit = array()) {
   if ($delta != 'currentsearch') {
     apachesolr_facetcount_save($edit);
   }
@@ -1232,28 +1209,6 @@ function apachesolr_search_form_apachesolr_settings_alter(&$form, $form_state) {
       '!blocklink' => l('block settings page', 'admin/build/block'),
     )),
   );
-  $form['advanced']['apachesolr_search_make_default'] = array(
-    '#type' => 'radios',
-    '#title' => t('Make Apache Solr Search the default'),
-    '#default_value' => variable_get('apachesolr_search_make_default', 0),
-    '#options' => array(0 => t('Disabled'), 1 => t('Enabled')),
-    '#description' => t('Hides core node search, and makes the search block submit to Apache Solr Search'),
-  );
-  $form['advanced']['apachesolr_search_default_previous'] = array(
-    '#type' => 'value',
-    '#value' => variable_get('apachesolr_search_make_default', 0),
-  );
-  $form['advanced']['apachesolr_search_taxonomy_links'] = array(
-    '#type' => 'radios',
-    '#title' => t('Use Apache Solr for taxonomy links'),
-    '#default_value' => variable_get('apachesolr_search_taxonomy_links', 0),
-    '#description' => t('Note: Vocabularies that need this behavior need to be checked off on the <a href="@enabled_filters_url">enabled filters</a> settings page', array('@enabled_filters_url' => url('admin/config/search/apachesolr/enabled-filters'))),
-    '#options' => array(0 => t('Disabled'), 1 => t('Enabled')),
-  );
-  $form['advanced']['apachesolr_search_taxonomy_previous'] = array(
-    '#type' => 'value',
-    '#value' => variable_get('apachesolr_search_taxonomy_links', 0),
-  );
 
   $form['apachesolr_search_spellcheck'] = array(
     '#type' => 'checkbox',
@@ -1263,27 +1218,12 @@ function apachesolr_search_form_apachesolr_settings_alter(&$form, $form_state) {
   );
 
   $form['#submit'][] = 'apachesolr_search_build_spellcheck';
-  $form['#submit'][] = 'apachesolr_search_make_default_submit';
 
   if (isset($form['buttons'])) {
     // Move buttons to the bottom.
     $buttons = $form['buttons'];
     unset($form['buttons']);
     $form['buttons'] = $buttons;
-  }
-}
-
-/**
- * Form submit funtion - do a menu rebuild if needed.
- *
- * @see apachesolr_search_form_apachesolr_settings_alter()
- */
-function apachesolr_search_make_default_submit($form, &$form_state) {
-  // We use variable_get() instead of the form values so as to also handle reset to defaults.
-  if ($form_state['values']['apachesolr_search_default_previous'] != variable_get('apachesolr_search_make_default', 0) ||
-      $form_state['values']['apachesolr_search_taxonomy_previous'] != variable_get('apachesolr_search_taxonomy_links', 0)) {
-    // Take account of path changes
-    menu_rebuild();
   }
 }
 
@@ -1296,7 +1236,7 @@ function apachesolr_search_form_apachesolr_delete_index_form_alter(&$form, $form
   $form['submit']['#submit'][] = 'apachesolr_search_build_spellcheck';
 }
 
-function apachesolr_search_build_spellcheck() {
+function apachesolr_search_build_spellcheck($form, &$form_state) {
   try {
     $solr = apachesolr_get_solr();
     $params['spellcheck'] = 'true';

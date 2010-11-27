@@ -270,11 +270,6 @@ function apachesolr_settings($form, &$form_state) {
     '#default_value' => variable_get('apachesolr_facetstyle', 'checkboxes'),
     '#options' => array('links' => t('Links only'), 'checkboxes' => t('Links with checkboxes')),
   );
-  $form['apachesolr_logging'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Log search requests'),
-    '#default_value' => variable_get('apachesolr_logging', TRUE),
-  );
   $form['apachesolr_failure'] = array(
     '#type' => 'select',
     '#title' => t('On failure'),
@@ -311,9 +306,9 @@ function apachesolr_settings($form, &$form_state) {
 /**
  * Gets information about the fields already in solr index.
  */
-function apachesolr_index_page() {
+function apachesolr_index_page($server_id = NULL) {
   try {
-    $solr = apachesolr_get_solr();
+    $solr = apachesolr_get_solr($server_id);
     // TODO: possibly clear this every page view if we are running multi-site.
     if (apachesolr_index_get_last_updated()) {
       $solr->clearCache();

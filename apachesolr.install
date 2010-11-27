@@ -313,5 +313,6 @@ function apachesolr_update_7000() {
     list($module, $filepath, $class) = $value;
     variable_set('apachesolr_service_class', $class);
   }
+  variable_del('apachesolr_logging');
 }
 
