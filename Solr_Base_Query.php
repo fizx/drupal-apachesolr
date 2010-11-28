@@ -22,12 +22,15 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
           $filter['#query'] = $match[0];
           $filter['#exclude'] = ($match[1] == '-');
           $filter['#value'] = trim($match[2]);
-          if (isset($match[3])) {
-            // Extra data for range queries
-            $filter['#start'] = $match[3];
-            $filter['#end'] = $match[4];
+          // Empty values cause Lucene parse errors, so skip them.
+          if (strlen($filter['#value'])) {
+            if (isset($match[3])) {
+              // Extra data for range queries
+              $filter['#start'] = $match[3];
+              $filter['#end'] = $match[4];
+            }
+            $extracted[] = $filter;
           }
-          $extracted[] = $filter;
           // Update the local copy of $filters by removing the match.
           $filterstring = str_replace($match[0], '', $filterstring);
         }

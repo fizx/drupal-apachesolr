@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#983572 by amateescu, pwolanin: fix for empty filter values causing Solr error.
 #795912 by pwolanin patch 64: fixes various settings forms and variables, avoids a notice, removes use of md5() in favor of drupal_hash_base64(). 
 #982846 by pwolanin: split out (and deprecate) the taxonomy path hijack feature.
 #982840 by pwolanin: OO cleanup for Drupal 7 coding standards.
