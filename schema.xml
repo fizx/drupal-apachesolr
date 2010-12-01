@@ -11,7 +11,7 @@
  http://wiki.apache.org/solr/SchemaXml
 -->
 
-<schema name="drupal-7.1.rc1" version="1.2">
+<schema name="drupal-7.1.0" version="1.2">
     <!-- attribute "name" is the name of this schema and is only used for display purposes.
          Applications should change this to reflect the nature of the search collection.
          version="1.2" is Solr's version number for the schema syntax and semantics.  It should
@@ -141,6 +141,7 @@
     <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
       <analyzer>
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
 
@@ -331,9 +332,9 @@
    <field name="name" type="text" indexed="true" stored="true" termVectors="true"/>
    <field name="sname" type="string" indexed="true" stored="false"/>
    <field name="sort_name" type="sortString" indexed="true" stored="false"/>
-   <field name="created" type="date" indexed="true" stored="true"/>
-   <field name="changed" type="date" indexed="true" stored="true"/>
-   <field name="last_comment_or_change" type="date" indexed="true" stored="true"/>
+   <field name="created" type="tdate" indexed="true" stored="true"/>
+   <field name="changed" type="tdate" indexed="true" stored="true"/>
+   <field name="last_comment_or_change" type="tdate" indexed="true" stored="true"/>
    <field name="nid"  type="long" indexed="true" stored="true"/>
    <field name="status" type="boolean" indexed="true" stored="true"/>
    <field name="promote" type="boolean" indexed="true" stored="true"/>
@@ -342,7 +343,7 @@
    <field name="tnid"  type="long" indexed="true" stored="true"/>
    <field name="translate" type="boolean" indexed="true" stored="true"/>
    <field name="language" type="string" indexed="true" stored="true"/>
-   <field name="comment_count" type="integer" indexed="true" stored="true"/>
+   <field name="comment_count" type="tint" indexed="true" stored="true"/>
    <field name="tid"  type="long" indexed="true" stored="true" multiValued="true"/>
    <field name="vid"  type="long" indexed="true" stored="true" multiValued="true"/>
    <field name="taxonomy_names" type="text" indexed="true" stored="false" termVectors="true" multiValued="true" omitNorms="true"/>
@@ -389,10 +390,9 @@
    <dynamicField name="ts_*"  type="text"    indexed="true"  stored="true" multiValued="false" termVectors="true"/>
    <dynamicField name="tm_*"  type="text"    indexed="true"  stored="true" multiValued="true" termVectors="true"/>
    <dynamicField name="tsen2k_*" type="edge_n2_kw_text" indexed="true" stored="true" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
-   <dynamicField name="ds_*" type="date"    indexed="true"  stored="true" multiValued="false"/>
-   <dynamicField name="dm_*" type="date"    indexed="true"  stored="true" multiValued="true"/>
-   <dynamicField name="tds_*" type="tdate"    indexed="true"  stored="true" multiValued="false"/>
-   <dynamicField name="tdm_*" type="tdate"    indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="twsm_*" type="text_ws" indexed="true" stored="true" multiValued="true"/>
+   <dynamicField name="ds_*" type="tdate"    indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="dm_*" type="tdate"    indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="bm_*"  type="boolean" indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="bs_*"  type="boolean" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="fs_*"  type="sfloat"  indexed="true"  stored="true" multiValued="false"/>
@@ -406,6 +406,17 @@
    <dynamicField name="tfm_*"  type="tfloat"  indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="tps_*"  type="tdouble" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="tpm_*"  type="tdouble" indexed="true"  stored="true" multiValued="true"/>
+
+   <!-- In rare cases a date rather than tdate is needed for sortMissingLast -->
+   <dynamicField name="dds_*" type="date"    indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="ddm_*" type="date"    indexed="true"  stored="true" multiValued="true"/>
+   <!-- In case a 32 bit int is really needed, we provide these fields -->
+   <dynamicField name="iis_*"  type="integer" indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="iim_*"  type="integer" indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="isis_*" type="sint"    indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="isim_*" type="sint"    indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="itis_*"  type="tint" indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="itim_*"  type="tint" indexed="true"  stored="true" multiValued="true"/>
    <!-- Sortable version of the dynamic string field -->
    <dynamicField name="sort_ss_*" type="sortString" indexed="true" stored="false"/>
    <copyField source="ss_*" dest="sort_ss_*"/>
