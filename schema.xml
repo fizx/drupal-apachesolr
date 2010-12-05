@@ -332,9 +332,9 @@
    <field name="name" type="text" indexed="true" stored="true" termVectors="true"/>
    <field name="sname" type="string" indexed="true" stored="false"/>
    <field name="sort_name" type="sortString" indexed="true" stored="false"/>
-   <field name="created" type="tdate" indexed="true" stored="true"/>
-   <field name="changed" type="tdate" indexed="true" stored="true"/>
-   <field name="last_comment_or_change" type="tdate" indexed="true" stored="true"/>
+   <field name="created" type="date" indexed="true" stored="true"/>
+   <field name="changed" type="date" indexed="true" stored="true"/>
+   <field name="last_comment_or_change" type="date" indexed="true" stored="true"/>
    <field name="nid"  type="long" indexed="true" stored="true"/>
    <field name="status" type="boolean" indexed="true" stored="true"/>
    <field name="promote" type="boolean" indexed="true" stored="true"/>
@@ -392,8 +392,10 @@
    <dynamicField name="tm_*"  type="text"    indexed="true"  stored="true" multiValued="true" termVectors="true"/>
    <dynamicField name="tsen2k_*" type="edge_n2_kw_text" indexed="true" stored="true" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
    <dynamicField name="twsm_*" type="text_ws" indexed="true" stored="true" multiValued="true"/>
-   <dynamicField name="ds_*" type="tdate"    indexed="true"  stored="true" multiValued="false"/>
-   <dynamicField name="dm_*" type="tdate"    indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="ds_*" type="date"    indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="dm_*" type="date"    indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="tds_*" type="tdate"    indexed="true"  stored="true" multiValued="false"/>
+   <dynamicField name="tdm_*" type="tdate"    indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="bm_*"  type="boolean" indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="bs_*"  type="boolean" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="fs_*"  type="sfloat"  indexed="true"  stored="true" multiValued="false"/>
@@ -408,9 +410,6 @@
    <dynamicField name="tps_*"  type="tdouble" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="tpm_*"  type="tdouble" indexed="true"  stored="true" multiValued="true"/>
 
-   <!-- In rare cases a date rather than tdate is needed for sortMissingLast -->
-   <dynamicField name="dds_*" type="date"    indexed="true"  stored="true" multiValued="false"/>
-   <dynamicField name="ddm_*" type="date"    indexed="true"  stored="true" multiValued="true"/>
    <!-- In case a 32 bit int is really needed, we provide these fields -->
    <dynamicField name="iis_*"  type="integer" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="iim_*"  type="integer" indexed="true"  stored="true" multiValued="true"/>

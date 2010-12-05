@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#989730 by pwolanin: Using tdate instead of data cases java exception in function queries. Partially revert #983892.
 #989658 by pwolanin: Drupal 7 allows multiple term refernece fields for the same vocabulary.
 #989398 by pwolanin: get some actual tests working.
 #983892 by pwolanin: update schema to use long instead of int, plus tdate fields.
