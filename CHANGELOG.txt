@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#989398 by pwolanin: get some actual tests working.
 #983892 by pwolanin: update schema to use long instead of int, plus tdate fields.
 #983894 by pwolanin: add a set of conf files that can be used to create a test core.
 #983572 by amateescu, pwolanin: fix for empty filter values causing Solr error.

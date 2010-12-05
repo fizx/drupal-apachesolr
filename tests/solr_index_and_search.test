@@ -1,7 +1,80 @@
 <?php
 // $Id$
 
-class DrupalSolrMatchTestCase extends DrupalWebTestCase {
+/**
+ * A test class that prvides the setUp and tearDown of a solr core on the
+ * default localhost server. This server must be configured for multiple cores
+ * with a solr.xml file.
+ */
+class DrupalSolrWebTestCase extends DrupalWebTestCase {
+  /**
+   * Implementation of setUp().
+   */
+  function setUp() {
+    parent::setUp('apachesolr', 'apachesolr_search', 'search');
+    // Load the default server.
+    $server_id = variable_get('apachesolr_default_server', 'solr');
+    $server = apachesolr_server_id_load($server_id);
+    // We will use a core named after the simpltest prefix.
+    $server['path'] = '/solr/' . $this->databasePrefix;
+    apachesolr_server_save($server);
+    $solr_url = "{$server['scheme']}://{$server['host']}:{$server['port']}{$server['path']}";
+    $core_admin_url = "{$server['scheme']}://{$server['host']}:{$server['port']}/solr/admin/cores";
+    $filesdir = variable_get('file_public_path');
+    mkdir("$filesdir/solr/conf", 0777, TRUE);
+    mkdir("$filesdir/solr/data");
+    $instancedir = realpath("$filesdir/solr");
+    $pattern = dirname(__FILE__) . '/conf/*';
+    foreach (glob($pattern) as $conf_file) {
+      copy($conf_file, "$instancedir/conf/" . basename($conf_file));
+    }
+    copy(dirname(__FILE__) . '/../schema.xml', "$instancedir/conf/schema.xml");
+    $contents = file_get_contents(dirname(__FILE__) . '/../solrconfig.xml');
+    // Change the autoCommit time down to 1 second.
+    file_put_contents("$instancedir/conf/solrconfig.xml", preg_replace('@<maxTime>[0-9]+</maxTime>@', '<maxTime>1000</maxTime>', $contents));
+    $query['action'] = 'CREATE';
+    $query['name'] = $this->databasePrefix;
+    $query['instanceDir'] = $instancedir;
+    $this->drupalGet($core_admin_url, array('query' => $query));
+    $this->assertResponse(200);
+    $this->instancedir = $instancedir;
+    $this->solr_url = $solr_url;
+    $this->core_admin_url = $core_admin_url;
+    $this->checkCoreStatus();
+  }
+
+  /**
+   * Helper function to invoke core admin actions.
+   */
+  protected function coreAdmin($action, $return_response = FALSE) {
+    $query = array();
+    $query['action'] = $action;
+    $query['wt'] = 'json';
+    $query['indent'] = '1';
+    $query['core'] = $this->databasePrefix;
+    $this->drupalGet($this->core_admin_url, array('query' => $query));
+    $this->assertResponse(200);
+    if ($return_response) {
+      return json_decode($this->drupalGetContent(), TRUE);
+    }
+  }
+
+  /**
+   * Helper function to verify that the expected core exists.
+   */
+  protected function checkCoreStatus() {
+    $response = $this->coreAdmin('STATUS', TRUE);
+    $this->assertTrue(isset($response['status'][$this->databasePrefix]['index']), 'Found Solr test core index status');
+  }
+
+  function tearDown() {
+    // Unload the Solr core.
+    $this->coreAdmin('UNLOAD');
+    parent::tearDown();
+  }
+}
+
+class DrupalSolrMatchTestCase extends DrupalSolrWebTestCase {
   /**
    * Implements getInfo().
    */
@@ -14,34 +87,22 @@ class DrupalSolrMatchTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Implementation setUp().
-   */
-  function setUp() {
-
-    //We run this pre-setup in case the user wants to use a different solr location for testing than the default
-    $this->solr = apachesolr_get_solr(variable_get('apachesolr_host', 'localhost'), variable_get('apachesolr_port', 8983), variable_get('apachesolr_path', '/solr'));
-    parent::setUp('apachesolr', 'apachesolr_search');
-  }
-
-  /**
    * Test search indexing.
    */
   function testMatching() {
-    $this->_setup();
-    $this->_testQueries();
+    $solr = apachesolr_get_solr();
+    $this->assertTrue($solr->ping(), "The Server could be Pinged");
+    $response = $solr->search("*:*", 0, 0, array('qt' => 'standard'));
+    $response = $response->response;
+    $this->assertEqual($response->numFound, 0, "There should not be any documents in the index");
+    //$this->_setup();
+    //$this->_testQueries();
   }
 
   /**
    * Set up a small index of items to test against.
    */
   function _setup() {
-    $ping = $this->solr->ping(10);
-    $this->assertNotEqual(FALSE, $ping, "The Server could be Pinged");
-    $response = $this->solr->search("*:*");
-    $response = $response->response;
-    $total = $response->numFound;
-
-    $this->assertEqual($total, 0, "There should not be any documents in the index");
 
     variable_set('minimum_word_size', 3);
     for ($i = 1; $i <= 7; ++$i) {
@@ -192,15 +253,4 @@ class DrupalSolrMatchTestCase extends DrupalWebTestCase {
     $this->assertEqual(!count($scores) || (min($scores) > 0.0 && max($scores) <= 1.0001), TRUE, "Query scoring '$query'");
   }
 
-  function tearDown() {
-    try {
-      $this->solr->deleteByQuery('*:*');
-      $this->solr->optimize();
-    }
-    catch (Exception $e) {
-      //I know this is wrong, but I don't feel like learning how to throw my own failure right now
-      $this->assertTrue(1, 0, $e->getMessage());
-    }
-    parent::tearDown();
-  }
 }

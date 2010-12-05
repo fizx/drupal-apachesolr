@@ -1626,6 +1626,7 @@ function apachesolr_server_asid_delete($asid) {
     ->condition('asid', $asid)
     ->execute();
   cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_get_solr');
   return $result;
 }
 
@@ -1651,6 +1652,7 @@ function apachesolr_server_save($server) {
       ->execute();
   }
   cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_get_solr');
 }
 
 /**
