@@ -148,45 +148,45 @@ function apachesolr_term_reference_indexing_callback($node, $field_name, $index_
   if (!empty($node->{$field_name}) && function_exists('taxonomy_get_parents_all')) {
     $field = $node->$field_name;
     list($lang, $items) = each($field);
-      foreach ($items as $item) {
-        // Double indexing of tids lets us do effecient searches (on tid)
-        // and do accurate per-vocabulary faceting.
+    foreach ($items as $item) {
+      // Double indexing of tids lets us do effecient searches (on tid)
+      // and do accurate per-vocabulary faceting.
 
-        // By including the ancestors to a term in the index we make
-        // sure that searches for general categories match specific
-        // categories, e.g. Fruit -> apple, a search for fruit will find
-        // content categorized with apple.
-        $ancestors = taxonomy_get_parents_all($item['tid']);
-        foreach ($ancestors as $ancestor) {
-          $fields[] = array(
-            'key' => 'tid',
-            'value' => $ancestor->tid,
-          );
-          $fields[] = array(
-            'key' => 'im_vid_'. $ancestor->vid,
-            'value' => $ancestor->tid,
-          );
-          $fields[] = array(
-            'key' => 'im_vid_'. $ancestor->vid,
-            'value' => $ancestor->tid,
-          );
-          $name = apachesolr_clean_text($ancestor->name);
-          $vocab_names[$ancestor->vid][] = $name;
-          // We index each name as a string for cross-site faceting
-          // using the vocab name rather than vid in field construction .
-          $fields[] = array(
-            'key' => 'sm_vid_'. apachesolr_vocab_name($ancestor->vid),
-            'value' => $name,
-          );
-        }
-      }
-      // Index the term names into a text field for MLT queries and keyword searching.
-      foreach ($vocab_names as $vid => $names) {
+      // By including the ancestors to a term in the index we make
+      // sure that searches for general categories match specific
+      // categories, e.g. Fruit -> apple, a search for fruit will find
+      // content categorized with apple.
+      $ancestors = taxonomy_get_parents_all($item['tid']);
+      foreach ($ancestors as $ancestor) {
         $fields[] = array(
-          'key' => 'ts_vid_'. $vid .'_names',
-          'value' => implode(' ', $names),
+          'key' => 'tid',
+          'value' => $ancestor->tid,
+        );
+        $fields[] = array(
+          'key' => 'im_vid_'. $ancestor->vid,
+          'value' => $ancestor->tid,
+        );
+        $fields[] = array(
+          'key' => 'im_vid_'. $ancestor->vid,
+          'value' => $ancestor->tid,
+        );
+        $name = apachesolr_clean_text($ancestor->name);
+        $vocab_names[$ancestor->vid][] = $name;
+        // We index each name as a string for cross-site faceting
+        // using the vocab name rather than vid in field construction .
+        $fields[] = array(
+          'key' => 'sm_vid_'. apachesolr_vocab_name($ancestor->vid),
+          'value' => $name,
         );
       }
+    }
+    // Index the term names into a text field for MLT queries and keyword searching.
+    foreach ($vocab_names as $vid => $names) {
+      $fields[] = array(
+        'key' => 'tm_vid_'. $vid .'_names',
+        'value' => implode(' ', $names),
+      );
+    }
   }
   return $fields;
 }

@@ -1887,7 +1887,7 @@ function apachesolr_field_name_map($field_name) {
     );
     if (module_exists('taxonomy')) {
       foreach (taxonomy_get_vocabularies() as $vocab) {
-        $map['ts_vid_'. $vocab->vid .'_names'] = t('Taxonomy term names only from the %name vocabulary', array('%name' => $vocab->name));
+        $map['tm_vid_'. $vocab->vid .'_names'] = t('Taxonomy term names only from the %name vocabulary', array('%name' => $vocab->name));
         $map['im_vid_'. $vocab->vid] = t('Taxonomy term IDs from the %name vocabulary', array('%name' => $vocab->name));
       }
     }

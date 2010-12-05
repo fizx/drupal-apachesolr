@@ -354,6 +354,7 @@
    <copyField source="name" dest="sort_name"/>
    <!-- Copy terms to a single field that contains all taxonomy term names -->
    <copyField source="ts_vid_*" dest="taxonomy_names"/>
+   <copyField source="tm_vid_*" dest="taxonomy_names"/>
 
    <!-- Here, default is used to create a "timestamp" field indicating
         when each document was indexed.-->
