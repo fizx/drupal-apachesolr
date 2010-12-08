@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#991590 by larskleiner: fix for API change to timezone param in format_date().
 #989730 by pwolanin: Using tdate instead of data cases java exception in function queries. Partially revert #983892.
 #989658 by pwolanin: Drupal 7 allows multiple term refernece fields for the same vocabulary.
 #989398 by pwolanin: get some actual tests working.

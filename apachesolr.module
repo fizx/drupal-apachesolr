@@ -1323,17 +1323,17 @@ function apachesolr_date_format_iso_by_gap($gap, $iso) {
   if ($unix !== FALSE) {
     switch ($gap) {
       case 'YEAR':
-        return format_date($unix, 'custom', 'Y', 0);
+        return format_date($unix, 'custom', 'Y', 'UTC');
       case 'MONTH':
-        return format_date($unix, 'custom', 'F Y', 0);
+        return format_date($unix, 'custom', 'F Y', 'UTC');
       case 'DAY':
-        return format_date($unix, 'custom', 'F j, Y', 0);
+        return format_date($unix, 'custom', 'F j, Y', 'UTC');
       case 'HOUR':
-        return format_date($unix, 'custom', 'g A', 0);
+        return format_date($unix, 'custom', 'g A', 'UTC');
       case 'MINUTE':
-        return format_date($unix, 'custom', 'g:i A', 0);
+        return format_date($unix, 'custom', 'g:i A', 'UTC');
       case 'SECOND':
-        return format_date($unix, 'custom', 'g:i:s A', 0);
+        return format_date($unix, 'custom', 'g:i:s A', 'UTC');
     }
   }
 
