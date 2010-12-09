@@ -156,14 +156,14 @@ function apachesolr_term_reference_indexing_callback($node, $field_name, $index_
       // sure that searches for general categories match specific
       // categories, e.g. Fruit -> apple, a search for fruit will find
       // content categorized with apple.
+      $fields[] = array(
+        'key' => $index_key,
+        'value' => $item['tid'],
+      );
       $ancestors = taxonomy_get_parents_all($item['tid']);
       foreach ($ancestors as $ancestor) {
         $fields[] = array(
           'key' => 'tid',
-          'value' => $ancestor->tid,
-        );
-        $fields[] = array(
-          'key' => 'im_vid_'. $ancestor->vid,
           'value' => $ancestor->tid,
         );
         $fields[] = array(

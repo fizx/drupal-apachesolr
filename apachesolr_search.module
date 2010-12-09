@@ -737,7 +737,7 @@ function apachesolr_search_apachesolr_facets() {
         'info' => t('@module_name Field: Filter by @field_dname (@field_name)', array('@module_name' => $field_info['module_name'], '@field_name' => $field_info['field']['field_name'], '@field_dname' => $field_info['display_name'])),
         'facet_field' => $index_key,
         'content_types' => $field_info['bundles'],
-    );
+    ) + $field_info;
   }
 
   return $facets;
@@ -844,94 +844,6 @@ function apachesolr_search_collect_children($field) {
     }
   }
   return $remove;
-}
-
-/**
- * Generate the facet block for a taxonomy vid delta.
- */
-function apachesolr_search_taxonomy_facet_block($response, $query, $module, $delta, $filter_by, $facet_callback = FALSE) {
-  $vid = substr($delta, 7);
-  if (!module_exists('taxonomy') || !is_numeric($vid)) {
-    return;
-  }
-
-  // Check that we have a response and a valid vid.
-  if (is_object($response->facet_counts->facet_fields->$delta) && ($vocab = taxonomy_vocabulary_load($vid))) {
-    $reflect_hierarchy = apachesolr_search_get_hierarchical_vocabularies();
-    $contains_active = FALSE;
-    $facets = array();
-
-    foreach ($response->facet_counts->facet_fields->$delta as $tid => $count) {
-       // TODO - for now we don't handle facet missing.
-      if ($tid != '_empty_') {
-        $active = $query->has_filter($delta, $tid);
-        if ($active) {
-          $contains_active = TRUE;
-        }
-        $facets[$tid] = array(
-          '#name' => $delta,
-          '#value' => $tid,
-          '#exclude' => FALSE,
-          '#count' => $count,
-          '#parent' => 0,
-          '#children' => array(),
-          '#has_children' => FALSE,
-          '#active' => $active,
-        );
-      }
-    }
-
-    if ($facets && $reflect_hierarchy[$vocab->vid]) {
-      $tids = array_keys($facets);
-      // @todo: faster as 2x separate queries?
-      $result = db_query("SELECT tid, parent FROM {taxonomy_term_hierarchy} WHERE parent > 0 AND (tid IN (:tids) OR parent IN (:tids))", array(':tids' => $tids));
-      foreach($result as $term){
-        // Mark all terms that are parents for later CSS class.
-        // We assume data in the Solr index is complete - potential for some
-        // breakage here.
-        if (isset($facets[$term->parent])) {
-          $facets[$term->parent]['#has_children'] = TRUE;
-          if (isset($facets[$term->tid])) {
-            $facets[$term->tid]['#parent'] = $term->parent;
-            // Use a reference so we see the updated data.
-            $facets[$term->parent]['#children'][] = &$facets[$term->tid];
-          }
-        }
-      }
-
-      // Check for the case like starting on a taxonomy/term/$tid page
-      // where parents are not marked as active.
-      // TODO: can we make this more efficient?
-      do {
-        $added_active = FALSE;
-        foreach ($facets as $tid => $field) {
-          if ($field['#active'] && $field['#parent'] && !$facets[$field['#parent']]['#active']) {
-            // This parent has an active child.
-            $added_active = TRUE;
-            $query->add_filter($delta, $field['#parent']);
-            $facets[$field['#parent']]['#active'] = TRUE;
-          }
-        }
-      } while ($added_active);
-      foreach ($facets as $tid => $field) {
-        if (!empty($field['#parent'])) {
-          // We will render it via its parent.
-          unset($facets[$tid]);
-        }
-      }
-    }
-
-    $items = apachesolr_search_nested_facet_items($query, $facets, $response->response->numFound);
-    // Process all terms into an item list
-    if ($items && ($response->response->numFound > 1 || $contains_active)) {
-      $initial_limits = variable_get('apachesolr_facet_query_initial_limits', array());
-      $limit = isset($initial_limits['apachesolr_search'][$delta]) ? $initial_limits['apachesolr_search'][$delta] : variable_get('apachesolr_facet_query_initial_limit_default', 10);
-      return array(
-        'subject' => t('Filter by @name', array('@name' => $vocab->name)),
-        'content' => theme('apachesolr_facet_list', array('items' => $items, 'display_limit' => $limit)),
-      );
-    }
-  }
 }
 
 /**
@@ -1044,14 +956,6 @@ function apachesolr_search_nested_facet_items($query, $facets, $num_found, $sort
     }
   }
   return array_values($items);
-}
-
-
-function apachesolr_search_taxonomy_get_term($tid) {
-  if (function_exists('taxonomy_term_load')) {
-    $term = taxonomy_term_load($tid);
-    return $term['name'];
-  }
 }
 
 /**
@@ -1478,47 +1382,6 @@ function apachesolr_search_currentsearch_block($response, $query) {
       'facet_text' => $keys,
       'path' => $query->get_path(''),
       'options' => array('query' => $query->get_url_queryvalues())));
-  }
-  // Find all taxonomy terms to be treated in a hierarchy.
-  if (module_exists('taxonomy')) {
-    $reflect_hierarchy = apachesolr_search_get_hierarchical_vocabularies();
-    $facets = array();
-    foreach ($fields as $index => $field) {
-      if ($field['#name'] && (strpos($field['#name'], 'im_vid_') === 0) && is_numeric($field['#value'])) {
-        $vid = substr($field['#name'], 7);
-        $tid = $field['#value'];
-        if ($reflect_hierarchy[$vid]) {
-          $fields[$index] += array('#parent' => 0, '#children' => array());
-          // Just save the index for later lookup.
-          $facets[$tid] = $index;
-        }
-      }
-    }
-    if ($facets) {
-      // Get all term hierarchy information.
-      $all_terms = apachesolr_search_get_parent_terms(array_keys($facets));
-      foreach ($all_terms as $tid => $term) {
-        if (!isset($facets[$tid])) {
-          // This is a parent that is missing from the query.  E.g. we started
-          // on a taxonomy/term/$tid page.
-          $field_name = 'im_vid_' . $term->vid;
-          $query->add_filter($field_name, $tid);
-          // Ordering is wonky, but oh well...
-          $fields[] = array('#name' => $field_name, '#value' => $tid, '#exclude' => FALSE, '#parent' => 0, '#children' => array());
-          // Get the index of the newly added facet.
-          end($fields);
-          $facets[$tid] = key($fields);
-        }
-      }
-      foreach ($all_terms as $tid => $term) {
-        $index = $facets[$term->tid];
-        if (isset($facets[$term->parent])) {
-          // Use a reference so we see the updated data.
-          $fields[$facets[$term->parent]]['#children'][] = &$fields[$index];
-          $fields[$index]['#parent'] = $term->parent;
-        }
-      }
-    }
   }
 
   // We don't directly render any items with a parent.

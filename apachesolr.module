@@ -951,19 +951,17 @@ function apachesolr_get_facet_definitions() {
 }
 
 /**
- * Returns a member of the facet definitions array if it contains
- * $field as the 'field_name' element.
+ * Returns a member of the facet definitions based on the Solr
+ * index key (field name).
  *
  * @param string $field
  *   The field_name being sought.
  */
-function apachesolr_get_facet_definition_by_field_name($field_name) {
+function apachesolr_get_facet_definition_by_field_name($index_key) {
   $definitions = apachesolr_get_facet_definitions();
   foreach ($definitions as $module => $facets) {
-    foreach ($facets as $key => $values) {
-      if (isset($values['field_name']) && $values['field_name'] == $field_name) {
-        return $definitions[$module][$key];
-      }
+    if (isset($definitions[$module][$index_key])) {
+      return $definitions[$module][$index_key];
     }
   }
 }
@@ -1861,7 +1859,8 @@ function apachesolr_index_key($field) {
       $type_prefix = 's'; // String
   }
   $sm = $field['multiple'] ? 'm_' : 's_';
-  return $type_prefix . $sm . $field['name'];
+  // Block deltas are limited to 32 chars.
+  return substr($type_prefix . $sm . $field['name'], 0, 32);
 }
 
 /**
@@ -1949,7 +1948,7 @@ function apachesolr_entity_fields($entity_type = 'node') {
           $row['name'] = $function($field);
         }
         else {
-          $row['name'] = $field['module'] . '_' . $field_name;
+          $row['name'] = $field['id'] . '_' . $field['field_name'];
         }
         $row['module_name'] = $modules[$field['module']]['name'];
         // Set display name
@@ -1980,18 +1979,6 @@ function apachesolr_clean_text($text) {
   $text = filter_xss(str_replace(array('<', '>'), array(' <', '> '), $text), array());
   // Decode entities and then make safe any < or > characters.
   return htmlspecialchars(html_entity_decode($text, ENT_NOQUOTES, 'UTF-8'), ENT_NOQUOTES, 'UTF-8');
-}
-
-function apacehsolr_term_reference_name($field) {
-  if (isset($field['settings']['allowed_values'][0]['vid'])) {
-    $vid = $field['settings']['allowed_values'][0]['vid'];
-    $name = 'vid_' . $vid;
-  }
-  else {
-    // Fallback.
-    $name = $field['module'] . '_' . $field['field_name'];
-  }
-  return $name;
 }
 
 /**
@@ -2304,11 +2291,9 @@ function field_apachesolr_field_mappings() {
       'index_type' => 'boolean',
     ),
     'taxonomy_term_reference' => array(
-      'display_callback' => 'apachesolr_search_taxonomy_get_term',
+      'display_callback' => 'apachesolr_taxonomy_get_term',
       'indexing_callback' => 'apachesolr_term_reference_indexing_callback',
       'index_type' => 'integer',
-      'facet_block_callback' => 'apachesolr_search_taxonomy_facet_block',
-      'name_callback' => 'apacehsolr_term_reference_name',
     ),
   );
 
@@ -2316,7 +2301,7 @@ function field_apachesolr_field_mappings() {
 }
 
 /**
- * Implements hook_apachesolr_field_mappings().
+ * Implements hook_apachesolr_field_mappings() on behalf of CCK.
  */
 function content_apachesolr_field_mappings() {
   $mappings = array(
@@ -2333,6 +2318,13 @@ function content_apachesolr_field_mappings() {
   );
 
   return $mappings;
+}
+
+function apachesolr_taxonomy_get_term($tid) {
+  if (function_exists('taxonomy_term_load')) {
+    $term = taxonomy_term_load($tid);
+    return $term->name;
+  }
 }
 
 /**
