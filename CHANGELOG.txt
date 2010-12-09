@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#979198 by pwolanin, janusman: Missing 'module' property on facet $block objects.
 #992860 by pwolanin, davereid: Taxonomy indexing and faceting has to be per field, not per vocab.
 #991590 by larskleiner: fix for API change to timezone param in format_date().
 #989730 by pwolanin: Using tdate instead of data cases java exception in using rord().
