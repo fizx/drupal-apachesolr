@@ -449,34 +449,29 @@ function apachesolr_search_add_boost_params($query) {
     }
   }
 
-  $data = $query->solr('getLuke');
-  if (isset($data->index->numDocs)) {
-    $total = $data->index->numDocs;
-  }
-  else {
-    $total = db_query("SELECT COUNT(nid) FROM {node}")->fetchField();
-  }
   // For the boost functions for the created timestamp, etc we use the
   // standard date-biasing function, as suggested (but steeper) at
-  // http://wiki.apache.org/solr/DisMaxRequestHandler
-  // rord() returns 1 for the newset doc, and the number in the index for
-  // the oldest doc.  The function is thus: $total/(rord()*$steepness + $total).
+  // http://wiki.apache.org/solr/SolrRelevancyFAQ#How_can_I_boost_the_score_of_newer_documents
+  // ms() returns the time difference in ms between now and the date
+  // The function is thus: $ab/(ms(NOW,date)*$steepness + $ab).
   $date_settings = variable_get('apachesolr_search_date_boost', '4:200.0');
   list($date_steepness, $date_boost) = explode(':', $date_settings);
   if ($date_boost) {
-    $params['bf'][] = "recip(rord(created),$date_steepness,$total,$total)^$date_boost";
+    $ab = 4 / $date_steepness;
+    $params['bf'][] = "recip(ms(NOW,created),3.16e-11,$ab,$ab)^$date_boost";
   }
   // Boost on comment count.
   $comment_settings = variable_get('apachesolr_search_comment_boost', '0:0');
   list($comment_steepness, $comment_boost) = explode(':', $comment_settings);
   if ($comment_boost) {
-    $params['bf'][] = "recip(rord(comment_count),$comment_steepness,$total,$total)^$comment_boost";
+    $params['bf'][] = "recip(div(1,max(comment_count,1)),$comment_steepness,10,10)^$comment_boost";
   }
   // Boost for a more recent comment or node edit.
   $changed_settings = variable_get('apachesolr_search_changed_boost', '0:0');
   list($changed_steepness, $changed_boost) = explode(':', $changed_settings);
   if ($changed_boost) {
-    $params['bf'][] = "recip(rord(last_comment_or_change),$changed_steepness,$total,$total)^$changed_boost";
+    $ab = 4 / $changed_steepness;
+    $params['bf'][] = "recip(ms(NOW,created),3.16e-11,$ab,$ab)^$changed_boost";
   }
   // Boost for nodes with sticky bit set.
   $sticky_boost = variable_get('apachesolr_search_sticky_boost', 0);
