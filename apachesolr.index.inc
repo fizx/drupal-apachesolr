@@ -349,6 +349,11 @@ function apachesolr_nodeapi_mass_update($nodes) {
   if (empty($nodes)) {
     return TRUE;
   }
+  
+  if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+    return TRUE;
+  }
+  
   $published_ids = array();
   $unpublished_ids = array();
   foreach ($nodes as $node) {
@@ -384,6 +389,11 @@ function apachesolr_nodeapi_mass_delete($nodes) {
   if (empty($nodes)) {
     return TRUE;
   }
+
+  if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+    return TRUE;
+  }
+
   $ids = array();
   $nids = array();
   foreach ($nodes as $node) {

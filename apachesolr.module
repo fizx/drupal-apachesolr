@@ -388,7 +388,7 @@ function apachesolr_exclude_types($namespace) {
  */
 function apachesolr_get_nodes_to_index($namespace, $limit) {
   $rows = array();
-  if (variable_get('apachesolr_read_only', 0)) {
+  if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
     return $rows;
   }
   list($excluded_types, $args, $join_sql, $exclude_sql) = apachesolr_exclude_types($namespace);
