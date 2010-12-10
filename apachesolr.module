@@ -1588,8 +1588,6 @@ function apachesolr_get_solr($id = NULL) {
     }
     // Takes advantage of auto-loading.
     $solr = new $class($host, $port, $path);
-    // Set a non-default behavior.
-    $solr->setCollapseSingleValueArrays(FALSE);
     $solr_cache['instances'][$server][$path] = $solr;
   }
   return $solr_cache['instances'][$server][$path];

@@ -542,10 +542,7 @@ function apachesolr_search_process_response($response, $query) {
       // Allow modules to alter each document and its extra information.
       drupal_alter('apachesolr_search_result', $doc, $extra);
 
-      $fields = array();
-      foreach ($doc->getFieldNames() as $field_name) {
-        $fields[$field_name] = $doc->getField($field_name);
-      }
+      $fields = (array) $doc;
 
       $result = array(
         // link is a required field, so handle it centrally.
@@ -603,12 +600,12 @@ function apachesolr_search_entity_info_alter(&$entity_info) {
 /**
  * Callback function for node search results.
  *
- * @param Apache_Solr_Document $doc
+ * @param stdClass $doc
  *   The result document from Apache Solr.
  * @param array $result
  *   The result array for this record to which to add.
  */
-function apachesolr_search_node_result(Apache_Solr_Document $doc, &$result, &$extra) {
+function apachesolr_search_node_result($doc, &$result, &$extra) {
   $result += array(
     'type' => apachesolr_search_get_type($doc->type),
     'user' => theme('username', array('account' => $doc)),

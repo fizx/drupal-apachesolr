@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#993448 by pwolanin, scor: get Solr result docs as stdClass instead of Apache_Solr_Document.
 
 Apache Solr integration 7.x-1.0-BETA1, 2010-12-09
 ------------------------------
