@@ -42,7 +42,7 @@ function apachesolr_server_delete_form_submit($form, &$form_state) {
 /**
  * Form builder for adding/editing a Solr server used as a menu callback.
  */
-function apachesolr_server_edit_form(&$form, &$form_state, $server = NULL) {
+function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
   if (empty($server)) {
     $server = array('asid' => NULL, 'server_id' => '', 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
   }
