@@ -159,6 +159,9 @@ function apachesolr_server_save_validate($form, &$form_state) {
 
 function apachesolr_server_save_submit($form, &$form_state) {
   apachesolr_server_save($form_state['values']);
+  if (!empty($form_state['values']['make_default'])) {
+    variable_set('apachesolr_default_server', $form_state['values']['server_id']);
+  }  
   cache_clear_all('apachesolr:servers', 'cache_apachesolr');
   $form_state['redirect'] = 'admin/config/search/apachesolr';
 }
