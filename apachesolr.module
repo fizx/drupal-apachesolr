@@ -1557,7 +1557,7 @@ function apachesolr_has_searched($searched = NULL) {
 
 /**
  * Factory method for solr singleton object. Structure allows for an arbitrary
- * number of solr objects to be used based on a name whie maps to 
+ * number of solr objects to be used based on a name whie maps to
  * the host, port, path combination.
  * Get an instance like this:
  *   $solr = apachesolr_get_solr();
@@ -2450,7 +2450,7 @@ function theme_apachesolr_facet_list($vars) {
       if (!is_array($hidden_item)) {
         $hidden_item = array('data' => $hidden_item);
       }
-      $hidden_item['class'] = isset($hidden_item['class']) ? $hidden_item['class'] . ' apachesolr-hidden-facet' : 'apachesolr-hidden-facet';
+      $hidden_item['class'][] = 'apachesolr-hidden-facet';
       $items[] = $hidden_item;
     }
   }
@@ -2477,7 +2477,7 @@ interface DrupalSolrQueryInterface {
    * @param $name
    *   Optional name of a Solr field.
    *
-   * @return an array of filters. 
+   * @return an array of filters.
    */
   function get_filters($name = NULL);
 
