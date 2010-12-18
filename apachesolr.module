@@ -2393,6 +2393,7 @@ function apachesolr_js() {
     // Drupal.settings as jQuery selectors to add the Show more links.
     $show_more_blocks = array();
     $facet_map = array();
+    $show_more_selector = array();
     foreach (apachesolr_get_facet_definitions() as $module => $definitions) {
       foreach ($definitions as $facet => $facet_definition) {
         $facet_map[$facet_definition['facet_field']] = $facet;
