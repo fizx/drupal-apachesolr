@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#983458  by craig_ : mass update and mass delete ignore setting apachesolr_read_only.
 #996976  by scor: list item class should be an array, not a string.
 #995526  by pwolanin: Alter server schema so we don't exceed the MyISAM key size limit.	
 #1000396 by dmitry_bezer: Edit server form ignored "Make this server the default" checkbox.
