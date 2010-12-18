@@ -22,7 +22,7 @@ function apachesolr_menu() {
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
   );
-  $items['admin/config/search/apachesolr/server/%apachesolr_server_asid/edit'] = array(
+  $items['admin/config/search/apachesolr/server/%apachesolr_server/edit'] = array(
     'title'              => 'Apache Solr search server edit',
     'description'        => 'Edit Apache Solr server.',
     'page callback'      => 'drupal_get_form',
@@ -30,7 +30,7 @@ function apachesolr_menu() {
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
   );
-  $items['admin/config/search/apachesolr/server/%apachesolr_server_asid/delete'] = array(
+  $items['admin/config/search/apachesolr/server/%apachesolr_server/delete'] = array(
     'title'              => 'Apache Solr search server delete',
     'page callback'      => 'apachesolr_server_delete_page',
     'page arguments'     => array(5),
@@ -1577,20 +1577,19 @@ function apachesolr_get_solr($id = NULL) {
 
   $host = $solr_cache['servers'][$id]['host'];
   $port = $solr_cache['servers'][$id]['port'];
-  $server = $host . ':' . $port;
   $path = $solr_cache['servers'][$id]['path'];
   $class = $solr_cache['servers'][$id]['service_class'];
 
-  if (empty($solr_cache['instances'][$server][$path])) {
+  if (empty($solr_cache['instances'][$id])) {
     // Use the default class if none is specified.
     if (empty($class)) {
       $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
     }
     // Takes advantage of auto-loading.
     $solr = new $class($host, $port, $path);
-    $solr_cache['instances'][$server][$path] = $solr;
+    $solr_cache['instances'][$id] = $solr;
   }
-  return $solr_cache['instances'][$server][$path];
+  return $solr_cache['instances'][$id];
 }
 
 function apachesolr_load_all_servers() {
@@ -1606,45 +1605,36 @@ function apachesolr_load_all_servers() {
   return $servers;
 }
 
-function apachesolr_server_id_load($server_id) {
+function apachesolr_server_load($server_id) {
   return db_query('SELECT * FROM {apachesolr_server} WHERE server_id = :server_id', array(':server_id' => $server_id))->fetchAssoc();
 }
 
-function apachesolr_server_asid_load($asid) {
-  if (!is_numeric($asid)) {
-    return FALSE;
-  }
-  return db_query('SELECT * FROM {apachesolr_server} WHERE asid = :asid', array(':asid' => (int) $asid))->fetchAssoc();
-}
-
-function apachesolr_server_asid_delete($asid) {
+function apachesolr_server_delete($server_id) {
   $result =  db_delete('apachesolr_server')
-    ->condition('asid', $asid)
+    ->condition('server_id', $server_id)
     ->execute();
   cache_clear_all('apachesolr:servers', 'cache_apachesolr');
   drupal_static_reset('apachesolr_get_solr');
   return $result;
 }
 
-function apachesolr_server_save($server) {
-  $default = array('asid' => NULL, 'server_id' => '', 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
+function apachesolr_server_save($server, $original_id = NULL) {
+  $default = array('server_id' => NULL, 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
   // Remove any unexpected fields.
   // @todo - getthis from the schema, or maybe use drupal_write_record().
   $server = array_intersect_key($server, $default);
-  if (!empty($server['asid'])) {
-    $asid = $server['asid'];
-    unset($server['asid']);
-    db_update('apachesolr_server')
-      ->fields($server)
-      ->condition('asid', $asid)
-      ->execute();
-  }
-  else {
+  if (empty($original_id) || $server['server_id'] == $original_id) {
     $server_id = $server['server_id'];
     unset($server['server_id']);
     db_merge('apachesolr_server')
       ->fields($server)
       ->key(array('server_id' => $server_id))
+      ->execute();
+  }
+  else {
+    db_update('apachesolr_server')
+      ->fields($server)
+      ->condition('server_id', $original_id)
       ->execute();
   }
   cache_clear_all('apachesolr:servers', 'cache_apachesolr');

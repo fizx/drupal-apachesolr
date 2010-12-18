@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#995526  by pwolanin: Alter server schema so we don't exceed the MyISAM key size limit.	
 #1000396 by dmitry_bezer: Edit server form ignored "Make this server the default" checkbox.
 #997240  by VladGh: fix parameters for apachesolr_server_edit_form for PHP 5.3.
 #993448  by pwolanin, scor: get Solr result docs as stdClass instead of Apache_Solr_Document.

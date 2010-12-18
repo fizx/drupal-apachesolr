@@ -18,9 +18,9 @@ function apachesolr_server_delete_page($server) {
 }
 
 function apachesolr_server_delete_form($form, &$form_state, $server) {
-  $form['asid'] = array(
+  $form['server_id'] = array(
     '#type' => 'value',
-    '#value' => $server['asid'],
+    '#value' => $server['server_id'],
   );
   return confirm_form(
     $form,
@@ -33,7 +33,7 @@ function apachesolr_server_delete_form($form, &$form_state, $server) {
 }
 
 function apachesolr_server_delete_form_submit($form, &$form_state) {
-  if (apachesolr_server_asid_delete($form_state['values']['asid'])) {
+  if (apachesolr_server_delete($form_state['values']['server_id'])) {
     drupal_set_message(t('The server was deleted'));
   }
   $form_state['redirect'] = 'admin/config/search/apachesolr';
@@ -44,12 +44,12 @@ function apachesolr_server_delete_form_submit($form, &$form_state) {
  */
 function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
   if (empty($server)) {
-    $server = array('asid' => NULL, 'server_id' => '', 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
+    $server = array('server_id' => '', 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
   }
 
-  $form['asid'] = array(
+  $form['original_server_id'] = array(
     '#type' => 'value',
-    '#value' => $server['asid'],
+    '#value' => $server['server_id'],
   );
   $form['host'] = array(
     '#type' => 'textfield',
@@ -93,7 +93,7 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
     '#type' => 'machine_name',
     '#title' => t('Server id'),
     '#machine_name' => array(
-      'exists' => 'apachesolr_server_id_load',
+      'exists' => 'apachesolr_server_load',
     ),
     '#default_value' => $server['server_id'],
     '#description' => t('Unique, machine-readable identifier Solr server.'),
@@ -115,7 +115,7 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
     '#submit' =>array('apachesolr_server_test_submit'),
     '#value' => t('Test connection'),
   );
-  if (!empty($server['asid']) && !$is_default) {
+  if (!empty($server['server_id']) && !$is_default) {
     $form['delete'] = array(
       '#type' => 'submit',
       '#submit' =>array('apachesolr_server_delete_submit'),
@@ -126,7 +126,7 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
 }
 
 function apachesolr_server_delete_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/apachesolr/server/' . $form_state['values']['asid'] . '/delete';
+  $form_state['redirect'] = 'admin/config/search/apachesolr/server/' . $form_state['values']['original_server_id'] . '/delete';
 }
 
 function apachesolr_server_test_submit($form, &$form_state) {
@@ -151,14 +151,10 @@ function apachesolr_server_save_validate($form, &$form_state) {
       form_set_error('port', t('The port has to be an integer between 1 and 65535.'));
     }
   }
-  $asid = db_query('SELECT asid FROM {apachesolr_server} WHERE host = :host AND port = :port AND path = :path', array(':host' => $form_state['values']['host'], ':port' => $form_state['values']['port'], ':path' => $form_state['values']['path']))->fetchField();
-  if ($asid && $asid != $form_state['values']['asid']) {
-    form_set_error('host', t('This combination of host, port, and path is already defined as one of your servers.'));
-  }
 }
 
 function apachesolr_server_save_submit($form, &$form_state) {
-  apachesolr_server_save($form_state['values']);
+  apachesolr_server_save($form_state['values'], $form_state['values']['original_server_id']);
   if (!empty($form_state['values']['make_default'])) {
     variable_set('apachesolr_default_server', $form_state['values']['server_id']);
   }  
@@ -218,13 +214,13 @@ function apachesolr_settings($form, &$form_state) {
     }
     else {
       $type = 'none';
-      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr/server/' . $data['asid'] .'/delete'));
+      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr/server/' . $data['server_id'] .'/delete'));
     }
     $rows[] = array('data' =>
       array(
         // Cells
         array('class' => 'icon'),
-        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['asid'] .'/edit')),
+        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['server_id'] .'/edit')),
         $delete_link,
         check_plain($data['name']),
         check_plain($data['host']),

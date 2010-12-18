@@ -17,7 +17,7 @@ function apachesolr_requirements($phase) {
   $has_server_settings = FALSE;
   if ($phase == 'runtime' && $file_exists) {
     $server_id = variable_get('apachesolr_default_server', 'solr');
-      $server = apachesolr_server_id_load($server_id);
+      $server = apachesolr_server_load($server_id);
       if (!$server || empty($server['host']) || empty($server['port']) || empty($server['path'])) {
       $requirements['apachesolr'] = array(
         'title' => $t('Apache Solr'),
@@ -149,11 +149,6 @@ function apachesolr_schema() {
   $schema['apachesolr_server'] = array(
     'description' => 'The Solr server table.',
     'fields' => array(
-      'asid' => array(
-        'description' => 'Integer primary key.',
-        'type' => 'serial',
-        'not null' => TRUE
-      ),
      'server_id' => array(
         'description' => 'Unique identifier for the server',
         'type' => 'varchar',
@@ -183,10 +178,8 @@ function apachesolr_schema() {
       ),
       'port' => array(
         'description' => 'Port number for the registered server',
-        'type' => 'varchar',
-        'length' => 10,
+        'type' => 'int',
         'not null' => TRUE,
-        'default' => ''
       ),
       'path' => array(
         'description' => 'Path to the registered server',
@@ -203,11 +196,7 @@ function apachesolr_schema() {
         'default' => ''
       ),
     ),
-    'primary key' => array('asid'),
-    'unique keys' => array(
-      'server_id' => array('server_id'),
-      'host_post_path' => array('host', 'port', 'path'),
-    ),
+    'primary key' => array('server_id'),
   );
 
   return $schema;
@@ -238,11 +227,6 @@ function apachesolr_update_7000() {
   $schema['apachesolr_server'] = array(
     'description' => 'The Solr server table.',
     'fields' => array(
-      'asid' => array(
-        'description' => 'Integer primary key (for possible use with Fields and Entity APIs)',
-        'type' => 'serial',
-        'not null' => TRUE
-      ),
      'server_id' => array(
         'description' => 'Unique identifier for the server',
         'type' => 'varchar',
@@ -272,10 +256,8 @@ function apachesolr_update_7000() {
       ),
       'port' => array(
         'description' => 'Port number for the registered server',
-        'type' => 'varchar',
-        'length' => 10,
+        'type' => 'int',
         'not null' => TRUE,
-        'default' => ''
       ),
       'path' => array(
         'description' => 'Path to the registered server',
@@ -292,11 +274,7 @@ function apachesolr_update_7000() {
         'default' => ''
       ),
     ),
-    'primary key' => array('asid'),
-    'unique keys' => array(
-      'server_id' => array('server_id'),
-      'host_post_path' => array('host', 'port', 'path'),
-    ),
+    'primary key' => array('server_id'),
   );
   db_create_table('apachesolr_server', $schema['apachesolr_server']);
   // Insert into the table the current single server record.
@@ -316,3 +294,23 @@ function apachesolr_update_7000() {
   variable_del('apachesolr_logging');
 }
 
+
+/**
+ * Re-jigger the schema to use fewer, shorter keys.
+ */
+function apachesolr_update_7001() {
+  if (db_field_exists('apachesolr_server', 'asid')) {
+    // You installed the beta1 and need to be fixed up.
+    db_drop_field('apachesolr_server', 'asid');
+    db_drop_unique_key('apachesolr_server', 'server_id');
+    db_add_primary_key('apachesolr_server', array('server_id'));
+    db_drop_unique_key('apachesolr_server', 'host_post_path');
+    db_change_field('apachesolr_server', 'port', 'port',
+      array(
+        'description' => 'Port number for the registered server',
+        'type' => 'int',
+        'not null' => TRUE,
+      )
+    );
+  }
+}
