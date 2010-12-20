@@ -8,6 +8,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-BETA2, 2010-12-18
 ------------------------------
+#957652  by aegnor, pwolanin: fix str_replace may remove a substring in filter_extract.
 #983458  by craig_ : mass update and mass delete ignore setting apachesolr_read_only.
 #996976  by scor: list item class should be an array, not a string.
 #995526  by pwolanin: Alter server schema so we don't exceed the MyISAM key size limit.	

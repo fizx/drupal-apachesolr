@@ -17,6 +17,9 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
     $patterns[] = '/(^| |-)'. $name .':([^ ]*)/';
     foreach ($patterns as $p) {
       if (preg_match_all($p, $filterstring, $matches, PREG_SET_ORDER)) {
+        // Sort matches longest to shortest to avoid accidentally
+        // removing a sub-string.
+        usort($matches, array($this, 'filter_extract_cmp'));
         foreach ($matches as $match) {
           $filter = array();
           $filter['#query'] = $match[0];
@@ -37,6 +40,13 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
       }
     }
     return $extracted;
+  }
+
+  public function filter_extract_cmp($a, $b) {
+    if (strlen($a[0]) == strlen($b[0])) {
+      return 0;
+    }
+    return (strlen($a[0]) > strlen($b[0])) ? -1 : 1;
   }
 
   /**
