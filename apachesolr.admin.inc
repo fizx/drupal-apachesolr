@@ -209,7 +209,7 @@ function apachesolr_settings($form, &$form_state) {
   foreach ($servers as $server_id => $data) {
     $is_default = $server_id == variable_get('apachesolr_default_server', 'solr');
     if ($is_default) {
-      $type = 'ok';
+      $type = 'selected';
       $delete_link = '';
     }
     else {

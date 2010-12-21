@@ -7,12 +7,7 @@ table.admin-apachesolr td.icon {
 table.admin-apachesolr td.operation {
   width: 16px;
 }
-tr.apachesolr-ok td.icon {
-  background-image: url(/misc/message-16-ok.png);
+tr.apachesolr-selected td.icon {
+  background-image: url(task-check.png);
 }
-tr.apachesolr-warning td.icon {
-  background-image: url(/misc/message-16-warning.png);
-}
-tr.apachesolr-error td.icon {
-  background-image: url(/misc/message-16-error.png);
-}
+
