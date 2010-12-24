@@ -144,7 +144,7 @@ function apachesolr_failure($search_name, $querystring) {
       break;
     case 'show_drupal_results':
       drupal_set_message(t("%search_name is not available. Your search is being redirected.", array('%search_name' => $search_name)));
-      drupal_goto('search/node/' . drupal_urlencode($querystring));
+      drupal_goto('search/node/' . drupal_encode_path($querystring));
       break;
     case 'show_no_results':
       return;
