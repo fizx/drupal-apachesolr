@@ -8,7 +8,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-BETA2, 2010-12-18
 ------------------------------
-#1007824 by pwolanin: use contextual links to avoid blcok caching mode issues.
+#1007824 by pwolanin: use contextual links to avoid block caching mode issues.
 #1003500 fix icon and icon path.
 #957652  by aegnor, pwolanin: fix str_replace may remove a substring in filter_extract.
 #983458  by craig_ : mass update and mass delete ignore setting apachesolr_read_only.
