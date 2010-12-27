@@ -60,6 +60,7 @@ function apachesolr_menu() {
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
     'type'               => MENU_LOCAL_TASK,
+    'context'            => MENU_CONTEXT_INLINE,
   );
   $items['admin/config/search/apachesolr/index'] = array(
     'title'              => 'Search index',
@@ -1172,7 +1173,15 @@ function apachesolr_facet_block($response, $query, $module, $delta, $filter_by, 
         'display_limit' => $limit,
         'delta' => $delta,
       ));
-      return array('subject' => $filter_by, 'content' => $output);
+      $render = array(
+        'output' => array(
+          '#markup' => $output,
+        ),
+        '#contextual_links' => array(
+          'enabled_filters' => array('admin/config/search/apachesolr/enabled-filters', array($delta)),
+        ),
+      );
+      return array('subject' => $filter_by, 'content' => $render);
     }
   }
   return NULL;
@@ -2455,11 +2464,7 @@ function theme_apachesolr_facet_list($vars) {
       $items[] = $hidden_item;
     }
   }
-  $admin_link = '';
-  if (user_access('administer search')) {
-    $admin_link = l(t('Configure enabled filters'), 'admin/config/search/apachesolr/enabled-filters');
-  }
-  return theme('item_list', array('items' => $items)) . $admin_link;
+  return theme('item_list', array('items' => $items));
 }
 
 function theme_apachesolr_sort_list($vars) {
