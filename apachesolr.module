@@ -60,7 +60,7 @@ function apachesolr_menu() {
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
     'type'               => MENU_LOCAL_TASK,
-    'context'            => MENU_CONTEXT_INLINE,
+    'context'            => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
   $items['admin/config/search/apachesolr/index'] = array(
     'title'              => 'Search index',
