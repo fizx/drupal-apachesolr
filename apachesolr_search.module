@@ -155,7 +155,7 @@ function apachesolr_search_apachesolr_document_handlers($type, $namespace) {
  *
  * Handle OR facets.
  */
-function apachesolr_search_finalize_query($query) {
+function apachesolr_search_finalize_query(DrupalSolrQueryInterface $query) {
   $ors = array();
   $facet_info = apachesolr_get_facet_definitions();
   foreach ($facet_info as $infos) {
@@ -186,6 +186,8 @@ function apachesolr_search_finalize_query($query) {
 
 /**
  * Execute an empty search (match all documents) and show a listing of all enabled facets.
+ *
+ * @throws Exception
  */
 function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $base_path = '') {
   global $user, $theme_key;
@@ -311,9 +313,6 @@ function theme_apachesolr_browse_blocks($vars) {
 function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '', $page = 0, $caller = 'apachesolr_search') {
   // This is the object that knows about the query coming from the user.
   $query = apachesolr_drupal_query($keys, $filterstring, $solrsort, $base_path);
-  if (empty($query)) {
-    throw new Exception(t('Could not construct a Solr query in function apachesolr_search_search()'));
-  }
 
   apachesolr_search_basic_params($query);
   if ($keys) {
@@ -336,8 +335,8 @@ function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '',
   return apachesolr_search_process_response($response, $final_query);
 }
 
-// TODO: Why does this take the $query object?
-function apachesolr_search_basic_params($query = NULL) {
+
+function apachesolr_search_basic_params(DrupalSolrQueryInterface $query = NULL) {
   $params = array(
     'fl' => 'id,entity_id,entity,bundle,bundle_name,nid,title,comment_count,type,created,changed,score,path,url,uid,name',
     'rows' => variable_get('apachesolr_rows', 10),
@@ -358,7 +357,7 @@ function apachesolr_search_basic_params($query = NULL) {
  * See the defaults there.
  * If you wish to override them, you can via settings.php
  */
-function apachesolr_search_highlighting_params($query = NULL) {
+function apachesolr_search_highlighting_params(DrupalSolrQueryInterface $query = NULL) {
   $params['hl'] = variable_get('apachesolr_hl_active', NULL);
   $params['hl.fragsize']= variable_get('apachesolr_hl_textsnippetlength', NULL);
   $params['hl.simple.pre'] = variable_get('apachesolr_hl_pretag', NULL);
@@ -371,7 +370,7 @@ function apachesolr_search_highlighting_params($query = NULL) {
   return $params;
 }
 
-function apachesolr_search_add_spellcheck_params($query) {
+function apachesolr_search_add_spellcheck_params(DrupalSolrQueryInterface $query) {
   $params = &$query->params;
   if (variable_get('apachesolr_search_spellcheck', TRUE)) {
     //Add new parameter to the search request
@@ -380,7 +379,7 @@ function apachesolr_search_add_spellcheck_params($query) {
   }
 }
 
-function apachesolr_search_add_facet_params($query) {
+function apachesolr_search_add_facet_params(DrupalSolrQueryInterface $query) {
   $facet_query_limits = variable_get('apachesolr_facet_query_limits', array());
   $facet_missing = variable_get('apachesolr_facet_missing', array());
   $facet_info = apachesolr_get_facet_definitions();
@@ -439,7 +438,7 @@ function apachesolr_search_add_facet_params($query) {
   }
 }
 
-function apachesolr_search_add_boost_params($query) {
+function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
   $params = &$query->params;
   // Note - we have query fields set in solrconfig.xml, which will operate when
   // none are set.
@@ -503,7 +502,7 @@ function apachesolr_search_add_boost_params($query) {
   }
 }
 
-function apachesolr_search_process_response($response, $query) {
+function apachesolr_search_process_response($response, DrupalSolrQueryInterface $query) {
   $results = array();
   // We default to getting snippets from the body.
   $hl_fl = isset($query->params['hl.fl']) ? $query->params['hl.fl'] : 'body';
@@ -649,7 +648,7 @@ function apachesolr_search_preprocess_search_results(&$variables) {
   }
 }
 
-function apachesolr_search_date_range($query, $facet_field) {
+function apachesolr_search_date_range(DrupalSolrQueryInterface $query, $facet_field) {
   foreach ($query->get_filters($facet_field) as $filter) {
     // If we had an ISO date library we could use ISO dates
     // directly.  Instead, we convert to Unix timestamps for comparison.
@@ -771,7 +770,7 @@ function apachesolr_search_block_info(){
 /**
  * Implements hook_block_view().
  */
-function apachesolr_search_block_view($delta = ''){
+function apachesolr_search_block_view($delta = '') {
   if (apachesolr_has_searched()) {
     // Get the query and response. Without these no blocks make sense.
     $response = apachesolr_static_response_cache();
@@ -866,7 +865,7 @@ function apachesolr_search_collect_children($field) {
  *   facets, it's text representation and wither it's active.  If false,
  *   the facets will be returned in the order they were received.
  */
-function apachesolr_search_nested_facet_items($query, $facets, $num_found, $sort = TRUE) {
+function apachesolr_search_nested_facet_items(DrupalSolrQueryInterface $query, $facets, $num_found, $sort = TRUE) {
   $facet_query_sorts = variable_get('apachesolr_facet_query_sorts', array());
   $items = array();
   foreach ($facets as $field) {
@@ -1376,7 +1375,7 @@ function apachesolr_search_get_parent_terms($tids) {
  * @param $query
  *   The Solr query object.
  */
-function apachesolr_search_currentsearch_block($response, $query) {
+function apachesolr_search_currentsearch_block($response, DrupalSolrQueryInterface $query) {
   $fields = $query->get_filters();
   $links = array();
   $facets = array();

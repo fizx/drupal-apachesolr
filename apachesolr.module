@@ -908,7 +908,7 @@ function apachesolr_block_save($delta = '', $edit = array()) {
  *   Whether the block should be visible. Other factors, like
  *   the block system's visibility settings, apply as well.
  */
-function apachesolr_block_visibility($query, $module, $delta) {
+function apachesolr_block_visibility(DrupalSolrQueryInterface $query, $module, $delta) {
   // TYPE HIERARCHY.
   // If the block is configured to heed type hierarchy then it looks to see if a
   // suitable type filter has been chosen. If not, the function returns.
@@ -1071,7 +1071,7 @@ function apachesolr_block_admin_configure_submit($form, &$form_state) {
  *
  * The $delta param is the Solr index field name.
  */
-function apachesolr_facet_block($response, $query, $module, $delta, $filter_by, $facet_callback = FALSE) {
+function apachesolr_facet_block($response, DrupalSolrQueryInterface $query, $module, $delta, $filter_by, $facet_callback = FALSE) {
   if (!empty($response->facet_counts->facet_fields->$delta)) {
     $facet_query_sorts = variable_get('apachesolr_facet_query_sorts', array());
     $contains_active = FALSE;
@@ -1192,7 +1192,7 @@ function apachesolr_facet_block($response, $query, $module, $delta, $filter_by, 
  *
  * TODO: Refactor with apachesolr_facet_block().
  */
-function apachesolr_date_facet_block($response, $query, $module, $facet_field, $filter_by, $facet_callback = FALSE) {
+function apachesolr_date_facet_block($response, DrupalSolrQueryInterface $query, $module, $facet_field, $filter_by, $facet_callback = FALSE) {
   $items = array();
 
   $new_query = clone $query;
@@ -1509,22 +1509,28 @@ function apachesolr_facetcount_save($edit) {
  *   $query->add_filter("uid", 1);
  *
  * }
+ *
+ * @return
+ *   TRUE to abort the current query, FALSE otherwise.
  */
-function apachesolr_modify_query($query, $caller) {
+function apachesolr_modify_query(DrupalSolrQueryInterface $query, $caller) {
   if (empty($query)) {
     // This should only happen if Solr is not set up - avoids fatal errors.
-    return;
+    return TRUE;
   }
 
   // Call the hooks first because otherwise any modifications to the
   // $query object don't end up in the $params.
   foreach (module_implements('apachesolr_modify_query') as $module) {
     $function_name = $module . '_apachesolr_modify_query';
-    $function_name($query, $caller);
+    if ($function_name($query, $caller)) {
+      // Someone pulled the ejection handle.
+      return TRUE;
+    }
   }
 
   // TODO: make this process internal to the query object.
-  if ($query && ($fq = $query->get_fq())) {
+  if ($fq = $query->get_fq()) {
     foreach ($fq as $delta => $values) {
       if (is_array($values) || is_object($values)) {
         foreach ($values as $value) {
@@ -1535,14 +1541,15 @@ function apachesolr_modify_query($query, $caller) {
   }
   // Add sort if present.
   // TODO: make this process internal to the query object.
-  if ($query) {
-    $sort = $query->get_solrsort();
+  if ($sort = $query->get_solrsort()) {
     $sortstring = $sort['#name'] .' '. $sort['#direction'];
     // We don't bother telling Solr to do its default sort.
     if ($sortstring != 'score desc') {
       $query->params['sort'] = $sortstring;
     }
   }
+  // Do not abort the query.
+  return FALSE;
 }
 
 /**
@@ -1690,7 +1697,7 @@ function apachesolr_server_status($host, $port, $path, $class = NULL) {
  *
  * @throws Exception
  */
-function apachesolr_do_query($caller, $current_query, $page = 0) {
+function apachesolr_do_query($caller, DrupalSolrQueryInterface $current_query, $page = 0) {
   // Allow modules to alter the query prior to statically caching it.
   // This can e.g. be used to add available sorts.
   foreach (module_implements('apachesolr_prepare_query') as $module) {
@@ -1703,12 +1710,13 @@ function apachesolr_do_query($caller, $current_query, $page = 0) {
   $query = apachesolr_current_query($current_query, $caller);
 
   // This hook allows modules to modify the query and params objects.
-  apachesolr_modify_query($query, $caller);
-  $query->params['start'] = $page * $query->params['rows'];
+  $eject = apachesolr_modify_query($query, $caller);
 
-  if (!$query) {
+  // A module implementing hook_apachesolr_modify_query() aborted the search.
+  if ($eject) {
     return array(NULL, array());
   }
+  $query->params['start'] = $page * $query->params['rows'];
   // Final chance for the caller to modify the query. The signature
   // is: CALLER_finalize_query($query);
   $function = $caller . '_finalize_query';
@@ -1767,15 +1775,17 @@ function apachesolr_static_response_cache($response = NULL, $namespace = 'apache
  *
  * @param $filters
  *   Key and value pairs that are applied as a filter query.
- *
  * @param $solrsort
  *   Visible string telling solr how to sort.
- *
  * @param $base_path
  *   The search base path (without the keywords) for this query.
- *
  * @param $solr
  *   An instance of DrupalApacheSolrService.
+ *
+ * @return
+ *   DrupalSolrQueryInterface object.
+ *
+ * @throws Exception
  */
 function apachesolr_drupal_query($keys = '', $filters = '', $solrsort = '', $base_path = '', $solr = NULL) {
   $class = variable_get('apachesolr_query_class', 'SolrBaseQuery');
@@ -1783,15 +1793,7 @@ function apachesolr_drupal_query($keys = '', $filters = '', $solrsort = '', $bas
   if (empty($solr)) {
     $solr = apachesolr_get_solr();
   }
-  try {
-    $query = new $class($solr, $keys, $filters, $solrsort, $base_path);
-  }
-  catch (Exception $e) {
-    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
-    $query = NULL;
-  }
-
-  return $query;
+  return new $class($solr, $keys, $filters, $solrsort, $base_path);
 }
 
 /**
@@ -1799,7 +1801,7 @@ function apachesolr_drupal_query($keys = '', $filters = '', $solrsort = '', $bas
  *
  * @todo reverse the order of parameters in future branches.
  */
-function apachesolr_current_query($query = NULL, $namespace = 'apachesolr_search') {
+function apachesolr_current_query(DrupalSolrQueryInterface $query = NULL, $namespace = 'apachesolr_search') {
   static $saved_query = array();
 
   if (is_object($query)) {
@@ -2220,8 +2222,8 @@ function apachesolr_mlt_suggestions($settings, $id, $solr = NULL) {
     }
 
     // This hook allows modules to modify the query object.
-    apachesolr_modify_query($query, 'apachesolr_mlt');
-    if (empty($query)) {
+    $eject = apachesolr_modify_query($query, 'apachesolr_mlt');
+    if ($eject) {
       return;
     }
 

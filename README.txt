@@ -4,22 +4,21 @@ This module integrates Drupal with the Apache Solr search platform. Solr search
 can be used as a replacement for core content search and boasts both extra
 features and better performance. Among the extra features is the ability to have
 faceted search on facets ranging from content author to taxonomy to arbitrary
-CCK fields.
+Field API fields.
 
-The module comes with a schema.xml and solrconfig.xml file which should be used
+The module comes with a schema.xml and solrconfig.xml file which must be used
 in your Solr installation.
 
-This module depends on the search framework in core. However, you may not want
-the core searches and only want Solr search. If that is the case, you want to
-use the Core Searches module in tandem with this module.
-
-When used in combination with core search module, Apache Solr is not the default
-search. Access it via a new tab on the default search page, called "Search".
+This module depends on the search framework in core.  When used in combination
+with core search module, Apache Solr is not the default search. Access it via a
+new tab on the default search page, called "Search".  You may configure it
+to be default at ?q=admin/config/search/settings
 
 Updating from 6.x
 -----------------
 Make sure that you have first updated to the latest 6.x version on the relevant
-branch and that you have run all schema updates.
+branch and that you have run all schema updates.  You will have to install the
+new schema.xml file, and delete your index and reindex all content.
 
 Installation
 ------------
@@ -177,27 +176,29 @@ Developers
 
 Exposed Hooks in 6.x:
 
-hook_apachesolr_modify_query(&$query, &$params, $caller);
+hook_apachesolr_modify_query($query, $caller);
 
-  Any module performing a search should call apachesolr_modify_query($query, $params, 'modulename'). 
+  Any module performing a search should call apachesolr_modify_query($query, 'modulename'). 
   That function then invokes this hook. It allows modules to modify the query object and params array. 
-  $caller indicates which module is invoking the hook.
+  $caller indicates which module is invoking the hook. A return value of TRUE from 
+  apachesolr_modify_query() indicates the search should be aborted. A module implementing
+  hook_apachesolr_modify_query() may return TRUE to flag the query to be aborted.
 
   Example:
 
-        function my_module_apachesolr_modify_query(&$query, &$params, $caller) {
+        function my_module_apachesolr_modify_query($query, $caller) {
           // I only want to see articles by the admin!
           $query->add_filter("uid", 1);         
         }        
 
-CALLER_finalize_query(&$query, &$params);
+CALLER_finalize_query($query);
 
   The module calling apachesolr_do_query() may implement a function that is run after
   hook_apachesolr_modify_query() and allows the caller to make final changes to the
   query and params before the query is sent to Solr.  The function name is built
   from the $caller parameter to apachesolr_do_query().
 
-hook_apachesolr_prepare_query(&$query, &$params, $caller);
+hook_apachesolr_prepare_query($query, $caller);
 
   This is pretty much the same as hook_apachesolr_modify_query() but runs earlier
   and before the query is statically cached. It can e.g. be used to add
@@ -205,7 +206,7 @@ hook_apachesolr_prepare_query(&$query, &$params, $caller);
 
   Example:
 
-        function my_module_apachesolr_prepare_query(&$query) {
+        function my_module_apachesolr_prepare_query($query) {
           // Add a sort on the node ID.
           $query->set_available_sort('nid', array(
             'title' => t('Node ID'),
