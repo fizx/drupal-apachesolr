@@ -28,8 +28,8 @@ function apachesolr_search_settings_page() {
  * Menu callback - boosts settings form.
  */
 function apachesolr_boost_settings_page() {
-  $output = drupal_get_form('apachesolr_search_bias_form');
-  $output += drupal_get_form('apachesolr_search_type_boost_form');
+  $output['apachesolr_search_bias_form'] = drupal_get_form('apachesolr_search_bias_form');
+  $output['apachesolr_search_type_boost_form'] = drupal_get_form('apachesolr_search_type_boost_form');
   return $output;
 }
 
@@ -103,15 +103,8 @@ function apachesolr_search_bias_form($form, &$form_state) {
     '#default_value' => $changed_settings,
     '#description' => t('This setting will change the result scoring so that nodes with the most recent comments (or most recent updates to the node itself) may appear before those with higher keyword matching.'),
   );
-  $form = system_settings_form($form);
 
-  // TODO: is this neccessary?
-  if (isset($form['buttons'])) {
-    $form['biasing']['buttons'] = $form['buttons'];
-    unset($form['buttons']);
-  }
-
-  return $form;
+  return apachesolr_settings_form($form, 'biasing');
 }
 
 /**
@@ -216,17 +209,14 @@ function apachesolr_search_type_boost_form($form, &$form_state) {
     '#default_value' => variable_get('apachesolr_search_excluded_types', array()),
     '#description' => t("Specify here which node types should be totally excluded from the search index. Content excluded from the index will never appear in any search results."),
   );
+  $form['apachesolr_search_type_settings']['original_excluded_types'] = array(
+    '#type' => 'value',
+    '#value' => $form['apachesolr_search_type_settings']['apachesolr_search_excluded_types']['#default_value'],
+  );
 
   $form['#submit'][] = 'apachesolr_search_type_boost_form_submit';
-  $form = system_settings_form($form);
 
-  // TODO: is this neccessary?
-  if (isset($form['buttons'])) {
-    $form['apachesolr_search_type_settings']['buttons'] = $form['buttons'];
-    unset($form['buttons']);
-  }
-
-  return $form;
+  return apachesolr_settings_form($form, 'apachesolr_search_type_settings');
 }
 
 /**
@@ -235,7 +225,7 @@ function apachesolr_search_type_boost_form($form, &$form_state) {
  * This is called before system_settings_form_submit().
  */
 function apachesolr_search_type_boost_form_submit($form_id, &$form_state) {
-  $old_excluded_types = variable_get('apachesolr_search_excluded_types', array());
+  $old_excluded_types = $form_state['values']['original_excluded_types'];
   $new_excluded_types = $form_state['values']['apachesolr_search_excluded_types'];
   // Check whether we are resetting the values.
   if ($form_state['clicked_button']['#value'] == t('Reset to defaults')) {

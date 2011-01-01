@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#1009398 by pwolanin, fix content bias forms.
 #1007860 by pwolanin: API fix for hook_apachesolr_modify_query, add type hinting.
 #1007824 by pwolanin: use contextual links to avoid block caching mode issues.
 #1003500 fix icon and icon path.

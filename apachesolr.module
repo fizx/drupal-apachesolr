@@ -2171,6 +2171,64 @@ function apachesolr_theme() {
 }
 
 /**
+ * A better version of system_settings_form().
+ */
+function apachesolr_settings_form($form, $fieldset_key = NULL) {
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#submit' => array('apachesolr_settings_form_submit'),
+    '#fieldset_key' => $fieldset_key,
+  );
+  $form['actions']['reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Reset to defaults'),
+    '#submit' => array('apachesolr_settings_form_reset'),
+  );
+
+  return $form;
+}
+
+function apachesolr_settings_form_submit($form, &$form_state) {
+  // Exclude unnecessary elements.
+  form_state_values_clean($form_state);
+
+  // Find out if the default values are buried in a fieldset.
+  if (!empty($form['actions']['submit']['#fieldset_key'])) {
+    $fieldset_key = $form['actions']['submit']['#fieldset_key'];
+    if (isset($form[$fieldset_key])) {
+      $form = $form[$fieldset_key];
+    }
+  }
+
+  foreach ($form_state['values'] as $key => $value) {
+    if (is_array($value) && isset($form_state['values']['array_filter'])) {
+      $value = array_keys(array_filter($value));
+    }
+
+    // There is no need to set default variable values.
+    if (!isset($form[$key]['#default_value']) || $form[$key]['#default_value'] != $value) {
+      variable_set($key, $value);
+    }
+  }
+
+  drupal_set_message(t('The configuration options have been saved.'));
+}
+
+function apachesolr_settings_form_reset($form, &$form_state) {
+  // Exclude unnecessary elements.
+  form_state_values_clean($form_state);
+
+  foreach ($form_state['values'] as $key => $value) {
+    if (variable_get($key, NULL) !== NULL) {
+      variable_del($key);
+    }
+  }
+  drupal_set_message(t('The configuration options have been reset to their default values.'));
+}
+
+/**
  * Performs a moreLikeThis query using the settings and retrieves documents.
  *
  * @param $settings
