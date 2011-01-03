@@ -79,7 +79,7 @@ function apachesolr_search_apachesolr_types_exclude($namespace) {
  */
 function apachesolr_search_search_info() {
   return variable_get('apachesolr_search_search_info', array(
-    'title' => 'Search',
+    'title' => 'Site',
     'path' => 'site',
     'conditions_callback' => 'apachesolr_search_conditions',
   ));
