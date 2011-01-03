@@ -28,21 +28,19 @@ Drupal.behaviors.apachesolr = {
 Drupal.apachesolr = {}
 
 Drupal.apachesolr.addCheckbox = function() {
+  // Create an unchecked checkbox.
+  var checkbox = $('<input type="checkbox" class="facet-checkbox" />');
   // Put href in context scope to be visible in the anonymous function.
   var href = $(this).attr('href');
-  $(this).before($('<input type="checkbox" />')
-    .attr('class', 'facet-checkbox')
-    .click(function(){
-      window.location.href = href;
-    })
-  );
+  checkbox.click(function(){
+    window.location.href = href;
+  });
+  $(this).before(checkbox).before('&nbsp;');
 }
 
 Drupal.apachesolr.makeCheckbox = function() {
   // Create a checked checkbox.
-  var checkbox = $('<input type="checkbox" />')
-    .attr('class', 'facet-checkbox')
-    .attr('checked', true);
+  var checkbox = $('<input type="checkbox" class="facet-checkbox" checked="true" />');
   // Put href in context scope to be visible in the anonymous function.
   var href = $(this).attr('href');
   checkbox.click(function(){
