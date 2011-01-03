@@ -1037,7 +1037,8 @@ function apachesolr_search_form_search_form_alter(&$form, $form_state) {
       '#type' => 'hidden',
       '#default_value' => json_encode(array_diff_key($_GET, array('q' => 1, 'page' => 1, 'filters' => 1, 'solrsort' => 1, 'retain-filters' => 1))),
     );
-    if ($queryvalues || isset($form_state['post']['apachesolr_search']['retain-filters'])) {
+    //drupal_set_message('<pre>'.print_r($form_state,1));
+    if ($queryvalues || isset($form_state['input']['apachesolr_search']['retain-filters'])) {
       $form['basic']['apachesolr_search']['retain-filters'] = array(
         '#type' => 'checkbox',
         '#title' => t('Retain current filters'),
@@ -1088,7 +1089,7 @@ function apachesolr_search_form_search_submit($form, &$form_state) {
     $get['retain-filters'] = '1';
   }
   // Add the query values into the redirect.
-  $form_state['redirect'] = array($form_state['redirect'], $get);
+  $form_state['redirect'] = array($form_state['redirect'], array('query' => $get));
 }
 
 /**
