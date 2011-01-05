@@ -177,6 +177,22 @@ function apachesolr_cck_text_indexing_callback($node, $field_name, $cck_info) {
   return $fields;
 }
 
+function apachesolr_cck_integer_indexing_callback($node, $field_name, $cck_info) {
+  $fields = array();
+  if (isset($node->{$field_name})) {
+    $index_key = apachesolr_index_key($cck_info);
+    foreach ($node->$field_name as $field) {
+      if ($index_value = isset($field['value']) ? (int) $field['value'] : FALSE) {
+        $fields[] = array(
+          'key' => $index_key,
+          'value' => $index_value,
+        );
+      }
+    }
+  }
+  return $fields;
+}
+
 function apachesolr_cck_nodereference_indexing_callback($node, $field_name, $cck_info) {
   $fields = array();
   if (isset($node->{$field_name})) {

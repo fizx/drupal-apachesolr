@@ -1957,7 +1957,34 @@ function apachesolr_cck_fields() {
           'index_type' => 'string',
           'facets' => TRUE,
         ),
+        'optionwidgets_onoff' => array(
+          'display_callback' => 'apachesolr_cck_text_field_callback',
+          'indexing_callback' => 'apachesolr_cck_text_indexing_callback',
+          'index_type' => 'string',
+          'facets' => TRUE,
+        ),
       );
+      // A single default mapping for all integer fields using optionwidgets.
+      $mappings['number_integer'] = array(
+        'optionwidgets_select' => array(
+           'display_callback' => 'apachesolr_cck_text_field_callback',
+           'indexing_callback' => 'apachesolr_cck_integer_indexing_callback',
+           'index_type' => 'sint',
+           'facets' => TRUE,
+         ),
+        'optionwidgets_buttons' => array(
+           'display_callback' => 'apachesolr_cck_text_field_callback',
+           'indexing_callback' => 'apachesolr_cck_integer_indexing_callback',
+           'index_type' => 'sint',
+           'facets' => TRUE,
+         ),
+        'optionwidgets_onoff' => array(
+           'display_callback' => 'apachesolr_cck_text_field_callback',
+           'indexing_callback' => 'apachesolr_cck_integer_indexing_callback',
+           'index_type' => 'sint',
+           'facets' => TRUE,
+         ),
+       );
       $mappings['nodereference'] = array(
         'nodereference_buttons' => array(
           'display_callback' => 'apachesolr_cck_nodereference_field_callback',
