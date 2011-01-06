@@ -18,7 +18,8 @@ Updating from 6.x
 -----------------
 Make sure that you have first updated to the latest 6.x version on the relevant
 branch and that you have run all schema updates.  You will have to install the
-new schema.xml file, and delete your index and reindex all content.
+new schema.xml and solrconfig.xml files, and restart the Solr server (or core)
+and delete your index and reindex all content.
 
 Installation
 ------------
@@ -170,100 +171,6 @@ generated at all times when nodes are indexed.  Alternately, set up a re-direct
 in .htaccess to prevent site visitors from accessing the site via more than one
 site address.
 
-
-Developers
---------------
-
-Exposed Hooks in 6.x:
-
-hook_apachesolr_modify_query($query, $caller);
-
-  Any module performing a search should call apachesolr_modify_query($query, 'modulename'). 
-  That function then invokes this hook. It allows modules to modify the query object and params array. 
-  $caller indicates which module is invoking the hook. A return value of TRUE from 
-  apachesolr_modify_query() indicates the search should be aborted. A module implementing
-  hook_apachesolr_modify_query() may return TRUE to flag the query to be aborted.
-
-  Example:
-
-        function my_module_apachesolr_modify_query($query, $caller) {
-          // I only want to see articles by the admin!
-          $query->add_filter("uid", 1);         
-        }        
-
-CALLER_finalize_query($query);
-
-  The module calling apachesolr_do_query() may implement a function that is run after
-  hook_apachesolr_modify_query() and allows the caller to make final changes to the
-  query and params before the query is sent to Solr.  The function name is built
-  from the $caller parameter to apachesolr_do_query().
-
-hook_apachesolr_prepare_query($query, $caller);
-
-  This is pretty much the same as hook_apachesolr_modify_query() but runs earlier
-  and before the query is statically cached. It can e.g. be used to add
-  available sorts to the query.
-
-  Example:
-
-        function my_module_apachesolr_prepare_query($query) {
-          // Add a sort on the node ID.
-          $query->set_available_sort('nid', array(
-            'title' => t('Node ID'),
-            'default' => 'asc',
-          ));
-        }
-
-hook_apachesolr_cck_fields_alter(&$mappings)
-
-  Add or alter index mappings for CCK types.  The default mappings array handles just 
-  text fields with option widgets:
-
-    $mappings['text'] = array(
-      'optionwidgets_select' => array('indexing_callback' => '', 'index_type' => 'string'),
-      'optionwidgets_buttons' => array('indexing_callback' => '', 'index_type' => 'string')
-    );
-
-  In your _alter hook implementation you can add additional field types such as:
-
-    $mappings['number_integer']['number'] = array('indexing_callback' => '', 'index_type' => 'integer');
-
-  You can allso add a mapping for a specific field.  This will take precedence over any
-  mapping for a general field type. A field-specific mapping would look like:
-
-    $mappings['per-field']['field_model_name'] = array('indexing_callback' => '', 'index_type' => 'string');
-
-  or
-
-    $mappings['per-field']['field_model_price'] = array('indexing_callback' => '', 'index_type' => 'float');
-
-hook_apachesolr_types_exclude($namespace)
-
-  
-  Invoked by apachesolr.module when generating a list of nodes to index for a given
-  namespace.  Return an array of node types to be excldued from indexing for that namespace 
-  (e.g. 'apachesolr_search'). This is used by apachesolr_search module to exclude 
-  certain node types from the index.
-
-hook_apachesolr_node_exclude($node, $namespace)
-
-  This is invoked by apachesolr.module for each node to be added to the index - if any module
-  returns TRUE, the node is skipped for indexing. 
-
-hook_apachesolr_update_index(&$document, $node)
-
-  Allows a module to change the contents of the $document object before it is sent to the Solr Server.
-  To add a new field to the document, you should generally use one of the pre-defined dynamic fields. 
-  Follow the naming conventions for the type of data being added based on the schema.xml file.
-
-hook_apachesolr_search_result_alter(&$doc)
-
-  The is invoked by apachesolr_search.module for each document returned in a search - new in 6.x-beta7
-  as a replacement for the call to hook_nodeapi().
-
-hook_apachesolr_sort_links_alter(&$sort_links)
-
-  Called by the sort link block code. Allows other modules to modify, add or remove sorts.
 
 
 Themers
