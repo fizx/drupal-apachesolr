@@ -286,6 +286,7 @@ function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $ba
         // We can safely assume these values, since we're taking over the block display.
         $block->visibility = TRUE;
         $block->enabled = TRUE;
+        $block->module = $module;
         // This hook is made up. It should be in Drupal core, and it is quite useful.
         // Including it here because it has saved the day on projects.
         drupal_alter('block', $block);
