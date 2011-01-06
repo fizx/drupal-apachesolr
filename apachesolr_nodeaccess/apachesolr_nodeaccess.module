@@ -39,10 +39,7 @@ function apachesolr_nodeaccess_build_subquery($account) {
     throw new Exception('No access');
   }
   $node_access_query = apachesolr_drupal_query();
-  if (empty($node_access_query)) {
-    throw new Exception('No query object in apachesolr_nodeaccess');
-  }
-  if (user_access('administer nodes', $account)) {
+  if (user_access('bypass node access', $account)) {
     // Access all content from the current site, or public content.
     $node_access_query->add_filter('nodeaccess_all', 0);
     $node_access_query->add_filter('hash', apachesolr_site_hash());
@@ -63,22 +60,16 @@ function apachesolr_nodeaccess_build_subquery($account) {
 /**
  * Implements hook_apachesolr_modify_query().
  */
-function apachesolr_nodeaccess_apachesolr_modify_query(&$query, &$params, $caller = 'apachesolr_search') {
-  if ($caller == 'apachesolr_views_query') {
-    return;
-  }
+function apachesolr_nodeaccess_apachesolr_modify_query(DrupalSolrQueryInterface $query, $caller = 'apachesolr_search') {
   global $user;
   try {
     $subquery = apachesolr_nodeaccess_build_subquery($user);
+    $query->add_subquery($subquery, 'OR');
   }
   catch (Exception $e) {
-    $query = NULL;
     watchdog("apachesolr_nodeaccess", 'User %name (UID:!uid) cannot search: @message', array('%name' => $user->name, '!uid' => $user->uid, '@message' => $e->getMessage()));
-    return;
-  }
-
-  if (!empty($subquery)) {
-    $query->add_subquery($subquery, 'OR');
+    // Returning TRUE aborts the search.
+    return TRUE;
   }
 }
 
@@ -129,7 +120,6 @@ function apachesolr_nodeaccess_form_alter(&$form, $form_state, $form_id) {
  */
 function apachesolr_nodeaccess_rebuild_nodeaccess(&$form, $form_state) {
   drupal_set_message(t('Solr search index will be rebuilt.'));
-  node_access_needs_rebuild(TRUE);
   apachesolr_clear_last_index();
 }
 
