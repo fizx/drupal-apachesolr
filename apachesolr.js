@@ -27,25 +27,37 @@ Drupal.behaviors.apachesolr = {
 
 Drupal.apachesolr = {}
 
+/**
+ * Constructor for a class.
+ */
+Drupal.apachesolr.Redirect = function(href) {
+  this.href = href;
+}
+
+/**
+ * Method to redirect to the stored href.
+ */
+Drupal.apachesolr.Redirect.prototype.gotoHref = function() {
+  window.location.href = this.href;
+}
+
 Drupal.apachesolr.addCheckbox = function() {
   // Create an unchecked checkbox.
   var checkbox = $('<input type="checkbox" class="facet-checkbox" />');
-  // Put href in context scope to be visible in the anonymous function.
+  // Get the href of the link that is this DOM object.
   var href = $(this).attr('href');
-  checkbox.click(function(){
-    window.location.href = href;
-  });
+  redirect = new Drupal.apachesolr.Redirect(href);
+  checkbox.click($.proxy(redirect, 'gotoHref'));
   $(this).before(checkbox).before('&nbsp;');
 }
 
 Drupal.apachesolr.makeCheckbox = function() {
   // Create a checked checkbox.
   var checkbox = $('<input type="checkbox" class="facet-checkbox" checked="true" />');
-  // Put href in context scope to be visible in the anonymous function.
+  // Get the href of the link that is this DOM object.
   var href = $(this).attr('href');
-  checkbox.click(function(){
-    window.location.href = href;
-  });
+  redirect = new Drupal.apachesolr.Redirect(href);
+  checkbox.click($.proxy(redirect, 'gotoHref'));
   // Add the checkbox, hide the link.
   $(this).before(checkbox).hide();
 }
