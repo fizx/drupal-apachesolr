@@ -1067,12 +1067,10 @@ function apachesolr_search_form_search_form_alter(&$form, $form_state) {
 
           // Show only if suggestion is different than current query.
           if ($query->get_query_basic() != $new_keywords) {
-            $form['basic']['suggestion'] = array(
+            $form['apachesolr_Search']['suggestion'] = array(
               '#prefix' => '<div class="spelling-suggestions">',
               '#suffix' => '</div>',
-              '#type' => 'item',
-              '#title' => t('Did you mean'),
-              '#value' => l($new_keywords, $query->get_path($new_keywords)),
+              '#markup' => '<label>' . t('Did you mean'). '</label>' . l($new_keywords, $query->get_path($new_keywords)),
             );
           }
         }
