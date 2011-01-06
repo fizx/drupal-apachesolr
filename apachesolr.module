@@ -2327,12 +2327,12 @@ function apachesolr_hook_info() {
  */
 function field_apachesolr_field_mappings() {
   $mappings = array(
-    'list' => array(
+    'list_integer' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'string',
     ),
-    'list_number' => array(
+    'list_float' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'string',
