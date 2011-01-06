@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#1017258 by pwolanin, Fix help text when there are no search results.
 #1013122 by pwolanin, some JS cleanup to use jQuery proxy.
 #1013136 by pwolanin, fix retain filters checkbox.
 #1009398 by pwolanin, fix content bias forms.
