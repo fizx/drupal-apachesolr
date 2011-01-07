@@ -5,6 +5,9 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+
+Apache Solr integration 7.x-1.0-BETA3, 2011-01-06
+------------------------------
 #1017836 by Janusman, pwolanin: fix empty search behavior.
 #1017624 by pwolanin: Fix for "Did you mean" suggestion does not show.
 #1007848 by pwolanin: Fixes for apachesolr_nodeaccess for Drupal 7.
