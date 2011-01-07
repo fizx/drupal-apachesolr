@@ -5,12 +5,13 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
-#1017624 by pwolanin, Fix for "Did you mean" suggestion does not show.
-#1007848 by pwolanin, Fixes for apachesolr_nodeaccess for Drupal 7.
-#1017258 by pwolanin, Fix help text when there are no search results.
-#1013122 by pwolanin, some JS cleanup to use jQuery proxy.
-#1013136 by pwolanin, fix retain filters checkbox.
-#1009398 by pwolanin, fix content bias forms.
+#1017836 by Janusman, pwolanin: fix empty search behavior.
+#1017624 by pwolanin: Fix for "Did you mean" suggestion does not show.
+#1007848 by pwolanin: Fixes for apachesolr_nodeaccess for Drupal 7.
+#1017258 by pwolanin: Fix help text when there are no search results.
+#1013122 by pwolanin: some JS cleanup to use jQuery proxy.
+#1013136 by pwolanin: fix retain filters checkbox.
+#1009398 by pwolanin: fix content bias forms.
 #1007860 by pwolanin: API fix for hook_apachesolr_modify_query, add type hinting.
 #1007824 by pwolanin: use contextual links to avoid block caching mode issues.
 #1003500 fix icon and icon path.

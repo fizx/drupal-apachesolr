@@ -111,9 +111,23 @@ function apachesolr_search_search_status(){
 function apachesolr_search_search_execute($keys = NULL, $conditions = NULL) {
   $filters = isset($conditions['filters']) ? $conditions['filters'] : '';
   $solrsort = isset($_GET['solrsort']) ? $_GET['solrsort'] : '';
+  $empty_search_behavior = isset($conditions['apachesolr_search_browse']) ? $conditions['apachesolr_search_browse'] : '';
+
+  // For perfomance reasons, do not run a search if search is empty and
+  // $empty_search_behavior condition is 'browse'
+  if (!$keys && !$filters && $empty_search_behavior == 'browse') {
+    // Pass empty search behavior as string on to apachesolr_search_search_page()
+    return array('apachesolr_search_browse' => $empty_search_behavior);
+  }
 
   try {
-    return apachesolr_search_run($keys, $filters, $solrsort, 'search/' . arg(1), pager_find_page());
+    $results = apachesolr_search_run($keys, $filters, $solrsort, 'search/' . arg(1), pager_find_page());
+    if (!$keys && !$filters && $empty_search_behavior == 'blocks') {
+      // If search was empty and empty search behavior is 'blocks', discard
+      // the result items and pass behavior on to apachesolr_search_search_page()
+      $results['apachesolr_search_browse'] = $empty_search_behavior;
+    }
+    return $results;
   }
   catch (Exception $e) {
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
@@ -130,11 +144,28 @@ function apachesolr_search_conditions() {
   if (isset($_GET['filters']) && trim($_GET['filters'])) {
     $conditions['filters'] = trim($_GET['filters']);
   }
-  if (variable_get('apachesolr_search_browse', 'browse') == 'results') {
+  if (variable_get('apachesolr_search_browse', 'browse') != 'none') {
     // Set a condition so the search is triggered.
-    $conditions['apachesolr_search_browse'] = 'results';
+    $conditions['apachesolr_search_browse'] = variable_get('apachesolr_search_browse', 'browse');
   }
   return $conditions;
+}
+
+/**
+ * Implements hook_search_page().
+ */
+function apachesolr_search_search_page($results) {
+  if (empty($results['apachesolr_search_browse'])) {
+    $output = array(
+      '#theme' => 'search_results',
+      '#results' => $results,
+      '#module' => 'apachesolr_search',
+    );
+  }
+  else {
+    $output = apachesolr_search_page_browse($results['apachesolr_search_browse']);
+  }
+  return $output;
 }
 
 /**
@@ -191,7 +222,30 @@ function apachesolr_search_finalize_query(DrupalSolrQueryInterface $query) {
 }
 
 /**
- * Execute an empty search (match all documents) and show a listing of all enabled facets.
+ * Handle browse results for empty searches.
+ */
+function apachesolr_search_page_browse($empty_search_behavior) {
+  $output = array();
+  // Switch in case we come up with new flags.
+  switch ($empty_search_behavior) {
+    case 'browse':
+      try {
+        $blocks = apachesolr_search_browse('', '', '', 'search/' . arg(1));
+        if (count($blocks) > 0) {
+          $output[] = array('#markup' => theme('apachesolr_browse_blocks', array('blocks' => $blocks)));
+        }
+      }
+      catch (Exception $e) {
+        watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+        apachesolr_failure(t('Solr search'), $keys);
+      }
+      break;
+  }
+  return $output;
+}
+
+/**
+ * Execute a search and show a listing of all enabled facets.
  *
  * @throws Exception
  */
@@ -265,8 +319,8 @@ function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $ba
           }
           if (isset($block->content) && $block->content && $block->enabled && $block->visibility) {
             // Normalize to the drupal_render() structure.
-            if (is_string($block->content)) {
-              $block->content = array('#markup' => $block->content);
+            if (is_array($block->content)) {
+              $block->content = drupal_render($block->content);
             }
             $block->subject = str_replace(t('Filter by '), t('Browse by '), $block->subject);
             $blocks["{$module}_{$delta}"] = $block;
