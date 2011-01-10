@@ -316,6 +316,7 @@ class DrupalApacheSolrService extends Apache_Solr_Service {
     if (!isset($result->code) || $result->code < 0) {
       $result->code = 0;
       $result->status_message = 'Request failed';
+      $result->protocol = 'HTTP/1.0';
     }
     // Additional information may be in the error property.
     if (isset($result->error)) {
