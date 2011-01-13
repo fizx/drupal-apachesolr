@@ -352,12 +352,16 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
 
   public function get_url_queryvalues() {
     $queryvalues = array();
-    if ($fq = $this->rebuild_fq(TRUE)) {
-      $queryvalues['filters'] = '';
-      foreach ($fq as $delta => $values) {
-        $queryvalues['filters'] .= ' ' . implode(' ', $values);
+    $filters = array();
+    foreach ($this->fields as $pos => $field) {
+      // Look for a field alias.
+      if (isset($this->field_map[$field['#name']])) {
+        $field['#name'] = $this->field_map[$field['#name']];
       }
-      $queryvalues['filters'] = trim($queryvalues['filters']);
+      $filters[] = $this->make_filter($field);
+    }
+    if ($filters) {
+      $queryvalues['filters'] = implode(' ', $filters);
     }
     $solrsort = $this->solrsort;
     if ($solrsort && ($solrsort['#name'] != 'score' || $solrsort['#direction'] != 'desc')) {
@@ -440,8 +444,13 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
       // Get the values for $name
       $extracted = $this->filter_extract($filterstring, $alias);
       if (count($extracted)) {
+        // A trailing space is required since we match all individual
+        // filter terms using a trailing space.
+        $filter_pos_string = $this->filterstring . ' ';
         foreach ($extracted as $filter) {
-          $pos = strpos($this->filterstring, $filter['#query']);
+          // The trailing space on $filter['#query'] avoids incorrect
+          //  matches to a substring. See http://drupal.org/node/891962
+          $pos = strpos($filter_pos_string, $filter['#query'] . ' ');
           // $solr_keys and $solr_crumbs are keyed on $pos so that query order
           // is maintained. This is important for breadcrumbs.
           $filter['#name'] = $name;

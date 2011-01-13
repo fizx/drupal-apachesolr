@@ -13,3 +13,4 @@ files[] = Drupal_Apache_Solr_Service.php
 files[] = Solr_Base_Query.php
 files[] = SolrPhpClient/Apache/Solr/Service.php
 files[] = tests/solr_index_and_search.test
+files[] = tests/solr_base_query.test

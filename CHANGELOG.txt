@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#891962  by jurcello, pwolanin: avoid incorrect filter substring matches, emit correct query string.
 #1018768 by pwolanin: fix notices during failed search request.
 
 Apache Solr integration 7.x-1.0-BETA3, 2011-01-06

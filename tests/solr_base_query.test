@@ -1,91 +1,283 @@
 <?php
 // $Id$
 
+class DummySolr {
+  function getFields() {
+    return (object) array(
+       'uid' =>
+      (object) array(
+         'type' => 'long',
+         'schema' => 'I-S----OF-----',
+      ),
+       'body' =>
+      (object) array(
+         'type' => 'text',
+         'schema' => 'ITS-V---------',
+      ),
+       'im_3_field_tags' =>
+      (object) array(
+         'type' => 'long',
+         'schema' => 'I-SM---OF-----',
+         'dynamicBase' => 'im_*',
+      ),
+       'entity' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'last_comment_or_change' =>
+      (object) array(
+         'type' => 'tdate',
+         'schema' => 'ITS----OF-----',
+      ),
+       'nodeaccess_ari4jj_node_access_example_view' =>
+      (object) array(
+         'type' => 'integer',
+         'schema' => 'I--M---OF-----',
+         'dynamicBase' => 'nodeaccess*',
+      ),
+       'type' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'entity_id' =>
+      (object) array(
+         'type' => 'tlong',
+         'schema' => 'ITS----OF-----',
+      ),
+       'sname' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I------OF----l',
+      ),
+       'changed' =>
+      (object) array(
+         'type' => 'tdate',
+         'schema' => 'ITS----OF-----',
+      ),
+       'id' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'timestamp' =>
+      (object) array(
+         'type' => 'date',
+         'schema' => 'I-S----OF----l',
+      ),
+       'title' =>
+      (object) array(
+         'type' => 'text',
+         'schema' => 'ITS-V--O------',
+      ),
+       'nodeaccess_ari4jj_node_access_example_edit' =>
+      (object) array(
+         'type' => 'integer',
+         'schema' => 'I--M---OF-----',
+         'dynamicBase' => 'nodeaccess*',
+      ),
+       'created' =>
+      (object) array(
+         'type' => 'tdate',
+         'schema' => 'ITS----OF-----',
+      ),
+       'name' =>
+      (object) array(
+         'type' => 'text',
+         'schema' => 'ITS-V---------',
+      ),
+       'path' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'taxonomy_names' =>
+      (object) array(
+         'type' => 'text',
+         'schema' => 'IT-MV--O------',
+      ),
+       'bundle' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'tid' =>
+      (object) array(
+         'type' => 'long',
+         'schema' => 'I-SM---OF-----',
+      ),
+       'tnid' =>
+      (object) array(
+         'type' => 'long',
+         'schema' => 'I-S----OF-----',
+      ),
+       'nodeaccess_ari4jj_node_access_example_author' =>
+      (object) array(
+         'type' => 'integer',
+         'schema' => 'I--M---OF-----',
+         'dynamicBase' => 'nodeaccess*',
+      ),
+       'tm_vid_1_names' =>
+      (object) array(
+         'type' => 'text',
+         'schema' => 'ITSMV---------',
+         'dynamicBase' => 'tm_*',
+      ),
+       'spell' =>
+      (object) array(
+         'type' => 'textSpell',
+         'schema' => 'ITSM----------',
+      ),
+       'site' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'comment_count' =>
+      (object) array(
+         'type' => 'tint',
+         'schema' => 'ITS----OF-----',
+      ),
+       'bundle_name' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'hash' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'status' =>
+      (object) array(
+         'type' => 'boolean',
+         'schema' => 'I-S----OF----l',
+      ),
+       'nid' =>
+      (object) array(
+         'type' => 'long',
+         'schema' => 'I-S----OF-----',
+      ),
+       'url' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'nodeaccess_all' =>
+      (object) array(
+         'type' => 'integer',
+         'schema' => 'I--M---OF-----',
+         'dynamicBase' => 'nodeaccess*',
+      ),
+       'sort_name' =>
+      (object) array(
+         'type' => 'sortString',
+         'schema' => 'IT-----O-----l',
+      ),
+       'tags_a' =>
+      (object) array(
+         'type' => 'text',
+         'schema' => 'IT-----O------',
+         'dynamicBase' => 'tags_*',
+      ),
+       'sticky' =>
+      (object) array(
+         'type' => 'boolean',
+         'schema' => 'I-S----OF----l',
+      ),
+       'promote' =>
+      (object) array(
+         'type' => 'boolean',
+         'schema' => 'I-S----OF----l',
+      ),
+       'teaser' =>
+      (object) array(
+         'type' => 'text',
+         'schema' => '-TS-----------',
+      ),
+       'type_name' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'im_vid_1' =>
+      (object) array(
+         'type' => 'long',
+         'schema' => 'I-SM---OF-----',
+         'dynamicBase' => 'im_*',
+      ),
+       'translate' =>
+      (object) array(
+         'type' => 'boolean',
+         'schema' => 'I-S----OF----l',
+      ),
+       'sort_title' =>
+      (object) array(
+         'type' => 'sortString',
+         'schema' => 'IT-----O-----l',
+      ),
+       'language' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-S----OF----l',
+      ),
+       'sm_vid_Tags' =>
+      (object) array(
+         'type' => 'string',
+         'schema' => 'I-SM---OF----l',
+         'dynamicBase' => 'sm_*',
+      ),
+    );
+  }
+}
 
-/***
- * JacobSingh: Warning! This test is totally broken because of the addition of the "hash" in apachesolr_search.module.
- * Needs to be moved out.
- *
+/**
+ * Unit tests for query object methods.
  */
-
-
-class DrupalSolrQueryTests extends DrupalWebTestCase {
-  function getInfo() {
+class SolrBaseQueryTests extends DrupalUnitTestCase {
+  public static function getInfo() {
     return array(
-      'name' => 'Query handling',
-      'description' => 'Throw various queries at the query object and make sure they all parse correctly.',
-      'group' => 'ApacheSolr'
+      'name' => 'Query object base functionality',
+      'description' => 'Tests query object methods individually.',
+      'group' => 'ApacheSolr',
     );
   }
 
-  function setUp() {
-    parent::setUp('search', 'apachesolr');
+  protected function setUp() {
+    parent::setUp();
+    require_once dirname(dirname(__FILE__)) . '/Solr_Base_Query.php';
   }
 
-  private $queries = array(
-    'foo',
-    'foo bar',
-    'foo bar "hubba baz"',
-    'uid:1',
-    'uid:1 uid:2',
-    'foo bar uid:1 uid:2',
-    'foo bar "I love you"',
-    'foo bar baz -hubba',
-    'foo -bar -term:31',
-    'foo*',
-    'foo?',
-    'somefield:"I love you"',
-  );
-
-  function testParseSimple() {
-    foreach ($this->queries as $string) {
-      $query = apachesolr_drupal_query($string);
-      // force the query to be rebuilt without removing any fields.
-      $query->remove_filter('fake-field-name');
-      $this->assertEqual($string, $query->get_query_basic());
+  /**
+   * Test ordering of parsed filter positions.
+   *
+   * Regression test for http://drupal.org/node/891962
+   */
+  function testParseFilters() {
+    $filterstring = 'tid:3 sort_title:hello tid:11 tid:1 tid:12 title:hello';
+    // Setup dummy Solr object.
+    $query = new SolrBaseQuery(new DummySolr(), 'mykeys', $filterstring, '', '');
+    $this->assertFalse($query->has_filter('title', 'Hello'));
+    $this->assertTrue($query->has_filter('title', 'hello'));
+    $filters = $query->get_filters();
+    $this->assertEqual(count($filters), 6, count($filters) . ' filters found, expected 6 filters');
+    // Check positions of filters
+    $expected = explode(' ', $filterstring);
+    foreach ($filters as $idx => $filter) {
+      $this->assertEqual($expected[$idx], trim($filter['#query']));
     }
-  }
-
-  function testAddTerm() {
-    foreach ($this->queries as $string) {
-      $query = apachesolr_drupal_query($string);
-      $query->add_filter('wham', '1');
-      $this->assertEqual($string, $query->get_query_basic());
-      $this->assertEqual(array('filters' => 'wham:1'), $query->get_url_queryvalues());
-    }
-  }
-
-  function testRemoveTerm() {
-    $string = 'foo';
-    $query = apachesolr_drupal_query($string);
-    $query->remove_filter('', 'foo');
-    $this->assertEqual('foo', $query->get_query_basic());
-
-    $string = 'foo bar';
-    $query = apachesolr_drupal_query($string);
-    $query->remove_filter('', 'foo');
-    $this->assertEqual('foo bar', $query->get_query_basic());
-
-    $string = 'foo bar';
-    $query = apachesolr_drupal_query($string, 'uid:1');
-    $query->remove_filter('uid', '1');
-    $this->assertEqual('foo bar', $query->get_query_basic());
-
-    $string = 'foo bar';
-    $query = apachesolr_drupal_query($string);
-    $query->remove_filter('uid', 'uid:1');
-    $this->assertEqual('foo bar', $query->get_query_basic());
-
-    $string = 'foo bar';
-    $query = apachesolr_drupal_query($string, 'uid:1 uid:2 tid:3');
-    $query->remove_filter('uid', '1');
-    $this->assertEqual('foo bar', $query->get_query_basic());
-    $this->assertEqual(array('filters' => 'uid:2 tid:3'), $query->get_url_queryvalues());
-
-    $string = 'foo bar';
-    $query = apachesolr_drupal_query($string, 'uid:1 uid:2 tid:3');
-    $query->remove_filter('uid');
-    $this->assertEqual('foo bar', $query->get_query_basic());
-    $this->assertEqual(array('filters' => 'tid:3'), $query->get_url_queryvalues());
+    // Check that the query string is re-assembled correctly
+    $this->assertEqual(array('filters' => $filterstring), $query->get_url_queryvalues());
+    $this->assertEqual('mykeys', $query->get_query_basic());
+    $query->remove_filter('tid', '11');
+    $filters = $query->get_filters();
+    $this->assertEqual(count($filters), 5, count($filters) . ' filters found, expected 5 filters');
+    $this->assertEqual(array('filters' => 'tid:3 sort_title:hello tid:1 tid:12 title:hello'), $query->get_url_queryvalues());
+    $query->remove_filter('tid');
+    $filters = $query->get_filters();
+    $this->assertEqual(count($filters), 2, count($filters) . ' filters found, expected 2 filters');
+    $this->assertEqual(array('filters' => 'sort_title:hello title:hello'), $query->get_url_queryvalues());
   }
 }
+
