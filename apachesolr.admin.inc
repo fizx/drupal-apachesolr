@@ -355,9 +355,12 @@ function apachesolr_index_page($server_id = NULL) {
   return $output;
 }
 
-function apachesolr_index_report() {
+function apachesolr_index_report($server_id = NULL) {
+  if (empty($server_id)) {
+    $server_id = apachesolr_default_server();
+  }
   try {
-    $solr = apachesolr_get_solr();
+    $solr = apachesolr_get_solr($server_id);
     // TODO: possibly clear this every page view if we are running multi-site.
     if (apachesolr_index_get_last_updated()) {
       $solr->clearCache();
@@ -380,7 +383,7 @@ function apachesolr_index_report() {
   elseif (isset($data->index->numDocs)) {
     $not_found = t('Not indexed');
     try {
-      $solr = apachesolr_get_solr();
+      $solr = apachesolr_get_solr($server_id);
       // Note: we use 2 since 1 fails on Ubuntu Hardy.
       $data = $solr->getLuke(2);
       $output .= '<p>' . t('Number of terms in index: @num', array('@num' => $data->index->numTerms)) . "</p>\n";
@@ -436,9 +439,9 @@ function apachesolr_enabled_facets_form_submit($form, &$form_state) {
   foreach ($form_state['values']['apachesolr_enabled_facets'] as $module => $facets) {
     $enabled[$module] = array_filter($facets);
   }
-  apachesolr_save_enabled_facets($enabled);
+  apachesolr_save_enabled_facets($form['#server_id'], $enabled);
   // This cache being stale can prevent new facet filters from working.
-  apachesolr_clear_cache();
+  apachesolr_clear_cache($form['#server_id']);
   $msg = t('The Apache Solr filters settings were changed.  To arrange the blocks for your enabled filters, visit the <a href="@url">blocks administration page</a>.', array('@url' => url('admin/structure/block')));
   drupal_set_message($msg, 'warning');
 }
@@ -450,7 +453,10 @@ function apachesolr_enabled_facets_form_submit($form, &$form_state) {
  * load on the search server.  Blocks are only offered for enabled facets, so
  * this also reduces the clutter on the blocks admin page.
  */
-function apachesolr_enabled_facets_form() {
+function apachesolr_enabled_facets_form($form, &$form_state, $server_id = NULL) {
+  if (empty($server_id)) {
+    $server_id = apachesolr_default_server();
+  }
   $facets = array();
   $module_facets = array();
   $module_list = array();
@@ -463,14 +469,19 @@ function apachesolr_enabled_facets_form() {
     }
   }
 
-  $enabled_facets = apachesolr_get_enabled_facets();
+  $enabled_facets = apachesolr_get_enabled_facets($server_id);
   $form = array();
+  $form['#server_id'] = $server_id;
   $form['apachesolr_enabled_facets']['help'] = array(
     '#type' => 'item',
     '#markup' => t('You can use this screen to select which search filter blocks should be created by enabling the corresponding filters on this page. For performance reasons, you should only enable filters that you intend to have available to users on the search page.  After selecting which filter blocks to create, you will be sent to the blocks page where you can choose which of those blocks should be enabled when your users search by placing each block in a region.'),
   );
   if ($module_list) {
-    $result = db_select('system')->fields('system', array('name', 'info'))->condition('name', $module_list, 'IN')->condition('type', 'module')->execute();
+    $result = db_select('system')
+      ->fields('system', array('name', 'info'))
+      ->condition('name', $module_list, 'IN')
+      ->condition('type', 'module')
+      ->execute();
     foreach ($result as $item) {
       $module_list[$item->name] = unserialize($item->info);
     }

@@ -3,6 +3,7 @@
 
 class DrupalApacheSolrService extends Apache_Solr_Service {
 
+  protected $server_id;
   protected $luke;
   protected $luke_cid;
   protected $stats;
@@ -92,7 +93,7 @@ class DrupalApacheSolrService extends Apache_Solr_Service {
     // Only try to get stats if we have connected to the index.
     if (empty($this->stats) && isset($data->index->numDocs)) {
       $url = $this->_constructUrl(self::STATS_SERVLET);
-      $this->stats_cid = "apachesolr:stats:" . drupal_hash_base64($url);
+      $this->stats_cid = $this->server_id . ":stats:" . drupal_hash_base64($url);
       $cache = cache_get($this->stats_cid, 'cache_apachesolr');
       if (isset($cache->data)) {
         $this->stats = simplexml_load_string($cache->data);
@@ -169,8 +170,8 @@ class DrupalApacheSolrService extends Apache_Solr_Service {
   }
 
   protected function _clearCache() {
-    cache_clear_all("apachesolr:luke:", 'cache_apachesolr', TRUE);
-    cache_clear_all("apachesolr:stats:", 'cache_apachesolr', TRUE);
+    cache_clear_all($this->server_id . ":stats:", 'cache_apachesolr', TRUE);
+    cache_clear_all($this->server_id . ":luke:", 'cache_apachesolr', TRUE);
     $this->luke = array();
     $this->stats = NULL;
   }
@@ -250,13 +251,30 @@ class DrupalApacheSolrService extends Apache_Solr_Service {
    *
    * @see Apache_Solr_Service::__construct()
    */
-  public function __construct($host = 'localhost', $port = 8180, $path = '/solr/') {
-    parent::__construct($host, $port, $path);
-    $this->luke_cid = "apachesolr:luke:" . drupal_hash_base64($this->_lukeUrl);
+  public function __construct($server_id, $host = 'localhost', $port = 8983, $path = '/solr/') {
+    $this->server_id = $server_id;
+    $this->setHost($host);
+    $this->setPort($port);
+    $this->setPath($path);
+
+    $this->_initUrls();
+
+    // determine our default http timeout from ini settings
+    $this->_defaultTimeout = (int) ini_get('default_socket_timeout');
+
+    // double check we didn't get 0 for a timeout
+    if ($this->_defaultTimeout <= 0) {
+      $this->_defaultTimeout = 60;
+    }
+    $this->luke_cid = $this->server_id . ":luke:" . drupal_hash_base64($this->_lukeUrl);
     $cache = cache_get($this->luke_cid, 'cache_apachesolr');
     if (isset($cache->data)) {
       $this->luke = $cache->data;
     }
+  }
+
+  function get_server_id() {
+    return $this->server_id;
   }
 
   /**

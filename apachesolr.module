@@ -145,6 +145,7 @@ function apachesolr_failure($search_name, $querystring) {
       break;
     case 'show_drupal_results':
       drupal_set_message(t("%search_name is not available. Your search is being redirected.", array('%search_name' => $search_name)));
+      // TODO - apachesolr_server_variable_get()
       drupal_goto('search/node/' . drupal_encode_path($querystring));
       break;
     case 'show_no_results':
@@ -661,9 +662,9 @@ function apachesolr_flush_caches() {
  * A wrapper for cache_clear_all to be used as a submit handler on forms that
  * require clearing Luke cache etc.
  */
-function apachesolr_clear_cache() {
+function apachesolr_clear_cache($server_id) {
   try {
-    $solr = apachesolr_get_solr();
+    $solr = apachesolr_get_solr($server_id);
     $solr->clearCache();
   }
   catch (Exception $e) {
@@ -738,8 +739,8 @@ function apachesolr_set_stats_message($text, $type = 'status', $repeat = FALSE) 
  *   An array consisting of info for facets that have been enabled
  *   for the specified module, or all enabled facets.
  */
-function apachesolr_get_enabled_facets($module = NULL) {
-  $enabled = variable_get('apachesolr_enabled_facets', array());
+function apachesolr_get_enabled_facets($server_id, $module = NULL) {
+  $enabled = apachesolr_server_variable_get($server_id, 'apachesolr_enabled_facets', array());
   if (isset($module)) {
     return isset($enabled[$module]) ? $enabled[$module] : array();
   }
@@ -754,8 +755,8 @@ function apachesolr_get_enabled_facets($module = NULL) {
  * @return
  *   The array consisting of info for all enabled facets.
  */
-function apachesolr_save_enabled_facets($enabled) {
-  variable_set('apachesolr_enabled_facets', $enabled);
+function apachesolr_save_enabled_facets($server_id, $enabled) {
+  apachesolr_server_variable_set($server_id, 'apachesolr_enabled_facets', $enabled);
   return $enabled;
 }
 
@@ -770,15 +771,15 @@ function apachesolr_save_enabled_facets($enabled) {
  * @return
  *   An array consisting of info for all enabled facets.
  */
-function apachesolr_save_module_facets($module, $facets = array()) {
-  $enabled = variable_get('apachesolr_enabled_facets', array());
+function apachesolr_save_module_facets($server_id, $module, $facets = array()) {
+  $enabled = apachesolr_server_variable_get('apachesolr_enabled_facets', array());
   if (!empty($facets) && is_array($facets)) {
     $enabled[$module] = $facets;
   }
   else {
     unset($enabled[$module]);
   }
-  variable_set('apachesolr_enabled_facets', $enabled);
+  apachesolr_server_variable_set($server_id, 'apachesolr_enabled_facets', $enabled);
   return $enabled;
 }
 
@@ -1571,8 +1572,24 @@ function apachesolr_has_searched($searched = NULL) {
   return $_searched;
 }
 
+
 /**
- * Factory method for solr singleton object. Structure allows for an arbitrary
+ * Get or set the default server ID for the current page.
+ */
+function apachesolr_default_server($server_id = NULL) {
+  static $default_server_id = NULL;
+
+  if (isset($server_id)) {
+    $default_server_id = $server_id;
+  }
+  if (empty($default_server_id)) {
+    $default_server_id = variable_get('apachesolr_default_server', 'solr');
+  }
+  return $default_server_id;
+}
+
+/**
+ * Factory method for solr singleton objects. Structure allows for an arbitrary
  * number of solr objects to be used based on a name whie maps to
  * the host, port, path combination.
  * Get an instance like this:
@@ -1583,32 +1600,35 @@ function apachesolr_has_searched($searched = NULL) {
 function apachesolr_get_solr($id = NULL) {
   $solr_cache = &drupal_static(__FUNCTION__);
 
-  if (empty($solr_cache['servers'])) {
-    $solr_cache['servers'] = apachesolr_load_all_servers();
+  $servers = apachesolr_load_all_servers();
+
+  if (empty($id) || empty($servers[$id])) {
+    $id = apachesolr_default_server();
   }
 
-  if (empty($id) || empty($solr_cache['servers'][$id])) {
-    $id = variable_get('apachesolr_default_server', 'solr');
-  }
+  $host = $servers[$id]['host'];
+  $port = $servers[$id]['port'];
+  $path = $servers[$id]['path'];
+  $class = $servers[$id]['service_class'];
 
-  $host = $solr_cache['servers'][$id]['host'];
-  $port = $solr_cache['servers'][$id]['port'];
-  $path = $solr_cache['servers'][$id]['path'];
-  $class = $solr_cache['servers'][$id]['service_class'];
-
-  if (empty($solr_cache['instances'][$id])) {
+  if (empty($solr_cache[$id])) {
     // Use the default class if none is specified.
     if (empty($class)) {
       $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
     }
     // Takes advantage of auto-loading.
-    $solr = new $class($host, $port, $path);
-    $solr_cache['instances'][$id] = $solr;
+    $solr = new $class($id, $host, $port, $path);
+    $solr_cache[$id] = $solr;
   }
-  return $solr_cache['instances'][$id];
+  return $solr_cache[$id];
 }
 
 function apachesolr_load_all_servers() {
+  $servers = &drupal_static(__FUNCTION__);
+
+  if (isset($servers)) {
+    return $servers;
+  }
   // Use cache_get to avoid DB when using memcache, etc.
   $cache = cache_get('apachesolr:servers', 'cache_apachesolr');
   if (isset($cache->data)) {
@@ -1616,31 +1636,43 @@ function apachesolr_load_all_servers() {
   }
   else {
     $servers = db_query('SELECT * FROM {apachesolr_server}')->fetchAllAssoc('server_id', PDO::FETCH_ASSOC);
+    foreach ($servers as $id => &$server) {
+      $conf = db_query('SELECT name, value FROM {apachesolr_server_variable} WHERE server_id = :server_id', array('server_id' => $id))->fetchAllAssoc('name', PDO::FETCH_ASSOC);
+      foreach ($conf as $name => $data) {
+        $server['conf'][$name] = unserialize($data['value']);
+      }
+    }
     cache_set('apachesolr:servers', $servers, 'cache_apachesolr');
   }
   return $servers;
 }
 
 function apachesolr_server_load($server_id) {
-  return db_query('SELECT * FROM {apachesolr_server} WHERE server_id = :server_id', array(':server_id' => $server_id))->fetchAssoc();
+  $servers = apachesolr_load_all_servers();
+  return isset($servers[$server_id]) ? $servers[$server_id] : FALSE;
 }
 
 function apachesolr_server_delete($server_id) {
-  $result =  db_delete('apachesolr_server')
+  $result = db_delete('apachesolr_server')
+    ->condition('server_id', $server_id)
+    ->execute();
+  $result = db_delete('apachesolr_server')
     ->condition('server_id', $server_id)
     ->execute();
   cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_load_all_servers');
   drupal_static_reset('apachesolr_get_solr');
   return $result;
 }
 
 function apachesolr_server_save($server, $original_id = NULL) {
   $default = array('server_id' => NULL, 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
+  $conf = isset($server['conf']) ? $server['conf'] : array();
   // Remove any unexpected fields.
   // @todo - getthis from the schema, or maybe use drupal_write_record().
   $server = array_intersect_key($server, $default);
+  $server_id = $server['server_id'];
   if (empty($original_id) || $server['server_id'] == $original_id) {
-    $server_id = $server['server_id'];
     unset($server['server_id']);
     db_merge('apachesolr_server')
       ->fields($server)
@@ -1652,8 +1684,65 @@ function apachesolr_server_save($server, $original_id = NULL) {
       ->fields($server)
       ->condition('server_id', $original_id)
       ->execute();
+    // Update the server_id column for the per-server variables.
+    db_update('apachesolr_server_variable')
+      ->fields(array('server_id' => $server_id))
+      ->condition('server_id', $original_id)
+      ->execute();
+  }
+  // Update the server variables (if any).  Note that a change in server_id
+  // will already have happened above.
+  foreach ($conf as $name => $value) {
+    db_merge('apachesolr_server_variable')
+      ->key(array('server_id' => $server_id, 'name' => $name))
+      ->fields(array('value' => serialize($value)))
+      ->execute();
   }
   cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_load_all_servers');
+  drupal_static_reset('apachesolr_get_solr');
+}
+
+/**
+ * Get a named variable, or return the default.
+ *
+ * @see variable_get()
+ */
+function apachesolr_server_variable_get($server_id, $name, $default = NULL) {
+  $server = apachesolr_server_load($server_id);
+  if (isset($server['conf'][$name])) {
+    return $server['conf'][$name];
+  }
+  return $default;
+}
+
+/**
+ * Set a named variable, or return the default.
+ *
+ * @see variable_set()
+ */
+function apachesolr_server_variable_set($server_id, $name, $value) {
+  db_merge('apachesolr_server_variable')
+    ->key(array('server_id' => $server_id, 'name' => $name))
+    ->fields(array('value' => serialize($value)))
+    ->execute();
+  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_load_all_servers');
+  drupal_static_reset('apachesolr_get_solr');
+}
+
+/**
+ * Get a named variable, or return the default.
+ *
+ * @see variable_del()
+ */
+function apachesolr_server_variable_del($server_id, $name) {
+  db_delete('apachesolr_server_variable')
+    ->condition('server_id', $server_id)
+    ->condition('name', $name)
+    ->execute();
+  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_load_all_servers');
   drupal_static_reset('apachesolr_get_solr');
 }
 
@@ -1669,7 +1758,7 @@ function apachesolr_server_status($host, $port, $path, $class = NULL) {
   $ping = FALSE;
   try {
     // Takes advantage of auto-loading.
-    $solr = new $class($host, $port, $path);
+    $solr = new $class('', $host, $port, $path);
     $ping = @$solr->ping(variable_get('apachesolr_ping_timeout', 4));
   }
   catch (Exception $e) {
@@ -2171,15 +2260,15 @@ function apachesolr_theme() {
 }
 
 /**
- * A better version of system_settings_form().
+ * A per-server version of system_settings_form().
  */
-function apachesolr_settings_form($form, $fieldset_key = NULL) {
+function apachesolr_settings_form($form, $server_id) {
+  $form['#server_id'] = $server_id;
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
     '#submit' => array('apachesolr_settings_form_submit'),
-    '#fieldset_key' => $fieldset_key,
   );
   $form['actions']['reset'] = array(
     '#type' => 'submit',
@@ -2194,22 +2283,14 @@ function apachesolr_settings_form_submit($form, &$form_state) {
   // Exclude unnecessary elements.
   form_state_values_clean($form_state);
 
-  // Find out if the default values are buried in a fieldset.
-  if (!empty($form['actions']['submit']['#fieldset_key'])) {
-    $fieldset_key = $form['actions']['submit']['#fieldset_key'];
-    if (isset($form[$fieldset_key])) {
-      $form = $form[$fieldset_key];
-    }
-  }
-
   foreach ($form_state['values'] as $key => $value) {
     if (is_array($value) && isset($form_state['values']['array_filter'])) {
       $value = array_keys(array_filter($value));
     }
 
     // There is no need to set default variable values.
-    if (!isset($form[$key]['#default_value']) || $form[$key]['#default_value'] != $value) {
-      variable_set($key, $value);
+    if (!isset($form[$key]['#default_value']) || is_array($value) || $form[$key]['#default_value'] != $value) {
+      apachesolr_server_variable_set($form['#server_id'], $key, $value);
     }
   }
 
@@ -2221,9 +2302,7 @@ function apachesolr_settings_form_reset($form, &$form_state) {
   form_state_values_clean($form_state);
 
   foreach ($form_state['values'] as $key => $value) {
-    if (variable_get($key, NULL) !== NULL) {
-      variable_del($key);
-    }
+    apachesolr_server_variable_del($form['#server_id'], $key);
   }
   drupal_set_message(t('The configuration options have been reset to their default values.'));
 }
@@ -2468,7 +2547,8 @@ function apachesolr_js() {
         $facet_map[$facet_definition['facet_field']] = $facet;
       }
     }
-    foreach (apachesolr_get_enabled_facets() as $module => $blocks) {
+    $server_id = apachesolr_default_server();
+    foreach (apachesolr_get_enabled_facets($server_id) as $module => $blocks) {
       foreach ($blocks as $block) {
         $show_more_selector[] = "#block-{$module}-{$facet_map[$block]}:has(.apachesolr-hidden-facet)";
       }

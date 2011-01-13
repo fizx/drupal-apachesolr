@@ -198,6 +198,31 @@ function apachesolr_schema() {
     ),
     'primary key' => array('server_id'),
   );
+  $schema['apachesolr_server_variable'] = array(
+    'description' => 'Variable values for each Solr server.',
+    'fields' => array(
+     'server_id' => array(
+        'description' => 'Unique identifier for the server',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'The name of the variable.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'The value of the variable.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+    ),
+    'primary key' => array('server_id', 'name'),
+  );
 
   return $schema;
 }
@@ -312,5 +337,56 @@ function apachesolr_update_7001() {
         'not null' => TRUE,
       )
     );
+  }
+}
+
+/**
+ * Create the per-server variable table.
+ */
+function apachesolr_update_7002() {
+  $schema['apachesolr_server_variable'] = array(
+    'description' => 'Variable values for each Solr server.',
+    'fields' => array(
+     'server_id' => array(
+        'description' => 'Unique identifier for the server',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'The name of the variable.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'value' => array(
+        'description' => 'The value of the variable.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+    ),
+    'primary key' => array('server_id', 'name'),
+  );
+  db_create_table('apachesolr_server_variable', $schema['apachesolr_server_variable']);
+  $server_id = variable_get('apachesolr_default_server', 'solr');
+  // Variables to be migrated:
+  $conf['apachesolr_enabled_facets'] = variable_get('apachesolr_enabled_facets', NULL);
+  $conf['apachesolr_search_query_fields'] = variable_get('apachesolr_search_query_fields', NULL);
+  $conf['apachesolr_search_type_boosts'] = variable_get('apachesolr_search_type_boosts', NULL);
+  $conf['apachesolr_search_comment_boost'] = variable_get('apachesolr_search_comment_boost', NULL);
+  $conf['apachesolr_search_changed_boost'] = variable_get('apachesolr_search_changed_boost', NULL);
+  $conf['apachesolr_search_sticky_boost'] = variable_get('apachesolr_search_sticky_boost', NULL);
+  $conf['apachesolr_search_promote_boost'] = variable_get('apachesolr_search_promote_boost', NULL);
+  $conf['apachesolr_search_excluded_types'] = variable_get('apachesolr_search_excluded_types', NULL);
+  foreach ($conf as $name => $value) {
+    if ($value !== NULL) {
+      db_merge('apachesolr_server_variable')
+        ->key(array('server_id' => $server_id, 'name' => $name))
+        ->fields(array('value' => serialize($value)))
+        ->execute();
+    }
+    variable_del($name);
   }
 }
