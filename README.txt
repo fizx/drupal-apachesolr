@@ -87,6 +87,10 @@ Similarly, move apache-solr-1.4.1/example/solr/conf/solrconfig.xml and rename
 it like solrconfig.bak. Then move the solrconfig.xml that comes with the
 ApacheSolr Drupal module to take its place.
 
+Finally, move apache-solr-1.4.1/example/solr/conf/protwords.txt and rename
+it like protwords.bak. Then move the protwords.txt that comes with the
+ApacheSolr Drupal module to take its place.
+
 Now start the solr application by opening a shell, changing directory to
 apache-solr-1.4.1/example, and executing the command java -jar start.jar
 
