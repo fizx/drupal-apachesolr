@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#528086  by pwolanin: Fix for special html entity search and display bugs. 
 #1020780 by pwolanin: Store variable settings per server for better flexibility.
 #891962  by jurcello, pwolanin: avoid incorrect filter substring matches, emit correct query string.
 #1018768 by pwolanin: fix notices during failed search request.
