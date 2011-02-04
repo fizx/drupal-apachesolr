@@ -28,12 +28,6 @@ function apachesolr_search_help($section) {
         '%percentage' => ((int)min(100, 100 * ($total - $remaining) / max(1, $total))) .'%',
         '@items' => format_plural($remaining, t('is 1 item'), t('are @count items')
       )));
-    case 'apachesolr_search#noresults':
-      return t('<ul>
-<li>Check if your spelling is correct, or try removing filters.</li>
-<li>Remove quotes around phrases to match each word individually: <em>"blue drop"</em> will match less than <em>blue drop</em>.</li>
-<li>You can require or exclude terms using + and -: <em>big +blue drop</em> will require a match on <em>blue</em> while <em>big blue -drop</em> will exclude results that contain <em>drop</em>.</li>
-</ul>');
   }
 }
 
@@ -155,7 +149,11 @@ function apachesolr_search_conditions() {
  * Implements hook_search_page().
  */
 function apachesolr_search_search_page($results) {
-  if (empty($results['apachesolr_search_browse'])) {
+  if (!empty($results['apachesolr_search_browse'])) {
+    // Show facet browsing blocks.
+    $output = apachesolr_search_page_browse($results['apachesolr_search_browse']);
+  }
+  elseif ($results) {
     $output = array(
       '#theme' => 'search_results',
       '#results' => $results,
@@ -163,7 +161,8 @@ function apachesolr_search_search_page($results) {
     );
   }
   else {
-    $output = apachesolr_search_page_browse($results['apachesolr_search_browse']);
+    // Give the user some custom help text.
+    $output = array('#markup' => theme('apachesolr_search_noresults'));
   }
   return $output;
 }
@@ -1156,38 +1155,6 @@ function apachesolr_search_form_search_submit($form, &$form_state) {
 }
 
 /**
- * Implements theme hook suggestion from template_preprocess_search_results().
- *
- * Available variables:
- * - $search_results: All results as it is rendered through
- *   search-result.tpl.php
- * - $module: The machine-readable name of the module (tab) being searched, such
- *   as "node" or "user".
- * - $pager: The pager.
- *
- *
- * @see template_preprocess_search_results()
- */
-function theme_apachesolr_search_results($variables) {
-  extract($variables);
-  $output = '';
-  if ($search_results) {
-    $output .= '<h2>' . t('Search results') . '</h2>';
-    $output .=<<<EOFM
-<ol class="search-results {$module}-results">
-  {$search_results}
-</ol>
-{$pager}
-EOFM;
-  }
-  else {
-    $output .= "<h2>" . t('Your search yielded no results') . "</h2>";
-    $output .= apachesolr_search_help('apachesolr_search#noresults', drupal_help_arg());
-  }
-  return $output;
-}
-
-/**
  * Implements hook_form_[form_id]_alter().
  *
  * This adds options to the apachesolr admin form.
@@ -1252,46 +1219,43 @@ function apachesolr_search_build_spellcheck($form, &$form_state) {
  */
 function apachesolr_search_theme() {
   return array(
-    'search_results__apachesolr_search' => array(
-      'function' => 'theme_apachesolr_search_results',
-    ),
     'apachesolr_breadcrumb_is_book_bid' => array(
-      'arguments' => array('field' => NULL, 'exclude' => FALSE),
+      'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
     'apachesolr_breadcrumb_uid' => array(
-      'arguments' => array('field' => NULL, 'exclude' => FALSE),
+      'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
     'apachesolr_breadcrumb_tid' => array(
-      'arguments' => array('field' => NULL, 'exclude' => FALSE),
+      'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
     'apachesolr_breadcrumb_type' => array(
-      'arguments' => array('field' => NULL, 'exclude' => FALSE),
+      'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
     'apachesolr_breadcrumb_language' => array(
-      'arguments' => array('field' => NULL, 'exclude' => FALSE),
+      'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
     'apachesolr_breadcrumb_field' => array(
-      'arguments' => array('field' => NULL),
+      'variables' => array('field' => NULL),
     ),
     'apachesolr_breadcrumb_changed' => array(
-      'arguments' => array('field' => NULL),
+      'variables' => array('field' => NULL),
       'function' => 'theme_apachesolr_breadcrumb_date_range',
     ),
     'apachesolr_breadcrumb_created' => array(
-      'arguments' => array('field' => NULL),
+      'variables' => array('field' => NULL),
       'function' => 'theme_apachesolr_breadcrumb_date_range',
     ),
     'apachesolr_browse_blocks' => array(
-      'arguments' => array('blocks' => NULL),
+      'variables' => array('blocks' => NULL),
     ),
     'apachesolr_currentsearch' => array(
-      'arguments' => array('total_found' => NULL, 'links' => NULL),
+      'variables' => array('total_found' => NULL, 'links' => NULL),
     ),
     'apachesolr_search_snippets' => array(
-      'arguments' => array('doc' => NULL, 'snippets' => NULL),
+      'variables' => array('doc' => NULL, 'snippets' => NULL),
     ),
     'apachesolr_search_noresults' => array(
-      'arguments' => array(),
+      'variables' => array(),
     ),
   );
 }
