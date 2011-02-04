@@ -275,7 +275,8 @@ function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $ba
   // Get blocks for all enabled filters
   $blocks = array();
   $rids = array_keys($user->roles);
-  foreach (apachesolr_get_enabled_facets() as $module => $module_facets) {
+  $server_id = apachesolr_default_server();
+  foreach (apachesolr_get_enabled_facets($server_id) as $module => $module_facets) {
     if (!module_exists($module)) {
       // When modules are disabled their facet settings may remain.
       continue;

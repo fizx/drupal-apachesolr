@@ -1011,7 +1011,7 @@ function apachesolr_form_block_admin_configure_alter(&$form, $form_state) {
   // Add a type-specific visibility checkbox.
   $module = $form['module']['#value'];
   $delta = $form['delta']['#value'];
-  $enabled_facets = apachesolr_get_enabled_facets();
+  $enabled_facets = apachesolr_get_enabled_facets(apachesolr_default_server());
 
   // If this block isn't enabled as a facet, get out of here.
   if (!isset($enabled_facets[$module][$delta])) {
