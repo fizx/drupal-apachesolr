@@ -1,7 +1,6 @@
 ; $Id$
 name = Apache Solr framework
 description = Framework for searching with Solr
-dependencies[] = search
 package = Apache Solr
 core = 7.x
 
