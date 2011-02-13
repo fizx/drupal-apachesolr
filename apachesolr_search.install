@@ -43,7 +43,9 @@ function apachesolr_search_update_7000() {
   $active = variable_get('search_active_modules', array('node', 'user'));
   $active[] = 'apachesolr_search';
   variable_set('search_active_modules', array_unique($active));
-  // TODO: if apachesolr was the default - make sure it's the default search module
+  if (variable_get('apachesolr_search_make_default', 0)) {
+    variable_set('search_default_module', 'apachesolr_search');
+  }
   variable_del('apachesolr_search_make_default');
 }
 
