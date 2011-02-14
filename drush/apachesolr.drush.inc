@@ -43,6 +43,12 @@ function apachesolr_drush_command() {
       'types' => dt('Optional. A space delimited list of content types to be marked for reindexing.'),
     ),
   );
+  $items['solr-index'] = array(
+    // the name of the function implementing your command.
+    'callback' => 'apachesolr_drush_solr_index',
+    // a short description of your command
+    'description' => dt('Reindexes content marked for (re)indexing.'),
+  );
   $items['solr-phpclient'] = array(
     'callback' => 'apachesolr_drush_solr_phpclient',
     'description' => dt('Downloads the required SolrPhpClient from googlecode.com.'),
@@ -78,6 +84,8 @@ function apachesolr_drush_help($section) {
       return dt("Used without parameters, this command deletes the entire Solr index. Used with parameters for content type, it deletes just the content types that are specified. After the index has been deleted, all content will be indexed again on future cron runs.");
     case 'drush:solr-reindex':
       return dt("Used without parameters, this command marks all of the content in the Solr index for reindexing. Used with paramters for content type, it marks just the content types that are specified. Reindexing is different than deleting as the content is still searchable while it is in queue to be reindexed. Reindexing is done on future cron runs.");
+    case 'drush:solr-index':
+      return dt("Reindexes content marked for (re)indexing. If you want to reindex all content or content of a specific type, use solr-reindex first to mark that content.");
     case 'drush:solr-phpclient':
       return dt("Downloads the SolrPhpClient libraray from googlecode.com. Include the optional path to an apachesolr module installation if you have more than one, or if the module is not yet enabled.");
     case 'drush:solr-search':
@@ -120,6 +128,13 @@ function apachesolr_drush_solr_reindex() {
   else {
     apachesolr_rebuild_index_table();
   }
+}
+
+function apachesolr_drush_solr_index() {
+  $path = drupal_get_path('module', 'apachesolr');
+  include_once($path . "/apachesolr.admin.inc");
+  apachesolr_batch_index_remaining();
+  drush_backend_batch_process();
 }
 
 function apachesolr_drush_solr_phpclient() {
