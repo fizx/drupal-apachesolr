@@ -182,7 +182,7 @@ function apachesolr_search_view($type = NULL) {
     // The form may be altered based on the query that was run.
     $form = drupal_get_form('search_form', NULL, $keys, $type);
   }
-  return $form . $results;
+  return theme('apachesolr_search_results_page', $form, $results);
 }
 
 function apachesolr_search_noresults() {
@@ -1109,6 +1109,9 @@ function apachesolr_search_theme() {
     'apachesolr_search_snippets' => array(
       'arguments' => array('doc' => NULL, 'snippets' => NULL),
     ),
+    'apachesolr_search_results_page' => array(
+      'arguments' => array('form' => '', 'results' => ''),
+    ),
   );
 }
 
@@ -1196,6 +1199,12 @@ function theme_apachesolr_search_snippets($doc, $snippets) {
   return implode(' ... ', $snippets) .' ...';
 }
 
+/**
+ * Theme function for the search results page.
+ */
+function theme_apachesolr_search_results_page($form, $results) {
+  return $form . $results;
+}
 
 function apachesolr_get_parent_terms($tids) {
   // Find the starting tid terms and then all their parents.
