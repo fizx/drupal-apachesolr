@@ -214,7 +214,8 @@ function apachesolr_search_view($type = NULL) {
     }
   }
   // Construct the search form.
-  return drupal_get_form('search_form', NULL, $keys, $type) . $content;
+  $form = drupal_get_form('search_form', NULL, $keys, $type);
+  return theme('apachesolr_search_results_page', $form, $content);
 }
 
 /**
@@ -1353,6 +1354,9 @@ function apachesolr_search_theme() {
     'apachesolr_search_noresults' => array(
       'arguments' => array(),
     ),
+    'apachesolr_search_results_page' => array(
+      'arguments' => array('form' => '', 'results' => ''),
+    ),
   );
 }
 
@@ -1486,6 +1490,12 @@ function theme_apachesolr_search_snippets($doc, $snippets = array()) {
   return $result . implode(' ... ', $snippets) . ' ...';
 }
 
+/**
+ * Theme function for the search results page.
+ */
+function theme_apachesolr_search_results_page($form, $results) {
+  return $form . $results;
+}
 
 /**
  * Brief message to display when no results match the query.
