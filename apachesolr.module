@@ -810,7 +810,7 @@ function apachesolr_block($op = 'list', $delta = 0, $edit = array()) {
           $docs = apachesolr_mlt_suggestions($block, apachesolr_document_id($node->nid));
           if (!empty($docs)) {
             $suggestions['subject'] = check_plain($block['name']);
-            $suggestions['content'] = theme('apachesolr_mlt_recommendation_block', $docs);
+            $suggestions['content'] = theme('apachesolr_mlt_recommendation_block', $docs, $delta);
             if (user_access('administer search')) {
               $suggestions['content'] .= l(t('Configure this block'), 'admin/build/block/configure/apachesolr/' . $delta, array('attributes' => array('class' => 'apachesolr-mlt-admin-link')));
             }
@@ -2156,7 +2156,7 @@ function apachesolr_theme() {
     ),
     // Returns a list of results (docs) in content recommendation block
     'apachesolr_mlt_recommendation_block' => array(
-      'arguments' => array('docs' => NULL),
+      'arguments' => array('docs' => NULL, 'delta' => NULL),
     ),
   );
 }
@@ -2257,7 +2257,7 @@ function apachesolr_mlt_load_block($delta) {
   return isset($blocks[$delta]) ? $blocks[$delta] : FALSE;
 }
 
-function theme_apachesolr_mlt_recommendation_block($docs) {
+function theme_apachesolr_mlt_recommendation_block($docs, $delta) {
   $links = array();
   foreach ($docs as $result) {
     // Suitable for single-site mode.
