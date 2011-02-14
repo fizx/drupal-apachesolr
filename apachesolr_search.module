@@ -288,6 +288,7 @@ function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $ba
       if ((isset($fc->facet_fields->$facet_field) && count((array) $fc->facet_fields->$facet_field) > 0) ||
           (isset($fc->facet_dates->$facet_field) && count((array) $fc->facet_dates->$facet_field) > 0)) {
         // This bit is modeled on block.module, block_list().
+        $data = module_invoke($module, 'block_view', $delta);
         $query = db_select('block', 'b');
         $br_alias = $query->leftJoin('block_role', 'br', 'b.module = br.module AND b.delta = br.delta');
         $query
@@ -304,7 +305,6 @@ function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $ba
         if ($block) {
           // TODO: not sure if we should show facets that have no corresponding enabled blocks here.
           // Anyways without this condition there will be warnings if fetchObject() returns false
-          $data = module_invoke($module, 'block_view', $delta);
           // We can safely assume these values, since we're taking over the block display.
           $block->visibility = TRUE;
           $block->enabled = TRUE;
