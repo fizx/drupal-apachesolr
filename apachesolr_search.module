@@ -550,7 +550,7 @@ function apachesolr_search_process_response($response, $query, $params) {
         }
       }
       // If there's no snippet at this point, add the teaser.
-      if (strlen($snippet) == 0) {
+      if (!$snippets) {
         if (isset($doc->teaser)) {
           $snippets[] = truncate_utf8($doc->teaser, 256, TRUE);
         }
