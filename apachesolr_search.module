@@ -237,7 +237,7 @@ function apachesolr_search_execute($keys, $filterstring, $solrsort, $base_path =
   // Add search terms and filters onto the breadcrumb.
   // We use the original $query to avoid exposing, for example, nodeaccess
   // filters in the breadcrumb.
-  drupal_set_breadcrumb(array_merge(menu_get_active_breadcrumb(), $query->get_breadcrumb()));
+  drupal_set_breadcrumb(array_merge(drupal_get_breadcrumb(), $query->get_breadcrumb()));
   return apachesolr_process_response($response, $final_query, $params);
 }
 
