@@ -811,7 +811,7 @@ function apachesolr_block_view($delta = '') {
       $docs = apachesolr_mlt_suggestions($block, apachesolr_document_id($node->nid));
       if (!empty($docs)) {
         $suggestions['subject'] = check_plain($block['name']);
-        $suggestions['content'] = theme('apachesolr_mlt_recommendation_block', array('docs' => $docs));
+        $suggestions['content'] = theme('apachesolr_mlt_recommendation_block', array('docs' => $docs, 'delta' => $delta));
         if (user_access('administer search')) {
            $suggestions['content'] .= l(t('Configure this block'), 'admin/build/block/configure/apachesolr/' . $delta, array('attributes' => array('class' => 'apachesolr-mlt-admin-link')));
         }
@@ -2258,7 +2258,7 @@ function apachesolr_theme() {
      * Returns a list of results (docs) in content recommendation block
      */
     'apachesolr_mlt_recommendation_block' => array(
-      'variables' => array('docs' => NULL),
+      'variables' => array('docs' => NULL, 'delta' => NULL),
     ),
   );
 }
