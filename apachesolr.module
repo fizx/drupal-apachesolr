@@ -1824,7 +1824,7 @@ function apachesolr_do_query($caller, DrupalSolrQueryInterface $current_query, $
     foreach ($query->params['fq'] as $delta => $value) {
       // Move the fq param if it has no local params and is not negative.
       if (!preg_match('/^(?:\{!|-)/', $value)) {
-        $qalt[] = $value;
+        $qalt[] = '(' . $value . ')';
         unset($query->params['fq'][$delta]);
       }
     }
