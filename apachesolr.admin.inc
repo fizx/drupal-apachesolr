@@ -44,10 +44,16 @@ function apachesolr_settings() {
   );
 
   $numbers = drupal_map_assoc(array(1, 5, 10, 20, 50, 100, 200));
+  $default_cron_limit = variable_get('apachesolr_cron_limit', 50);
+  // apachesolr_cron_limit may be overridden in settings.php. If its current
+  // value is not among the default set of options, add it.
+  if (!isset($numbers[$default_cron_limit])) {
+    $numbers[$default_cron_limit] = $default_cron_limit;
+  }
   $form['apachesolr_cron_limit'] = array(
     '#type' => 'select',
     '#title' => t('Number of items to index per cron run'),
-    '#default_value' => variable_get('apachesolr_cron_limit', 50),
+    '#default_value' => $default_cron_limit,
     '#options' => $numbers,
     '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce the number of items to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status')))
   );
