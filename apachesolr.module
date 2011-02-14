@@ -1196,6 +1196,11 @@ function apachesolr_date_facet_block($response, $query, $module, $delta, $facet_
     $gap = $field->gap;
     unset($field->gap);
 
+    if (isset($field->start)) {
+      $start = $field->start;
+      unset($field->start);
+    }
+
     // Treat each date facet as a range start, and use the next date
     // facet as range end.  Use 'end' for the final end.
     $range_end = array();
