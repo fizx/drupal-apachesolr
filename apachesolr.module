@@ -1147,6 +1147,7 @@ function apachesolr_date_gap_drilldown($gap) {
 function apachesolr_facetcount_form($module, $delta) {
   $initial = variable_get('apachesolr_facet_query_initial_limits', array());
   $limits = variable_get('apachesolr_facet_query_limits', array());
+  $children = variable_get('apachesolr_facet_show_children', array());
   $facet_missing = variable_get('apachesolr_facet_missing', array());
 
   $limit = drupal_map_assoc(array(50, 40, 30, 20, 15, 10, 5, 3));
@@ -1165,6 +1166,13 @@ function apachesolr_facetcount_form($module, $delta) {
     '#options' => $limit,
     '#description' => t('The maximum number of filter links to show in this block.'),
     '#default_value' => isset($limits[$module][$delta]) ? $limits[$module][$delta] : variable_get('apachesolr_facet_query_limit_default', 20),
+  );
+  $form['apachesolr_facet_show_children'] = array(
+    '#type' => 'radios',
+    '#title' => t('Always show child facets'),
+    '#options' => array(0 => t('No'), 1 => t('Yes')),
+    '#description' => t('Show the child facets even if the parent facet is not selected.'),
+    '#default_value' => isset($children[$module][$delta]) ? $children[$module][$delta] : 0,
   );
   $form['apachesolr_facet_missing'] = array(
     '#type' => 'radios',
@@ -1190,6 +1198,9 @@ function apachesolr_facetcount_save($edit) {
   $initial = variable_get('apachesolr_facet_query_initial_limits', array());
   $initial[$module][$delta] = (int)$edit['apachesolr_facet_query_initial_limit'];
   variable_set('apachesolr_facet_query_initial_limits', $initial);
+  $children = variable_get('apachesolr_facet_show_children', array());
+  $children[$module][$delta] = (int)$edit['apachesolr_facet_show_children'];
+  variable_set('apachesolr_facet_show_children', $children);
   $facet_missing = variable_get('apachesolr_facet_missing', array());
   $facet_missing[$module][$delta] = (int)$edit['apachesolr_facet_missing'];
   variable_set('apachesolr_facet_missing', $facet_missing);
