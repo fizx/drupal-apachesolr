@@ -165,6 +165,7 @@ function apachesolr_node_to_document($nid, $namespace) {
  * Extract taxonomy from $node and add to dynamic fields.
  */
 function apachesolr_add_taxonomy_to_document(&$document, $node) {
+  static $ancestors = array();
   if (isset($node->taxonomy) && is_array($node->taxonomy)) {
     foreach ($node->taxonomy as $term) {
       // Double indexing of tids lets us do effecient searches (on tid)
@@ -174,8 +175,10 @@ function apachesolr_add_taxonomy_to_document(&$document, $node) {
       // sure that searches for general categories match specific
       // categories, e.g. Fruit -> apple, a search for fruit will find
       // content categorized with apple.
-      $ancestors = taxonomy_get_parents_all($term->tid);
-      foreach ($ancestors as $ancestor) {
+      if (!isset($ancestors[$term->tid])) {
+        $ancestors[$term->tid] = taxonomy_get_parents_all($term->tid);
+      }
+      foreach ($ancestors[$term->tid] as $ancestor) {
         $document->setMultiValue('tid', $ancestor->tid);
         $document->setMultiValue('im_vid_'. $ancestor->vid, $ancestor->tid);
         $name = apachesolr_clean_text($ancestor->name);
