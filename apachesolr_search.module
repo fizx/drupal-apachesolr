@@ -570,7 +570,9 @@ function apachesolr_search_process_response($response, $query, $params) {
         $extra[] = format_plural($doc->is_upload_count, '1 attachment', '@count attachments');
       }
       // Allow modules to alter each document and its extra information.
-      drupal_alter('apachesolr_search_result', $doc, $extra);
+      $data = array($doc);
+      $data['__drupal_alter_by_ref'] = array(&$extra);
+      drupal_alter('apachesolr_search_result', $data);
       $fields = array();
       foreach ($doc->getFieldNames() as $field_name) {
         $fields[$field_name] = $doc->getField($field_name);
