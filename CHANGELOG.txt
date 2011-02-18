@@ -6,6 +6,18 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
 #1064782 by jpmckinney: Use module_load_include, module_load_install instead of include_once.
+#791916 by Network | jpmckinney: Allow facet search block to have children always show.
+#937328 by Davy Van Den Bremt | pwolanin: Drush support for indexing remaining nodes.
+#1060698 by dww | jpmckinney: Always display the current value of apachesolr_cron_limit in the admin UI.
+#904312 by pounard: Use drupal_get_breadcrumb() not menu_get_active_breadcrumb().
+#616888 bangpound: Pass delta to MLT blocks' theme function.
+#864146 by pwolanin | jpmckinney: Fixed When moving fq to q.alt, we should parenthesize each fq.
+#896324 by ahankinson | jpmckinney: Fixed module_invoke() called too late.
+#840358 by pwolanin | torstenzenk: Fixed Error searching Taxonomies.
+#991444 by Nick_vh: None of start, end, gap should show up as date facets.
+#835674 pwolanin: Remove search module dependency from apachesolr.
+#961570 jpmckinney: if apachesolr_search was the default search module in D6, make it so in D7.
+#878996 by pwolanin | weri: Added Don't break the loop.
 #1050044 by pwolanin: hook_theme API fix, and revert to using core theme('search_results').
 #1026916 by dmitry_bezer: apachesolr_get_enabled_facets() mandatory parameter was omitted.
 #528086  by pwolanin: Fix for special html entity search and display bugs. 
