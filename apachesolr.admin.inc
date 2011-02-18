@@ -171,8 +171,6 @@ function apachesolr_settings($form, &$form_state) {
 
   // Perform a check to ensure the server is there
   if (empty($_POST)) {
-    // update_help() loads install.inc via include_once, so not much
-    // point in working around it.
     module_load_install('apachesolr');
     foreach (apachesolr_requirements('runtime') as $requirement) {
       $status = $requirement['severity'] == REQUIREMENT_ERROR ? 'error' : 'status';

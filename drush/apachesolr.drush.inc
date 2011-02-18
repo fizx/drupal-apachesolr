@@ -106,7 +106,7 @@ function apachesolr_drush_help($section) {
  */
 function apachesolr_drush_solr_delete_index() {
   $args = func_get_args();
-  module_load_include('inc', 'apachesolr', 'admin');
+  module_load_include('inc', 'apachesolr', 'apachesolr.admin');
   if (count($args) > 0) {
     foreach ($args as $type) {
       apachesolr_delete_index($type);
@@ -130,7 +130,7 @@ function apachesolr_drush_solr_reindex() {
 }
 
 function apachesolr_drush_solr_index() {
-  module_load_include('inc', 'apachesolr', 'admin');
+  module_load_include('inc', 'apachesolr', 'apachesolr.admin');
   apachesolr_batch_index_remaining();
   drush_backend_batch_process();
 }
