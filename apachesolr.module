@@ -420,7 +420,7 @@ function apachesolr_index_nodes($rows, $namespace = '', $callback = 'apachesolr_
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
     return FALSE;
   }
-  include_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.index.inc');
+  module_load_include('inc', 'apachesolr', 'apachesolr.index');
   $documents = array();
   $old_position = apachesolr_get_last_index($namespace);
   $position = $old_position;
@@ -530,7 +530,7 @@ function apachesolr_index_updated($updated = NULL) {
  */
 function apachesolr_cron() {
   // Mass update and delete functions are in the include file.
-  include_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.index.inc');
+  module_load_include('inc', 'apachesolr', 'apachesolr.index');
   apachesolr_cron_check_node_table();
   try {
     $solr = apachesolr_get_solr();
@@ -1435,7 +1435,7 @@ function apachesolr_static_response_cache($response = NULL, $namespace = 'apache
  */
 function apachesolr_drupal_query($keys = '', $filters = '', $solrsort = '', $base_path = '') {
   list($module, $class) = variable_get('apachesolr_query_class', array('apachesolr', 'Solr_Base_Query'));
-  include_once drupal_get_path('module', $module) .'/'. $class .'.php';
+  module_load_include('php', $module, $class);
 
   try {
     $query = new $class(apachesolr_get_solr(), $keys, $filters, $solrsort, $base_path);
