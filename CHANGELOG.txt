@@ -6,6 +6,14 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 Apache Solr Search Integration 6.x-1.3, xxxx-xx-xx
 ------------------------------
 #890314 by quaoar: avoid searching twice when using the search block. 
+#1064782 by jpmckinney: Use module_load_include, module_load_install instead of include_once
+#791916 by Network | jpmckinney: Allow facet search block to have children always show
+#937328 by Davy Van Den Bremt | pwolanin: Drush support for indexing remaining nodes.
+#1060698 by dww | jpmckinney: Always display the current value of apachesolr_cron_limit in the admin UI
+#904312 by pounard: Use drupal_get_breadcrumb() not menu_get_active_breadcrumb()
+#908252 by katbailey: Wrap the output of apachesolr_search_view in a theme function
+#616888 bangpound: Pass delta to MLT blocks' theme function
+#991444 by Nick_vh: None of start, end, gap should show up as date facets.
 #528086 by pwolanin: Fix for special html entity search and display bugs.
 #957652 by aegnor, pwolanin: fix str_replace may remove a substring in filter_extract.
 #983458 by craig_: respect apachesolr_read_only setting for mass updates, use defined constants.
