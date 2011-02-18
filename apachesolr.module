@@ -433,7 +433,7 @@ function apachesolr_index_nodes($rows, $namespace) {
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
     return FALSE;
   }
-  include_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.index.inc');
+  module_load_include('inc', 'apachesolr', 'index');
   $documents = array();
   $old_position = apachesolr_get_last_index($namespace);
   $position = $old_position;
