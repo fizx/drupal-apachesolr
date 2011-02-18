@@ -5,8 +5,9 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.3, xxxx-xx-xx
 ------------------------------
-#528086  by pwolanin: Fix for special html entity search and display bugs.
-#957652  by aegnor, pwolanin: fix str_replace may remove a substring in filter_extract.
+#890314 by quaoar: avoid searching twice when using the search block. 
+#528086 by pwolanin: Fix for special html entity search and display bugs.
+#957652 by aegnor, pwolanin: fix str_replace may remove a substring in filter_extract.
 #983458 by craig_: respect apachesolr_read_only setting for mass updates, use defined constants.
 #983572 by amateescu, pwolanin: fix for empty filter values causing Solr error.
 #949768 by pwolanin: Index more CCK fields by default.

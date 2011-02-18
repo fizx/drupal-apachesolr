@@ -867,6 +867,7 @@ function apachesolr_search_form_search_theme_form_alter(&$form, $form_state) {
  */
 function apachesolr_search_form_search_block_form_alter(&$form, $form_state) {
   if (variable_get('apachesolr_search_make_default', 0)) {
+    $form['#action'] = url('search/apachesolr_search');
     if (!isset($form['#submit'])) {
       $form['#submit'] = array('apachesolr_search_search_box_form_submit');
     }
