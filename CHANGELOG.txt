@@ -6,6 +6,18 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
 #890314 by quaoar: avoid searching twice when using the search block.
+#1064782 by jpmckinney: Use module_load_include, module_load_install instead of include_once
+#925608 by janusman | jpmckinney: Quick perf improvement: cache term ancestors on indexing
+#799890 by tbenice | jpmckinney: Alter search result extra information
+#791916 by Network | jpmckinney: Allow facet search block to have children always show
+#937328 by Davy Van Den Bremt | pwolanin: Drush support for indexing remaining nodes.
+#1060698 by dww | jpmckinney: Always display the current value of apachesolr_cron_limit in the admin UI
+#904312 by pounard: Use drupal_get_breadcrumb() not menu_get_active_breadcrumb()
+#908252 by katbailey | jpmckinney: Wrap the output of apachesolr_search_view in a theme function
+#616888 bangpound: Pass delta to MLT blocks' theme function
+#912454 by soyarma: Undefined variable $snippet on line 552
+#991444 by Nick_vh: None of start, end, gap should show up as date facets.
+#963484 by e-anima: Missing $delta in apachesolr_search_taxonomy_facet_block
 #891962 by jurcello, pwolanin: avoid incorrect filter substring matches, emit correct query string.
 #949768 by pwolanin: Index more CCK fields by default.
 #957652 by aegnor, pwolanin: fix str_replace may remove a substring in filter_extract.
