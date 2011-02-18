@@ -5,6 +5,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#901720 by jpmckinney | robertDouglass: Highlighting snippets in search results not flexible enough, and logic improvement.
 #1064782 by jpmckinney: Use module_load_include, module_load_install instead of include_once.
 #791916 by Network | jpmckinney: Allow facet search block to have children always show.
 #937328 by Davy Van Den Bremt | pwolanin: Drush support for indexing remaining nodes.

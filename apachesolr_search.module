@@ -565,23 +565,32 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
 function apachesolr_search_process_response($response, DrupalSolrQueryInterface $query) {
   $results = array();
   // We default to getting snippets from the body.
-  $hl_fl = isset($query->params['hl.fl']) ? $query->params['hl.fl'] : 'body';
+  $hl_fl = isset($query->params['hl.fl']) ? explode(',', $query->params['hl.fl']) : array('body');
   $total = $response->response->numFound;
   pager_default_initialize($total, $query->params['rows']);
   if ($total > 0) {
     foreach ($response->response->docs as $doc) {
       $extra = array();
 
+      // Start with an empty snippets array.
+      $snippets = array();
+
       // Find the nicest available snippet.
-      if (isset($response->highlighting->{$doc->id}->$hl_fl)) {
-        $snippet = theme('apachesolr_search_snippets__'. $doc->entity . '__' . $doc->bundle, array('doc' => $doc, 'snippets' => $response->highlighting->{$doc->id}->$hl_fl));
+      foreach ($hl_fl as $hl_param) {
+        if (isset($response->highlighting->{$doc->id}->$hl_param)) {
+          // Merge arrays preserving keys.
+          foreach ($response->highlighting->{$doc->id}->$hl_param as $values) {
+            $snippets[$hl_param] = $values;
+          }
+        }
       }
-      elseif (isset($doc->teaser)) {
-        $snippet = theme('apachesolr_search_snippets__'. $doc->entity . '__' . $doc->bundle, array('doc' => $doc, 'snippets' => array(truncate_utf8($doc->teaser, 256, TRUE))));
+      // If there's no snippet at this point, add the teaser.
+      if (!$snippets) {
+        if (isset($doc->teaser)) {
+          $snippets[] = truncate_utf8($doc->teaser, 256, TRUE);
+        }
       }
-      else {
-        $snippet = '';
-      }
+      $snippet = theme('apachesolr_search_snippets__'. $doc->entity . '__' . $doc->bundle, array('doc' => $doc, 'snippets' => $snippets));
 
       if (!isset($doc->body)) {
         $doc->body = $snippet;
@@ -612,6 +621,7 @@ function apachesolr_search_process_response($response, DrupalSolrQueryInterface 
         // These values are not required by the search module but are provided
         // to give entity callbacks and themers more flexibility.
         'score' => $doc->score,
+        'snippets' => $snippets,
         'snippet' => $snippet,
         'fields' => $fields,
         'entity_type' => $doc->entity,
@@ -1253,7 +1263,7 @@ function apachesolr_search_theme() {
       'variables' => array('total_found' => NULL, 'links' => NULL),
     ),
     'apachesolr_search_snippets' => array(
-      'variables' => array('doc' => NULL, 'snippets' => NULL),
+      'variables' => array('doc' => NULL, 'snippets' => array()),
     ),
     'apachesolr_search_noresults' => array(
       'variables' => array(),
@@ -1389,8 +1399,19 @@ function theme_apachesolr_currentsearch($vars) {
  */
 function theme_apachesolr_search_snippets($vars) {
   $result = '';
-  if(is_array($vars['snippets'])){
-    $result = implode(' ... ', $vars['snippets']);
+  if (is_array($vars['snippets'])) {
+    $snippets = $vars['snippets'];
+    if (isset($snippets['body'])) {
+      $result .= $snippets['body'];
+      unset($snippets['body']);
+    }
+    if (isset($snippets['teaser'])) {
+      $result .= (strlen($result) > 0) ? ' ... ' : '';
+      $result .= $snippets['teaser'];
+      unset($snippets['teaser']);
+    }
+    $result .= (strlen($result) > 0) ? ' ... ' : '';
+    $result .= implode(' ... ', $snippets);
   }
   return $result . ' ...';
 }
