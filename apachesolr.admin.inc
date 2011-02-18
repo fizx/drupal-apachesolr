@@ -173,9 +173,7 @@ function apachesolr_settings($form, &$form_state) {
   if (empty($_POST)) {
     // update_help() loads install.inc via include_once, so not much
     // point in working around it.
-    include_once DRUPAL_ROOT.'/includes/install.inc';
-    module_load_include('install', 'apachesolr');
-
+    module_load_install('apachesolr');
     foreach (apachesolr_requirements('runtime') as $requirement) {
       $status = $requirement['severity'] == REQUIREMENT_ERROR ? 'error' : 'status';
       if ($status == 'error') {
