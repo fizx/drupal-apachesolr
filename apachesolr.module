@@ -1787,7 +1787,7 @@ function apachesolr_static_response_cache($response = NULL, $namespace = 'apache
  */
 function apachesolr_drupal_query($keys = '', $filters = '', $solrsort = '', $base_path = '', $solr = NULL) {
   list($module, $class) = variable_get('apachesolr_query_class', array('apachesolr', 'Solr_Base_Query'));
-  include_once drupal_get_path('module', $module) .'/'. $class .'.php';
+  module_load_include('php', $module, $class);
 
   if (empty($solr)) {
     $solr = apachesolr_get_solr();
