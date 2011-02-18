@@ -433,7 +433,7 @@ function apachesolr_index_nodes($rows, $namespace) {
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
     return FALSE;
   }
-  module_load_include('inc', 'apachesolr', 'index');
+  module_load_include('inc', 'apachesolr', 'apachesolr.index');
   $documents = array();
   $old_position = apachesolr_get_last_index($namespace);
   $position = $old_position;
