@@ -1,4 +1,3 @@
-; $Id$
 name = Apache Solr CCK text search
 description = Index and search on CCK text fields. Only needed when using the CCK Content Permissions module.
 dependencies[] = apachesolr

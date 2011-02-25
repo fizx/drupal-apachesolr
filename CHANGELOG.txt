@@ -1,4 +1,3 @@
-// $Id$
 
 Apache Solr integration x.x-x.x, xxxx-xx-xx
 ------------------------------
