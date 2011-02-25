@@ -1,4 +1,3 @@
-; $Id$
 name = Apache Solr search
 description = Search with Solr
 dependencies = search apachesolr

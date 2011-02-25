@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 require_once 'SolrPhpClient/Apache/Solr/Service.php';
 

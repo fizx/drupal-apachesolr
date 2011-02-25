@@ -1,4 +1,3 @@
-/* $Id$ */
 
 This module integrates Drupal with the Apache Solr search platform. Solr search
 can be used as a replacement for core content search and boasts both extra

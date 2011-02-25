@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Overrides taxonomy/term/X links
