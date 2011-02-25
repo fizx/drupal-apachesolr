@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class SolrBaseQuery implements DrupalSolrQueryInterface {
 

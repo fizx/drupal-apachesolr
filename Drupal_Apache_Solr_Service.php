@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class DrupalApacheSolrService extends Apache_Solr_Service {
 

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * A test class that prvides the setUp and tearDown of a solr core on the

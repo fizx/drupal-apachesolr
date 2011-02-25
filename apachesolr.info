@@ -1,4 +1,3 @@
-; $Id$
 name = Apache Solr framework
 description = Framework for searching with Solr
 package = Apache Solr

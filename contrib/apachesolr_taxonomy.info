@@ -1,4 +1,3 @@
-; $Id$
 name = Apache Solr Taxonomy
 description = Override handling of taxonomy/term/X links using Solr search. Deprecated in favor of Views integration.
 dependencies[] = taxonomy
