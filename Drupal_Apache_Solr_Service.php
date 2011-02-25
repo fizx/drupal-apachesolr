@@ -1,5 +1,4 @@
 <?php
-// $Id$
 require_once 'SolrPhpClient/Apache/Solr/Service.php';
 
 class Drupal_Apache_Solr_Service extends Apache_Solr_Service {

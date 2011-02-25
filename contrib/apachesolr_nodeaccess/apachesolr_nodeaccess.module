@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Implementation of apachesolr_update_index
