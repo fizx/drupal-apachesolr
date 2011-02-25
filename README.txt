@@ -1,4 +1,3 @@
-/* $Id$ */
 
 Apache Solr Search Integration 5.x-1.0
 

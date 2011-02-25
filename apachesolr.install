@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function apachesolr_uninstall() {
   variable_del('apachesolr_cron_last');

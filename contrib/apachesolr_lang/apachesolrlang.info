@@ -1,4 +1,3 @@
-; $Id$
 name = Apache Solr languages
 description = Adds language facets.
 dependencies = locale apachesolr search

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class DrupalApacheSolrNodeAccess extends DrupalTestCase {
   function get_info() {

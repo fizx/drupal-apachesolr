@@ -1,4 +1,3 @@
-; $Id$
 name = ApacheSolr Image integration
 description = Integrates the ApacheSolr and Image modules
 dependencies = image apachesolr

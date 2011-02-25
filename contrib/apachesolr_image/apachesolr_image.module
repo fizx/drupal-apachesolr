@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function apachesolr_image_apachesolr_update_index(&$document, $node) {
   if ($node->type == 'image') {

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class DrupalSolrQueryBreadcrumbTests extends DrupalTestCase {
   function get_info() {

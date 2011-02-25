@@ -1,5 +1,4 @@
 <?php
-//$ID$
 
 function apachesolr_mlt_install() {
   switch ($GLOBALS['db_type']) {
