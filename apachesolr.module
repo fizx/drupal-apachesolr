@@ -14,7 +14,7 @@ define('APACHESOLR_READ_ONLY', 1);
 function apachesolr_menu() {
   $items = array();
   $items['admin/config/search/apachesolr'] = array(
-    'title'              => 'Apache Solr search integration',
+    'title'              => 'Apache Solr',
     'description'        => 'Administer Apache Solr.',
     'page callback'      => 'drupal_get_form',
     'page arguments'     => array('apachesolr_settings'),
