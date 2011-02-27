@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#704190 by pwolanin | robertDouglass | jpmckinney: Add page callbacks to display conf files in the index in reports.
 #925608 by jpmckinney | janusman: Quick perf improvement: cache term ancestors on indexing.
 #1059380 by jpmckinney: apachesolr_fields_list_display_callback doesn't return if $facet in list_allowed_values.
 #1059368 by jpmckinney: apachesolr_clear_cache as a #submit callback doesn't work.
