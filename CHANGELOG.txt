@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#1059368 by jpmckinney: apachesolr_clear_cache as a #submit callback doesn't work.
 #1072884 by justinrandell: incorrect use of query->condition() in apachesolr_cron().
 #901720 by jpmckinney | robertDouglass: Highlighting snippets in search results not flexible enough, and logic improvement.
 #1064782 by jpmckinney: Use module_load_include, module_load_install instead of include_once.

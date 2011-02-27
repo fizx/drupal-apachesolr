@@ -661,6 +661,10 @@ function apachesolr_flush_caches() {
  * require clearing Luke cache etc.
  */
 function apachesolr_clear_cache($server_id) {
+  // Reset $server_id to NULL if call originates form a form submit handler.
+  if (is_array($server_id)) {
+    $server_id = NULL;
+  }
   try {
     $solr = apachesolr_get_solr($server_id);
     $solr->clearCache();
