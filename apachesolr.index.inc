@@ -142,6 +142,9 @@ function apachesolr_node_to_document($node, $namespace) {
  * Callback that converts term_reference field into an array
  */
 function apachesolr_term_reference_indexing_callback($node, $field_name, $index_key, $field_info) {
+  // Keep ancestors cached
+  static $ancestors = array();
+
   $fields = array();
   $vocab_names = array();
   if (!empty($node->{$field_name}) && function_exists('taxonomy_get_parents_all')) {
@@ -159,8 +162,10 @@ function apachesolr_term_reference_indexing_callback($node, $field_name, $index_
         'key' => $index_key,
         'value' => $item['tid'],
       );
-      $ancestors = taxonomy_get_parents_all($item['tid']);
-      foreach ($ancestors as $ancestor) {
+      if (!isset($ancestors[$item['tid']])) {
+        $ancestors[$item['tid']] = taxonomy_get_parents_all($item['tid']);
+      }
+      foreach ($ancestors[$item['tid']] as $ancestor) {
         $fields[] = array(
           'key' => 'tid',
           'value' => $ancestor->tid,
