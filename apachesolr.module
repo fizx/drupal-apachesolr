@@ -604,7 +604,7 @@ function apachesolr_cron() {
     $query = db_select('apachesolr_search_node', 'asn');
     $n_alias = $query->innerJoin('node', 'n', 'n.nid = asn.nid');
     $query->fields($n_alias, array('nid', 'status'));
-    $query->condition('asn.status', "$n_alias.status", '<>');
+    $query->where("asn.status <> $n_alias.status");
     $result = $query->execute();
     foreach ($result as $node) {
       apachesolr_node_update($node, FALSE);
