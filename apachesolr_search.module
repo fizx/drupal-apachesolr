@@ -1182,7 +1182,7 @@ function apachesolr_search_form_apachesolr_settings_alter(&$form, $form_state) {
     '#default_value' => variable_get('apachesolr_search_browse', 'browse'),
     '#description' => t("This is what is shown when the user enters an empty search, or removes all filters from an active search. Remember to enable filters on the !filterslink and assign blocks to regions on the !blocklink", array(
       '!filterslink' => l('enabled filters page', 'admin/config/search/apachesolr/enabled-filters'),
-      '!blocklink' => l('block settings page', 'admin/build/block'),
+      '!blocklink' => l('block settings page', 'admin/structure/block'),
     )),
   );
 

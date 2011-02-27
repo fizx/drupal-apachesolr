@@ -832,7 +832,7 @@ function apachesolr_block_view($delta = '') {
         $suggestions['subject'] = check_plain($block['name']);
         $suggestions['content'] = theme('apachesolr_mlt_recommendation_block', array('docs' => $docs, 'delta' => $delta));
         if (user_access('administer search')) {
-           $suggestions['content'] .= l(t('Configure this block'), 'admin/build/block/configure/apachesolr/' . $delta, array('attributes' => array('class' => 'apachesolr-mlt-admin-link')));
+           $suggestions['content'] .= l(t('Configure this block'), 'admin/structure/block/manage/apachesolr/' . $delta . '/configure', array('attributes' => array('class' => 'apachesolr-mlt-admin-link')));
         }
       }
     }

@@ -682,7 +682,7 @@ function apachesolr_mlt_add_block_form() {
 function apachesolr_mlt_add_block_form_submit($form, &$form_state) {
   apachesolr_mlt_save_block($form_state['values']);
   drupal_set_message('New content recommendation block created.  Drag it into a region to enable it');
-  $form_state['redirect'] = 'admin/build/block';
+  $form_state['redirect'] = 'admin/structure/block';
 }
 
 /**
@@ -947,7 +947,7 @@ function apachesolr_mlt_delete_block_form($form_state, $delta) {
 
     return confirm_form($form,
       t('Are you sure you want to delete the Apache Solr content recommendation block %name?', array('%name' => $block['name'])),
-      'admin/build/block',
+      'admin/structure/block',
       t('The block will be deleted. This action cannot be undone.'),
       t('Delete'), t('Cancel'));
   }
@@ -958,7 +958,7 @@ function apachesolr_mlt_delete_block_form_submit($form, &$form_state) {
   unset($blocks[$form_state['values']['delta']]);
   variable_set('apachesolr_mlt_blocks', $blocks);
   drupal_set_message(t('The block has been deleted.'));
-  $form_state['redirect'] = 'admin/build/block';
+  $form_state['redirect'] = 'admin/structure/block';
 }
 
 /**
