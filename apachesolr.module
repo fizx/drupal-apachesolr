@@ -2103,7 +2103,7 @@ function apachesolr_fields_list_display_callback($facet, $options) {
   if (isset($fields[$field_name])) {
     $allowed_values = list_allowed_values($field);
     if (isset($allowed_values[$facet])) {
-      $output = field_filter_xss($allowed_values[$facet]);
+      return field_filter_xss($allowed_values[$facet]);
     }
   }
   else {
