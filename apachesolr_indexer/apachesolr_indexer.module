@@ -1,0 +1,866 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Indexer for the ApacheSolr module.
+ */
+
+function apachesolr_permission() {
+  return array(
+    'configure indexing settings' => array(
+      'title' => t('Configure indexing settings'),
+      'description' => t('Configure how Apachesolr will index content and what content will get indexed.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function apachesolr_indexer_menu() {
+
+  $items['indexer-test'] = array(
+    'title' => 'Indexer text',
+    'page callback' => 'apachesolr_test_page',
+    'access arguments' => array('access content'),
+  );
+
+  $items['admin/config/search/apachesolr/indexer'] = array(
+    'title' => 'Indexing',
+    'page callback' => 'apachesolr_indexer_configure',
+    'file' => 'apachesolr_indexer.admin.inc',
+    'access arguments' => array('configure indexing settings'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/search/apachesolr/indexer/status'] = array(
+    'title' => 'Indexing',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['admin/config/search/apachesolr/indexer/bundles'] = array(
+    'title' => 'Bundles',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('apachesolr_indexer_config_form'),
+    'file' => 'apachesolr_indexer.admin.inc',
+    'access arguments' => array('configure indexing settings'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/search/apachesolr/indexer/reindex'] = array(
+    'title' => 'Reindex',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('apachesolr_indexer_action_form'),
+    'file' => 'apachesolr_indexer.admin.inc',
+    'access arguments' => array('configure indexing settings'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/search/apachesolr/indexer/reindex/delete'] = array(
+    'title' => 'Reindex',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('apachesolr_indexer_action_form_delete_confirm'),
+    'file' => 'apachesolr_indexer.admin.inc',
+    'access arguments' => array('configure indexing settings'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/search/apachesolr/indexer/reindex/reset'] = array(
+    'title' => 'Reindex',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('apachesolr_indexer_action_form_reset_confirm'),
+    'file' => 'apachesolr_indexer.admin.inc',
+    'access arguments' => array('configure indexing settings'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function apachesolr_test_page() {
+
+  // Test run our cron hook.
+  apachesolr_indexer_cron();
+
+  //dpm($item);
+  $queue = DrupalQueue::get('apachesolr_indexer_entities');
+
+  /*
+  $item = $queue->claimItem(1);
+  if ($item) {
+    apachesolr_indexer_process_entity($item->data);
+    $queue->deleteItem($item);
+  }
+  */
+
+  while ($item = $queue->claimItem(1)) {
+    apachesolr_indexer_process_entity($item->data);
+    $queue->deleteItem($item);
+  }
+
+  return array('#markup' => 'x');
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function apachesolr_indexer_entity_info_alter(&$entity_info) {
+
+  // First set defaults so that we needn't worry about NULL keys.
+  foreach (array_keys($entity_info) as $type) {
+    $entity_info[$type] += array('apachesolr' => array());
+    $entity_info[$type]['apachesolr'] += array(
+      'indexable' => FALSE,
+      'status callback' => '',
+      'document callback' => '',
+      'reindex callback' => '',
+    );
+  }
+
+  // Set those values that we know.  Other modules can do so
+  // for their own entities if they want.
+  $entity_info['node']['apachesolr']['indexable'] = TRUE;
+  $entity_info['node']['apachesolr']['status callback'] = 'apachesolr_indexer_node_status_callback';
+  $entity_info['node']['apachesolr']['document callback'] = 'apachesolr_indexer_solr_document_node';
+  $entity_info['node']['apachesolr']['reindex callback'] = 'apachesolr_indexer_solr_reindex_node';
+
+  $entity_info['user']['apachesolr']['indexable'] = TRUE;
+  $entity_info['user']['apachesolr']['status callback'] = 'apachesolr_indexer_user_status_callback';
+  $entity_info['user']['apachesolr']['document callback'] = 'apachesolr_indexer_solr_document_user';
+  $entity_info['user']['apachesolr']['reindex callback'] = 'apachesolr_indexer_solr_reindex_user';
+
+  // For any supported entity type and bundle, flag it for indexing.
+  foreach ($entity_info as $entity_type => $info) {
+    if ($info['apachesolr']['indexable']) {
+      $supported = apachesolr_indexer_get_bundles('default', $entity_type);
+      foreach (array_keys($info['bundles']) as $bundle) {
+        if (in_array($bundle, $supported)) {
+          $entity_info[$entity_type]['bundles'][$bundle]['apachesolr']['index'] = TRUE;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Reindexing callback for ApacheSolr, for nodes.
+ */
+function apachesolr_indexer_solr_reindex_node() {
+
+  $transaction = db_transaction();
+  try {
+    db_delete('apachesolr_indexer_entities')
+      ->condition('entity_type', 'node')
+      ->execute();
+
+    $select = db_select('node', 'n');
+    $select->addExpression("'node'", 'entity_type');
+    $select->addField('n', 'nid', 'entity_id');
+    $select->addField('n', 'type', 'bundle');
+    $select->addField('n', 'status', 'status');
+    $select->addExpression(REQUEST_TIME, 'changed');
+    $select->condition('n.type', apachesolr_indexer_get_bundles('default', 'node'), 'IN');
+
+    $insert = db_insert('apachesolr_indexer_entities')
+      ->fields(array('entity_id', 'bundle', 'status', 'entity_type', 'changed'))
+      ->from($select)
+      ->execute();
+  }
+  catch(Exception $e) {
+    $transaction->rollback();
+    //drupal_set_message($e->getMessage(), 'error');
+    watchdog_exception('Apache Solr', $e);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Reindexing callback for ApacheSolr, for users.
+ */
+function apachesolr_indexer_solr_reindex_user() {
+
+  $transaction = db_transaction();
+  try {
+    db_delete('apachesolr_indexer_entities')
+      ->condition('entity_type', 'user')
+      ->execute();
+
+    // We know there's only one bundle type, so if that doesn't get indexed just
+    // skip this entirely.
+    if (apachesolr_indexer_get_bundles('default', 'user')) {
+      $select = db_select('users', 'u');
+      $select->addExpression("'user'", 'entity_type');
+      $select->addExpression("'user'", 'bundle');
+      $select->addField('u', 'uid', 'entity_id');
+      $select->addField('u', 'status', 'status');
+      $select->addExpression(REQUEST_TIME, 'changed');
+
+      $insert = db_insert('apachesolr_indexer_entities')
+        ->fields(array('entity_id', 'status', 'entity_type', 'bundle', 'changed'))
+        ->from($select)
+        ->execute();
+    }
+  }
+  catch(Exception $e) {
+    $transaction->rollback();
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog_exception('Apache Solr', $e);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Status callback for ApacheSolr, for nodes.
+ */
+function apachesolr_indexer_node_status_callback($node, $type) {
+  return $node->status;
+}
+
+/**
+ * Status callback for ApacheSolr, for users.
+ */
+function apachesolr_indexer_user_status_callback($user, $type) {
+  return $user->status;
+}
+
+/**
+ * Implements hook_cron().
+ */
+function apachesolr_indexer_cron() {
+  $cron_limit = variable_get('apachesolr_cron_limit', 50);
+
+  $rows = apachesolr_indexer_get_entities_to_index('apachesolr_search', $cron_limit);
+
+  apachesolr_indexer_enqueue($rows);
+
+  variable_set('apachesolr_indexer_last_run', REQUEST_TIME);
+
+}
+
+
+function apachesolr_indexer_enqueue(array $rows) {
+  $queue = DrupalQueue::get('apachesolr_indexer_entities');
+
+  foreach ($rows as $row) {
+    $queue->createItem($row);
+  }
+
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function apachesolr_indexer_cron_queue_info() {
+  $queues['apachesolr_indexer_entities'] = array(
+    'worker callback' => 'apachesolr_indexer_process_entity',
+    'time' => 10,
+  );
+  return $queues;
+}
+
+/**
+ * Worker callback for apachesolr_indexer_entities.
+ *
+ * @see apachesolr_index_nodes() for the old-skool verison.
+ */
+function apachesolr_indexer_process_entity($item) {
+
+  try {
+    // Get the $solr object
+    $solr = apachesolr_get_solr();
+    // If there is no server available, don't continue.
+    if (!$solr->ping(variable_get('apachesolr_ping_timeout', 4))) {
+      throw new Exception(t('No Solr instance available during indexing.'));
+    }
+  }
+  catch (Exception $e) {
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  // Always build the content for the index as an anonynmous user to avoid
+  // exposing restricted fields and such.
+  // @todo Uncomment these lines when we're done debugging, since they break dpm().
+  //global $user;
+  //drupal_save_session(FALSE);
+  //$saved_user = $user;
+  //$user = drupal_anonymous_user();
+
+  // Pull out all of our pertinent data.
+  $entity_type = $item->entity_type;
+  // TRUE on reset to bypass static caching and not blow out our memory limit.
+  $entity = entity_load($entity_type, array($item->entity_id), array(), TRUE);
+  $entity = $entity ? reset($entity) : FALSE;
+
+  if (empty($entity)) {
+    // If the object failed to load, just stop.
+    return FALSE;
+  }
+
+  list($entity_id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  // $status = apachesolr_entity_callback($entity, $type, 'status callback', array($entity, $type));
+
+  // Create a new document, and do the bare minimum on it.
+  $document = _apachesolr_indexer_process_entity_get_document($entity, $entity_type);
+
+  // Call a type-specific callback to add stuff to the document.
+  apachesolr_entity_callback($entity, $entity_type, 'document callback', array($document, $entity, $entity_type));
+
+  // Call an all-entity hook to add stuff to the document.
+  module_invoke_all('apachesolr_indexer_document_build', $document, $entity, $entity_type);
+
+  // Call a type-specific hook to add stuff to the document.
+  module_invoke_all('apachesolr_indexer_document_' . $entity_type . '_build', $document, $entity, $entity_type);
+
+  // Call a bundle-specific hook if available.
+  module_invoke_all('apachesolr_indexer_document_' . $entity_type . '_' . $bundle . '_build', $document, $entity, $entity_type);
+
+  // Now allow modules to alter each other's additions for maximum flexibility.
+  drupal_alter('apachesolr_indexer_document', $document, $entity, $entity_type);
+  drupal_alter('apachesolr_indexer_document_' . $entity_type, $document, $entity, $entity_type);
+  drupal_alter('apachesolr_indexer_document_' . $entity_type . '_' . $bundle, $document, $entity, $entity_type);
+
+
+  // Final processing to ensure that the document is properly structured.
+
+  // All records must have a title field, which is used for user-friendly labeling.
+  if (empty($document->title)) {
+    $document->title = '';
+  }
+
+  // All records must have a "body" field, which is used for fulltext indexing.
+  // If we don't have one, enter an empty value.  This does mean that the entity
+  // will not be fulltext searchable.
+  if (empty($document->body)) {
+    $document->body = '';
+  }
+
+  // All records must have a "teaser" field, which is used for abbreviated
+  // displays when no highlighted text is available.
+  if (empty($document->teaser)) {
+    $document->teaser = truncate_utf8($document->body, 300, TRUE);
+  }
+
+  // Add additional indexing based on the body of each record.
+  apachesolr_indexer_add_tags_to_document($document, $document->body);
+
+
+  // Send the document off to Solr.
+  try {
+    $ret = $solr->addDocuments(array($document));
+    watchdog('Apache Solr', 'Indexing succeeded on @type @id', array(
+      '@type' => $entity_type,
+      '@id' => $entity_id,
+    ), WATCHDOG_INFO);
+  }
+  catch (Exception $e) {
+    watchdog('Apache Solr', 'Indexing failed on @type @id<br /> !message', array(
+      '@type' => $entity_type,
+      '@id' => $entity_id,
+      '!message' => nl2br(strip_tags($e->getMessage())),
+    ), WATCHDOG_ERROR);
+    dpm($e->getMessage());
+    return FALSE;
+  }
+
+
+  // Restore the user.
+  // @todo Uncomment these lines when we're done debugging, since they break dpm().
+  //$user = $saved_user;
+  //drupal_save_session(TRUE);
+
+}
+
+/**
+ * Builds the node-specific information for a Solr document.
+ *
+ * @param Apache_Solr_Document $document
+ *   The Solr document we are building up.
+ * @param stdClass $entity
+ *   The entity we are indexing.
+ * @param string $entity_type
+ *   The type of entity we're dealing with.
+ */
+function apachesolr_indexer_solr_document_node(Apache_Solr_Document $document, $node, $entity_type) {
+  // This is a required field.
+  $document->title = apachesolr_clean_text($node->title);
+
+  $document->nid = $node->nid;
+  $document->uid = $node->uid;
+  $document->status = $node->status;
+  $document->sticky = $node->sticky;
+  $document->promote = $node->promote;
+  $document->tnid = $node->tnid;
+  $document->translate = $node->translate;
+
+  // Build the node body.
+  $build = node_view($node, 'search_index');
+  // Why do we need this?
+  unset($build['#theme']);
+  $text = drupal_render($build);
+  $node->title = apachesolr_clean_text($node->title);
+
+  // @todo The comment stuff may well belong in a comment-specific hook instead.
+  // We should figure that out later.
+
+  // Fetch extra data normally not visible, including comments.
+  // We do this manually (with module_implements instead of node_invoke_nodeapi)
+  // because we want a keyed array to come back. Only in this way can we decide
+  // whether to index comments or not.
+  $extra = array();
+  $exclude_comments = in_array($node->type, variable_get('apachesolr_exclude_comments_types', array()), TRUE);
+  foreach (module_implements('node_update_index') as $module) {
+    if ($exclude_comments && $module == 'comment') {
+      // Don't add comments.
+      continue;
+    }
+    $function = $module . '_node_update_index';
+    if ($output = $function($node)) {
+      $extra[$module] = $output;
+    }
+  }
+  if (!variable_get('apachesolr_index_comments_with_node', TRUE)) {
+    unset($extra['comment']);
+  }
+
+  $text .= "\n\n" . implode(' ', $extra);
+
+  $document->body = apachesolr_clean_text($text);
+  if (isset($node->teaser)) {
+    $document->teaser = apachesolr_clean_text($node->teaser);
+  }
+  else {
+    $document->teaser = truncate_utf8($document->body, 300, TRUE);
+  }
+
+  $document->type = $node->type;
+  $document->type_name = node_type_get_name($node);
+  $document->created = apachesolr_date_iso($node->created);
+  $document->changed = apachesolr_date_iso($node->changed);
+  $last_change = (isset($node->last_comment_timestamp) && $node->last_comment_timestamp > $node->changed) ? $node->last_comment_timestamp : $node->changed;
+  $document->last_comment_or_change = apachesolr_date_iso($last_change);
+  $document->comment_count = isset($node->comment_count) ? $node->comment_count : 0;
+
+  // We need to get the real username here, since it needs a full user object.
+  // That means we can't do the format_username() call on the display side.
+  $document->name = format_username(user_load($node->uid));
+}
+
+
+/**
+ * Builds the user-specific information for a Solr document.
+ *
+ * @param Apache_Solr_Document $document
+ *   The Solr document we are building up.
+ * @param stdClass $entity
+ *   The entity we are indexing.
+ * @param string $entity_type
+ *   The type of entity we're dealing with.
+ */
+function apachesolr_indexer_solr_document_user(Apache_Solr_Document $document, $account, $entity_type) {
+
+  $document->uid = $account->uid;
+
+  // Title is a required field.
+  $document->title = apachesolr_clean_text(format_username($account));
+
+  $document->mail = $account->mail;
+  $document->signature = $account->signature;
+
+  // Note the conspicuous lack of password hash. :-)
+
+  // Build the user body.
+  $build = user_view($account, 'search_index');
+  // Why do we need this?
+  unset($build['#theme']);
+  $text = drupal_render($build);
+
+  $document->body = apachesolr_clean_text($text);
+
+  $document->created = apachesolr_date_iso($account->created);
+  $document->access = apachesolr_date_iso($account->access);
+}
+
+
+/**
+ * Extract HTML tag contents from $text and add to boost fields.
+ *
+ * $text must be stripped of control characters before hand.
+ */
+function apachesolr_indexer_add_tags_to_document(&$document, $text) {
+  $tags_to_index = variable_get('apachesolr_tags_to_index', array(
+    'h1' => 'tags_h1',
+    'h2' => 'tags_h2_h3',
+    'h3' => 'tags_h2_h3',
+    'h4' => 'tags_h4_h5_h6',
+    'h5' => 'tags_h4_h5_h6',
+    'h6' => 'tags_h4_h5_h6',
+    'u' => 'tags_inline',
+    'b' => 'tags_inline',
+    'i' => 'tags_inline',
+    'strong' => 'tags_inline',
+    'em' => 'tags_inline',
+    'a' => 'tags_a'
+  ));
+
+  // Strip off all ignored tags.
+  $text = strip_tags($text, '<'. implode('><', array_keys($tags_to_index)) .'>');
+
+  preg_match_all('@<('. implode('|', array_keys($tags_to_index)) .')[^>]*>(.*)</\1>@Ui', $text, $matches);
+  foreach ($matches[1] as $key => $tag) {
+    $tag = strtolower($tag);
+    // We don't want to index links auto-generated by the url filter.
+    if ($tag != 'a' || !preg_match('@(?:http://|https://|ftp://|mailto:|smb://|afp://|file://|gopher://|news://|ssl://|sslv2://|sslv3://|tls://|tcp://|udp://|www\.)[a-zA-Z0-9]+@', $matches[2][$key])) {
+      if (!isset($document->{$tags_to_index[$tag]})){
+        $document->{$tags_to_index[$tag]} = '';
+      }
+      $document->{$tags_to_index[$tag]} .= ' '. apachesolr_clean_text($matches[2][$key]);
+    }
+  }
+}
+
+
+/**
+ * Returns a generic Solr document object for this entity.
+ *
+ * This function will do the basic processing for the document that is common
+ * to all entities, but virtually all entities will need their own additional
+ * processing.
+ *
+ * @param stdClass $entity
+ *   The entity for which we want a document.
+ * @param string $entity_type
+ *   The type of entity we're processing.
+ * @return Apache_Solr_Document
+ */
+function _apachesolr_indexer_process_entity_get_document($entity, $entity_type) {
+  list($entity_id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  $document = new Apache_Solr_Document();
+
+  $document->id = apachesolr_document_id($entity_id, $entity_type);
+  $document->site = url(NULL, array('absolute' => TRUE));
+  $document->hash = apachesolr_site_hash();
+
+  $document->entity_id = $entity_id;
+  $document->entity = $entity_type;
+  $document->bundle = $bundle;
+  $document->bundle_name = entity_bundle_label($entity_type, $bundle);
+
+  $path = entity_uri($entity_type, $entity);
+  $document->path = $path['path'];
+  $document->url = url($path['path'], $path['options'] + array('absolute' => TRUE));
+
+  if (empty($entity->language)) {
+    // 'und' is the language-neutral code in Drupal 7.
+    $document->language = LANGUAGE_NONE;
+  }
+  else {
+    $document->language = $entity->language;
+  }
+
+  // Path aliases can have important information about the content.
+  // Add them to the index as well.
+  if (function_exists('drupal_get_path_alias')) {
+    // Add any path alias to the index, looking first for language specific
+    // aliases but using language neutral aliases otherwise.
+    $output = drupal_get_path_alias($document->path, $document->language);
+    if ($output && $output != $document->path) {
+      $document->path_alias = $output;
+    }
+  }
+
+
+  return $document;
+}
+
+
+/**
+ * Returns an array of rows from a query based on an indexing namespace.
+ */
+function apachesolr_indexer_get_entities_to_index($namespace, $limit) {
+  $rows = array();
+  if (variable_get('apachesolr_read_only', 0)) {
+    return $rows;
+  }
+
+  $last_change = variable_get('apachesolr_indexer_last_run', 0);
+
+  foreach (entity_get_info() as $type => $info) {
+    $bundles = array();
+    foreach ($info['bundles'] as $bundle => $bundle_info) {
+      if (isset($bundle_info['apachesolr']['index']) && $bundle_info['apachesolr']['index']) {
+        $bundles[] = $bundle;
+      }
+    }
+
+    // If we're not checking any bundles of this entity type, just skip them all.
+    if (empty($bundles)) {
+      continue;
+    }
+
+    $last_entity_id = variable_get('apachesolr_indexer_last_run_id_' . $type, 0);
+
+    // Find the next batch of entities to index for this entity type.  Note that
+    // for ordering we're grabbing the oldest first and then ordering by ID so
+    // that we get a definitive order.
+    $query = db_select('apachesolr_indexer_entities', 'aie')
+      ->fields('aie', array('entity_type', 'entity_id', 'changed'))
+      ->condition('aie.status', 1)
+      ->condition('aie.entity_type', $type)
+      ->condition('aie.bundle', $bundles)
+      ->condition(db_or()->condition('aie.changed', $last_change, '>')->condition(db_and()->condition('aie.changed', $last_change)->condition('aie.entity_id', $last_entity_id, '>')))
+      ->orderBy('aie.changed')
+      ->orderBy('aie.entity_id')
+      ->range(0, $limit);
+
+    $records = $query->execute()->fetchAll();
+
+    // @todo This assumes an int ID, which technically the entity system
+    // doesn't require.  Fix this later.
+    $max_id = 0;
+    foreach ($records as $record) {
+      $rows[] = $record;
+      $max_id = max($max_id, $record->entity_id);
+    }
+
+    variable_set('apachesolr_indexer_last_run_id_' . $type, $max_id);
+  }
+
+  return $rows;
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function apachesolr_indexer_entity_insert($entity, $type) {
+  // For our purposes there's really no difference between insert and update.
+  return apachesolr_indexer_entity_update($entity, $type);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function apachesolr_indexer_entity_update($entity, $type) {
+
+  if (apachesolr_entity_should_index($entity, $type)) {
+    $info = entity_get_info($type);
+    list($id, $vid, $bundle) = entity_extract_ids($type, $entity);
+    $status = apachesolr_entity_callback($entity, $type, 'status callback', array($entity, $type));
+
+    // If we haven't seen this entity before it may not be there, so merge
+    // instead of update.
+    db_merge('apachesolr_indexer_entities')
+      ->key(array(
+      'entity_type' => $type,
+      'entity_id' => $id,
+      ))
+      ->fields(array(
+        'bundle' => $bundle,
+        'status' => $status,
+        'changed' => REQUEST_TIME,
+      ))
+      ->execute();
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ *
+ * @see apachesolr_node_delete().
+ */
+function apachesolr_indexer_entity_delete($entity, $type) {
+  if (apachesolr_indexer_delete_entity_from_index($type, $entity)) {
+    // There was no exception, so delete from the table.
+    list($id) = entity_extract_ids($type, $entity);
+    db_delete('apachesolr_indexer_entities')
+      ->condition('entity_type', $type)
+      ->condition('entity_id', $id)
+      ->execute();
+  }
+}
+
+/**
+ * Delete an entity from the indexer.
+ */
+function apachesolr_indexer_delete_entity_from_index($entity_type, $entity) {
+  static $failed = FALSE;
+  if ($failed) {
+    return FALSE;
+  }
+  try {
+    list($id) = entity_extract_ids($entity_type, $entity);
+    $solr = apachesolr_get_solr();
+    $solr->deleteById(apachesolr_document_id($entity_id, $entity_type));
+    apachesolr_index_set_last_updated(REQUEST_TIME);
+    return TRUE;
+  }
+  catch (Exception $e) {
+    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+    // Don't keep trying queries if they are failing.
+    $failed = TRUE;
+    return FALSE;
+  }
+}
+
+/**
+ * Sets what bundles on the specified entity type should be indexed.
+ *
+ * @param string $core
+ *   The Solr core for which to index entities.
+ * @param string $entity_type
+ *   The entity type to index.
+ * @param array $bundles
+ *   The machine names of the bundles to index.
+ */
+function apachesolr_indexer_set_bundles($core, $entity_type, array $bundles) {
+
+  $transaction = db_transaction();
+  try {
+    db_delete('apachesolr_indexer_bundles')
+      ->condition('core', $core)
+      ->condition('entity_type', $entity_type)
+      ->execute();
+
+    $insert = db_insert('apachesolr_indexer_bundles')
+      ->fields(array('core', 'entity_type', 'bundle'));
+
+    foreach ($bundles as $bundle) {
+      $insert->values(array(
+        'core' => $core,
+        'entity_type' => $entity_type,
+        'bundle' => $bundle,
+      ));
+    }
+
+    $insert->execute();
+  }
+  catch(Exception $e) {
+    $transaction->rollback();
+    watchdog_exception('Apache Solr', $e);
+  }
+}
+
+/**
+ * Gets a list of the bundles on the specified entity type that should be indexed.
+ *
+ * @param string $core
+ *   The Solr core for which to index entities.
+ * @param string $entity_type
+ *   The entity type to index.
+ * @return array
+ *   The bundles that should be indexed.
+ */
+function apachesolr_indexer_get_bundles($core, $entity_type) {
+  return db_query("SELECT bundle FROM {apachesolr_indexer_bundles} WHERE core = :core AND entity_type = :entity_type", array(
+    ':core' => $core,
+    ':entity_type' => $entity_type,
+  ))->fetchCol();
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function apachesolr_indexer_hook_info() {
+
+  $hooks['apachesolr_indexer_document_build'] = array(
+    'group' => 'apachesolr',
+  );
+  $hooks['apachesolr_indexer_document_alter'] = array(
+    'group' => 'apachesolr',
+  );
+/*
+  foreach (entity_get_info() as $entity_type => $info) {
+    $hooks['apachesolr_indexer_document_' . $entity_type . '_build'] = array(
+      'group' => 'apachesolr',
+    );
+    $hooks['apachesolr_indexer_document_' . $entity_type . '_alter'] = array(
+      'group' => 'apachesolr',
+    );
+    foreach ($info['bundles'] as $bundle => $bundle_info) {
+      $hooks['apachesolr_indexer_document_' . $entity_type . '_' . $bundle . '_build'] = array(
+        'group' => 'apachesolr',
+      );
+      $hooks['apachesolr_indexer_document_' . $entity_type . '_' . $bundle . '_alter'] = array(
+        'group' => 'apachesolr',
+      );
+    }
+  }
+*/
+  return $hooks;
+}
+
+
+/**
+ * Implements hook_apachesolr_indexer_document_build().
+ */
+function field_apachesolr_indexer_document_build(Apache_Solr_Document $document, $entity, $entity_type) {
+
+  $info = entity_get_info($entity_type);
+  if ($info['fieldable']) {
+    // Handle fields including taxonomy.
+    $indexed_fields = apachesolr_entity_fields($entity_type);
+    foreach ($indexed_fields as $index_key => $field_info) {
+      $field_name = $field_info['field']['field_name'];
+      // See if the node has fields that can be indexed
+      if (isset($entity->{$field_name})) {
+        // Got a field.
+        $function = $field_info['indexing_callback'];
+        if ($function && function_exists($function)) {
+          // NOTE: This function should always return an array.  One
+          // entity field may be indexed to multiple Solr fields.
+          $fields = $function($entity, $field_name, $index_key, $field_info);
+          foreach ($fields as $field) {
+            // It's fine to use this method also for single value fields.
+            $document->setMultiValue($field['key'], $field['value']);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_apachesolr_indexer_document_node_book_build().
+ */
+function apachesolr_indexer_apachesolr_indexer_document_node_book_build(Apache_Solr_Document $document, $entity, $entity_type) {
+  // Index book module data.
+  if (!empty($entity->book['bid'])) {
+    // Hard-coded - must change if apachesolr_index_key() changes.
+    $document->is_book_bid = (int) $entity->book['bid'];
+  }
+}
+
+// This really should be in core, but it isn't yet.  When it gets added to core,
+// we can remove this version.
+// @see http://drupal.org/node/969180
+if (!function_exists('entity_bundle_label')) {
+
+/**
+ * Returns the label of a bundle.
+ *
+ * @param $entity_type
+ *   The entity type; e.g. 'node' or 'user'.
+ * @param $entity
+ *   The entity for which we want the human-readable label of its bundle.
+ *
+ * @return
+ *   A string with the human-readable name of the bundle, or FALSE if not specified.
+ */
+function entity_bundle_label($entity_type, $bundle) {
+  $labels = &drupal_static(__FUNCTION__, array());
+
+  if (empty($labels)) {
+    foreach (entity_get_info() as $entity_type => $entity_info) {
+      foreach ($entity_info['bundles'] as $bundle => $bundle_info) {
+        $labels[$entity_type][$bundle] = !empty($bundle_info['label']) ? $bundle_info['label'] : FALSE;
+      }
+    }
+  }
+
+  return $labels[$entity_type][$bundle];
+}
+
+}

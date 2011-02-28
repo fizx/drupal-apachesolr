@@ -1,0 +1,9 @@
+; $Id:$
+name = Apache Solr Indexer
+description = Indexer for reading arbitrary entity types into a solr core.
+dependencies[] = apachesolr
+package = Apache Solr
+core = 7.x
+
+files[] = apachesolr_indexer.module
+files[] = apachesolr_indexer.apachesolr.inc
