@@ -240,6 +240,7 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_mlt_blocks');
   variable_del('apachesolr_cron_limit');
   variable_del('apachesolr_enabled_facets');
+  variable_del('apachesolr_exclude_nodeapi_types');
   // Remove blocks.
   db_delete('block')->condition('module', 'apachesolr')->execute();
 }
@@ -390,3 +391,20 @@ function apachesolr_update_7002() {
     variable_del($name);
   }
 }
+
+/**
+ * Move excluded comment types into a new variable.
+ */
+function apachesolr_update_7003() {
+  // Same as apachesolr_update_6006()
+  $exclude_comment_types = variable_get('apachesolr_exclude_comments_types', NULL);
+  if (is_array($exclude_comment_types)) {
+    $exclude = array();
+    foreach ($exclude_comment_types as $type) {
+      $exclude[$type]['comment'] = TRUE;
+    }
+    variable_set('apachesolr_exclude_nodeapi_types', $exclude);
+  }
+  variable_del('apachesolr_exclude_comments_types');
+}
+
