@@ -151,21 +151,21 @@ function apachesolr_term_reference_indexing_callback($node, $field_name, $index_
     $field = $node->$field_name;
     list($lang, $items) = each($field);
     foreach ($items as $item) {
-      // Double indexing of tids lets us do effecient searches (on tid)
-      // and do accurate per-vocabulary faceting.
+      // Triple indexing of tids lets us do effecient searches (on tid)
+      // and do accurate per field or per-vocabulary faceting.
 
       // By including the ancestors to a term in the index we make
       // sure that searches for general categories match specific
       // categories, e.g. Fruit -> apple, a search for fruit will find
       // content categorized with apple.
-      $fields[] = array(
-        'key' => $index_key,
-        'value' => $item['tid'],
-      );
       if (!isset($ancestors[$item['tid']])) {
         $ancestors[$item['tid']] = taxonomy_get_parents_all($item['tid']);
       }
       foreach ($ancestors[$item['tid']] as $ancestor) {
+        $fields[] = array(
+          'key' => $index_key,
+          'value' => $ancestor->tid,
+        );
         $fields[] = array(
           'key' => 'tid',
           'value' => $ancestor->tid,
