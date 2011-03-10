@@ -372,7 +372,7 @@ function apachesolr_nodeapi_mass_update($nodes) {
     return TRUE;
   }
 
-  if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+  if (apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
     return TRUE;
   }
 
@@ -411,7 +411,7 @@ function apachesolr_nodeapi_mass_delete($nodes) {
     return TRUE;
   }
 
-  if (apachesolr_server_variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+  if (apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
     return TRUE;
   }
 

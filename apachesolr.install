@@ -239,7 +239,6 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_index_last');
   variable_del('apachesolr_mlt_blocks');
   variable_del('apachesolr_cron_limit');
-  variable_del('apachesolr_enabled_facets');
   variable_del('apachesolr_exclude_nodeapi_types');
   // Remove blocks.
   db_delete('block')->condition('module', 'apachesolr')->execute();

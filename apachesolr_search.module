@@ -12,7 +12,7 @@
 function apachesolr_search_help($section) {
   switch ($section) {
     case 'admin/config/search/apachesolr/index':
-      if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+      if (apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
         return t('Operating in read-only mode; updates are disabled.');
       }
       $remaining = 0;

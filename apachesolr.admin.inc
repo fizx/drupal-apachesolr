@@ -296,7 +296,7 @@ function apachesolr_settings($form, &$form_state) {
   $form['advanced']['apachesolr_read_only'] = array(
     '#type' => 'radios',
     '#title' => t('Index write access'),
-    '#default_value' => variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE),
+    '#default_value' => apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE),
     '#options' => array(APACHESOLR_READ_WRITE => t('Read and write (normal)'), APACHESOLR_READ_ONLY => t('Read only')),
     '#description' => t('<em>Read only</em> stops this site from sending updates to your search index. Useful for development sites.'),
   );
@@ -322,6 +322,10 @@ function apachesolr_index_page($server_id = NULL) {
     $data->fields = array();
   }
 
+  if (empty($server_id)) {
+    $server_id = apachesolr_default_server();
+  }
+
   $output = array();
   $status_header = '';
   if (isset($data->index->numDocs)) {
@@ -344,7 +348,7 @@ function apachesolr_index_page($server_id = NULL) {
     $status_header .= $delete_msg;
   }
   $status_header .= '<p>' . l(t('View more details on the search index contents'), 'admin/reports/apachesolr') . "</p>\n";
-  if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_WRITE) {
+  if (apachesolr_server_variable_get($server_id, 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_WRITE) {
     $output['apachesolr_index_action_status_header'] = array('#markup' => $status_header);
     // Display the Delete Index form.
     $output['apachesolr_index_action_form'] = drupal_get_form('apachesolr_index_action_form');
