@@ -424,7 +424,7 @@
    <copyField source="ss_*" dest="sort_ss_*"/>
   <!-- A random sort field -->
    <dynamicField name="random_*" type="rand" indexed="true" stored="true"/>
-   <!-- This field is used to store node access records, as opposed to CCK field data -->
+   <!-- This field is used to store node access records, as opposed to field data -->
    <dynamicField name="nodeaccess*" type="integer" indexed="true" stored="false" multiValued="true"/>
 
    <!-- The following causes solr to ignore any fields that don't already match an existing

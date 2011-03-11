@@ -400,7 +400,7 @@ function apachesolr_get_last_change($namespace) {
  */
 function apachesolr_get_nodes_to_index($namespace, $limit) {
   $rows = array();
-  if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+  if (apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
     return $rows;
   }
 
@@ -790,7 +790,7 @@ function apachesolr_save_enabled_facets($server_id, $enabled) {
  *   An array consisting of info for all enabled facets.
  */
 function apachesolr_save_module_facets($server_id, $module, $facets = array()) {
-  $enabled = apachesolr_server_variable_get('apachesolr_enabled_facets', array());
+  $enabled = apachesolr_server_variable_get($server_id, 'apachesolr_enabled_facets', array());
   if (!empty($facets) && is_array($facets)) {
     $enabled[$module] = $facets;
   }

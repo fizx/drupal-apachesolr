@@ -6,27 +6,31 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
 #1089692 by jpmckinney: Use apachesolr_clear_last_index where possible.
 #1089342 by elliotttf: Content Biasing not working.
+#996800  by elliotttf: trim host, port, and path strings to prevent connection errors.
+#1020780 by jpmckinney, pwolanin: cleanup of variable_get to apachesolr_server_variable_get conversion.
+#1085630 by pwolanin: Index taxonomy term ancestors into term reference-based field.
+#1050000 by pwolanin: More generically prevent calling nodeapi update_index when indexing.
 #1060536 by jpmckinney: Long title and Default shortcut link obscured in overlay.
 #1060550 by jpmckinney: admin/build/block should be admin/structure/block.
-#704190 by pwolanin | robertDouglass | jpmckinney: Add page callbacks to display conf files in the index in reports.
-#925608 by jpmckinney | janusman: Quick perf improvement: cache term ancestors on indexing.
+#704190  by pwolanin | robertDouglass | jpmckinney: Add page callbacks to display conf files in the index in reports.
+#925608  by jpmckinney | janusman: Quick perf improvement: cache term ancestors on indexing.
 #1059380 by jpmckinney: apachesolr_fields_list_display_callback doesn't return if $facet in list_allowed_values.
 #1059368 by jpmckinney: apachesolr_clear_cache as a #submit callback doesn't work.
 #1072884 by justinrandell: incorrect use of query->condition() in apachesolr_cron().
-#901720 by jpmckinney | robertDouglass: Highlighting snippets in search results not flexible enough, and logic improvement.
+#901720  by jpmckinney | robertDouglass: Highlighting snippets in search results not flexible enough, and logic improvement.
 #1064782 by jpmckinney: Use module_load_include, module_load_install instead of include_once.
-#791916 by Network | jpmckinney: Allow facet search block to have children always show.
-#937328 by Davy Van Den Bremt | pwolanin: Drush support for indexing remaining nodes.
+#791916  by Network | jpmckinney: Allow facet search block to have children always show.
+#937328  by Davy Van Den Bremt | pwolanin: Drush support for indexing remaining nodes.
 #1060698 by dww | jpmckinney: Always display the current value of apachesolr_cron_limit in the admin UI.
-#904312 by pounard: Use drupal_get_breadcrumb() not menu_get_active_breadcrumb().
-#616888 bangpound: Pass delta to MLT blocks' theme function.
-#864146 by pwolanin | jpmckinney: Fixed When moving fq to q.alt, we should parenthesize each fq.
-#896324 by ahankinson | jpmckinney: Fixed module_invoke() called too late.
-#840358 by pwolanin | torstenzenk: Fixed Error searching Taxonomies.
-#991444 by Nick_vh: None of start, end, gap should show up as date facets.
-#835674 pwolanin: Remove search module dependency from apachesolr.
-#961570 jpmckinney: if apachesolr_search was the default search module in D6, make it so in D7.
-#878996 by pwolanin | weri: Added Don't break the loop.
+#904312  by pounard: Use drupal_get_breadcrumb() not menu_get_active_breadcrumb().
+#616888  by bangpound: Pass delta to MLT blocks' theme function.
+#864146  by pwolanin | jpmckinney: Fixed When moving fq to q.alt, we should parenthesize each fq.
+#896324  by ahankinson | jpmckinney: Fixed module_invoke() called too late.
+#840358  by pwolanin | torstenzenk: Fixed Error searching Taxonomies.
+#991444  by Nick_vh: None of start, end, gap should show up as date facets.
+#835674  by pwolanin: Remove search module dependency from apachesolr.
+#961570  by jpmckinney: if apachesolr_search was the default search module in D6, make it so in D7.
+#878996  by pwolanin | weri: Added Don't break the loop.
 #1050044 by pwolanin: hook_theme API fix, and revert to using core theme('search_results').
 #1026916 by dmitry_bezer: apachesolr_get_enabled_facets() mandatory parameter was omitted.
 #528086  by pwolanin: Fix for special html entity search and display bugs. 

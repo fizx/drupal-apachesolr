@@ -32,17 +32,17 @@ function apachesolr_node_to_document($node, $namespace) {
     // because we want a keyed array to come back. Only in this way can we decide
     // whether to index comments or not.
     $extra = array();
-    $exclude_comments = in_array($node->type, variable_get('apachesolr_exclude_comments_types', array()), TRUE);
+    $excludes = variable_get('apachesolr_exclude_nodeapi_types', array());
+    $exclude_nodeapi = isset($excludes[$node->type]) ? $excludes[$node->type] : array();
     foreach (module_implements('node_update_index') as $module) {
-      if ($exclude_comments && $module == 'comment') {
-        // Don't add comments.
-        continue;
+      // Invoke nodeapi if this module has not been excluded, for example,
+      // exclude 'comment' for a type to skip indexing its comments.
+      if (empty($exclude_nodeapi[$module])) {
+        $function = $module .'_node_update_index';
+        if ($output = $function($node)) {
+          $extra[$module] = $output;
+        }
       }
-      $function = $module . '_node_update_index';
-      if ($output = $function($node)) {
-        $extra[$module] = $output;
-      }
-
     }
     if (!variable_get('apachesolr_index_comments_with_node', TRUE)) {
       unset($extra['comment']);
@@ -151,21 +151,21 @@ function apachesolr_term_reference_indexing_callback($node, $field_name, $index_
     $field = $node->$field_name;
     list($lang, $items) = each($field);
     foreach ($items as $item) {
-      // Double indexing of tids lets us do effecient searches (on tid)
-      // and do accurate per-vocabulary faceting.
+      // Triple indexing of tids lets us do effecient searches (on tid)
+      // and do accurate per field or per-vocabulary faceting.
 
       // By including the ancestors to a term in the index we make
       // sure that searches for general categories match specific
       // categories, e.g. Fruit -> apple, a search for fruit will find
       // content categorized with apple.
-      $fields[] = array(
-        'key' => $index_key,
-        'value' => $item['tid'],
-      );
       if (!isset($ancestors[$item['tid']])) {
         $ancestors[$item['tid']] = taxonomy_get_parents_all($item['tid']);
       }
       foreach ($ancestors[$item['tid']] as $ancestor) {
+        $fields[] = array(
+          'key' => $index_key,
+          'value' => $ancestor->tid,
+        );
         $fields[] = array(
           'key' => 'tid',
           'value' => $ancestor->tid,
@@ -372,7 +372,7 @@ function apachesolr_nodeapi_mass_update($nodes) {
     return TRUE;
   }
 
-  if (variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+  if (apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
     return TRUE;
   }
 
@@ -411,7 +411,7 @@ function apachesolr_nodeapi_mass_delete($nodes) {
     return TRUE;
   }
 
-  if (apachesolr_server_variable_get('apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+  if (apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
     return TRUE;
   }
 
