@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#1089342 by elliotttf: Content Biasing not working.
 #1060536 by jpmckinney: Long title and Default shortcut link obscured in overlay.
 #1060550 by jpmckinney: admin/build/block should be admin/structure/block.
 #704190 by pwolanin | robertDouglass | jpmckinney: Add page callbacks to display conf files in the index in reports.
