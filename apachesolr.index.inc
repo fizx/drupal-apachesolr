@@ -54,39 +54,11 @@ function apachesolr_node_to_document($node, $namespace) {
     $document->id = apachesolr_document_id($node->nid);
     $document->site = url(NULL, array('absolute' => TRUE));
     $document->hash = apachesolr_site_hash();
-    $document->entity = 'node';
+    $document->entity_type = 'node';
     $document->entity_id = $node->nid;
-    $document->nid = $node->nid;
-    $document->uid = $node->uid;
-    $document->title = $node->title;
-    $document->status = $node->status;
-    $document->sticky = $node->sticky;
-    $document->promote = $node->promote;
-    $document->tnid = $node->tnid;
-    $document->translate = $node->translate;
-    if (empty($node->language)) {
-      // 'und' is the language-neutral code in Drupal 7.
-      $document->language = LANGUAGE_NONE;
-    }
-    else {
-      $document->language = $node->language;
-    }
-    $document->body = apachesolr_clean_text($text);
-    if (isset($node->teaser)) {
-      $document->teaser = apachesolr_clean_text($node->teaser);
-    }
-    else {
-      $document->teaser = truncate_utf8($document->body, 300, TRUE);
-    }
     $document->bundle = $node->type;
     $document->bundle_name = node_type_get_name($node);
-    $document->created = apachesolr_date_iso($node->created);
-    $document->changed = apachesolr_date_iso($node->changed);
-    $last_change = (isset($node->last_comment_timestamp) && $node->last_comment_timestamp > $node->changed) ? $node->last_comment_timestamp : $node->changed;
-    $document->last_comment_or_change = apachesolr_date_iso($last_change);
-    $document->comment_count = isset($node->comment_count) ? $node->comment_count : 0;
-    $document->name = $node->name;
-
+    $document->label = $node->title;
     $path = 'node/' . $node->nid;
     $document->url = url($path, array('absolute' => TRUE));
     $document->path = $path;
@@ -101,6 +73,39 @@ function apachesolr_node_to_document($node, $namespace) {
         $document->path_alias = $output;
       }
     }
+
+    $document->ss_name = $node->name;
+    // We want the name to ale be searchable for keywords.
+    $document->om_name = $node->name;
+
+    // Everything else uses dynamic fields
+    $document->is_uid = $node->uid;
+    $document->bs_status = $node->status;
+    $document->bs_sticky = $node->sticky;
+    $document->bs_promote = $node->promote;
+    $document->is_tnid = $node->tnid;
+    $document->bs_translate = $node->translate;
+    if (empty($node->language)) {
+      // 'und' is the language-neutral code in Drupal 7.
+      $document->ss_language = LANGUAGE_NONE;
+    }
+    else {
+      $document->ss_language = $node->language;
+    }
+    $document->content = apachesolr_clean_text($text);
+    if (isset($node->teaser)) {
+      $document->teaser = apachesolr_clean_text($node->teaser);
+    }
+    else {
+      $document->teaser = truncate_utf8($document->content, 300, TRUE);
+    }
+    $document->ds_created = apachesolr_date_iso($node->created);
+    $document->ds_changed = apachesolr_date_iso($node->changed);
+    $last_change = (isset($node->last_comment_timestamp) && $node->last_comment_timestamp > $node->changed) ? $node->last_comment_timestamp : $node->changed;
+    $document->ds_last_comment_or_change = apachesolr_date_iso($last_change);
+    $document->is_comment_count = isset($node->comment_count) ? $node->comment_count : 0;
+
+
 
     // Handle fields including taxonomy.
     $indexed_fields = apachesolr_entity_fields('node');

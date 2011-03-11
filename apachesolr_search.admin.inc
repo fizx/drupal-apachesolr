@@ -117,15 +117,10 @@ function apachesolr_search_bias_form($form, &$form_state, $server_id) {
  */
 function apachesolr_search_settings_form($form, &$form_state, $fields, $server_id) {
   // get the current weights
-  $qf = apachesolr_server_variable_get($server_id, 'apachesolr_search_query_fields', array());
-  $weights = drupal_map_assoc(array('21.0', '13.0', '8.0', '5.0', '3.0', '2.0', '1.0', '0.8', '0.5', '0.3', '0.2', '0.1'));
-  $weights['0'] = t('Omit');
-  // Note - we have default values set in solrconfig.xml, which will operate
-  // when none are set.  That's the preferred state.
   $defaults = array(
-    'body' => '1.0',
-    'title' => '5.0',
-    'name' => '3.0',
+    'content' => '1.0',
+    'label' => '5.0',
+    'om_name' => '3.0',
     'taxonomy_names' => '2.0',
     'tags_h1' => '5.0',
     'tags_h2_h3' => '3.0',
@@ -133,6 +128,9 @@ function apachesolr_search_settings_form($form, &$form_state, $fields, $server_i
     'tags_inline' => '1.0',
     'tags_a' => '0',
   );
+  $qf = apachesolr_server_variable_get($server_id, 'apachesolr_search_query_fields', $defaults);
+  $weights = drupal_map_assoc(array('21.0', '13.0', '8.0', '5.0', '3.0', '2.0', '1.0', '0.8', '0.5', '0.3', '0.2', '0.1'));
+  $weights['0'] = t('Omit');
   if (!$qf) {
     $qf = $defaults;
   }

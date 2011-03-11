@@ -397,7 +397,7 @@ function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '',
 
 function apachesolr_search_basic_params(DrupalSolrQueryInterface $query = NULL) {
   $params = array(
-    'fl' => 'id,entity_id,entity,bundle,bundle_name,nid,title,comment_count,type,created,changed,score,path,url,uid,name',
+    'fl' => 'id,entity_id,entity_type,bundle,bundle_name,label,is_comment_count,ds_created,ds_changed,score,path,url,is_uid,name',
     'rows' => variable_get('apachesolr_rows', 10),
     'facet' => 'true',
     'facet.mincount' => 1,
@@ -500,9 +500,19 @@ function apachesolr_search_add_facet_params(DrupalSolrQueryInterface $query) {
 function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
   $server_id = $query->solr('get_server_id');
   $params = &$query->params;
-  // Note - we have query fields set in solrconfig.xml, which will operate when
-  // none are set.
-  $qf = apachesolr_server_variable_get($server_id, 'apachesolr_search_query_fields', array());
+
+  $defaults = array(
+    'content' => '1.0',
+    'label' => '5.0',
+    'om_name' => '3.0',
+    'taxonomy_names' => '2.0',
+    'tags_h1' => '5.0',
+    'tags_h2_h3' => '3.0',
+    'tags_h4_h5_h6' => '2.0',
+    'tags_inline' => '1.0',
+    'tags_a' => '0',
+  );
+  $qf = apachesolr_server_variable_get($server_id, 'apachesolr_search_query_fields', $defaults);
   $fields = $query->solr('getFields');
   if ($qf && $fields) {
     foreach ($fields as $field_name => $field) {
@@ -529,26 +539,26 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
   list($date_steepness, $date_boost) = explode(':', $date_settings);
   if ($date_boost) {
     $ab = 4 / $date_steepness;
-    $params['bf'][] = "recip(ms(NOW,created),3.16e-11,$ab,$ab)^$date_boost";
+    $params['bf'][] = "recip(ms(NOW,ds_created),3.16e-11,$ab,$ab)^$date_boost";
   }
   // Boost on comment count.
   list($comment_steepness, $comment_boost) = explode(':', $comment_settings);
   if ($comment_boost) {
-    $params['bf'][] = "recip(div(1,max(comment_count,1)),$comment_steepness,10,10)^$comment_boost";
+    $params['bf'][] = "recip(div(1,max(is_comment_count,1)),$comment_steepness,10,10)^$comment_boost";
   }
   // Boost for a more recent comment or node edit.
   list($changed_steepness, $changed_boost) = explode(':', $changed_settings);
   if ($changed_boost) {
     $ab = 4 / $changed_steepness;
-    $params['bf'][] = "recip(ms(NOW,created),3.16e-11,$ab,$ab)^$changed_boost";
+    $params['bf'][] = "recip(ms(NOW,ds_created),3.16e-11,$ab,$ab)^$changed_boost";
   }
   // Boost for nodes with sticky bit set.
   if ($sticky_boost) {
-    $params['bq'][] = "sticky:true^$sticky_boost";
+    $params['bq'][] = "bs_sticky:true^$sticky_boost";
   }
   // Boost for nodes with promoted bit set.
   if ($promote_boost) {
-    $params['bq'][] = "promote:true^$promote_boost";
+    $params['bq'][] = "bs_promote:true^$promote_boost";
   }
   // Modify the weight of results according to the node types.
   $type_boosts = apachesolr_server_variable_get($server_id, 'apachesolr_search_type_boosts', array());
@@ -556,7 +566,7 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
     foreach ($type_boosts as $type => $boost) {
       // Only add a param if the boost is != 0 (i.e. > "Normal").
       if ($boost) {
-        $params['bq'][] = "type:$type^$boost";
+        $params['bq'][] = "bundle:$type^$boost";
       }
     }
   }
@@ -565,7 +575,7 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
 function apachesolr_search_process_response($response, DrupalSolrQueryInterface $query) {
   $results = array();
   // We default to getting snippets from the body.
-  $hl_fl = isset($query->params['hl.fl']) ? explode(',', $query->params['hl.fl']) : array('body');
+  $hl_fl = isset($query->params['hl.fl']) ? explode(',', $query->params['hl.fl']) : array('content');
   $total = $response->response->numFound;
   pager_default_initialize($total, $query->params['rows']);
   if ($total > 0) {
@@ -590,19 +600,19 @@ function apachesolr_search_process_response($response, DrupalSolrQueryInterface 
           $snippets[] = truncate_utf8($doc->teaser, 256, TRUE);
         }
       }
-      $snippet = theme('apachesolr_search_snippets__'. $doc->entity . '__' . $doc->bundle, array('doc' => $doc, 'snippets' => $snippets));
+      $snippet = theme('apachesolr_search_snippets__'. $doc->entity_type . '__' . $doc->bundle, array('doc' => $doc, 'snippets' => $snippets));
 
-      if (!isset($doc->body)) {
-        $doc->body = $snippet;
+      if (!isset($doc->content)) {
+        $doc->content = $snippet;
       }
 
       // Normalize common dates so that we can use Drupal's normal date and
       // time handling.
-      if (isset($doc->created)) {
-        $doc->created = strtotime($doc->created);
+      if (isset($doc->ds_created)) {
+        $doc->created = strtotime($doc->ds_created);
       }
-      if (isset($doc->changed)) {
-        $doc->changed = strtotime($doc->changed);
+      if (isset($doc->ds_changed)) {
+        $doc->changed = strtotime($doc->ds_changed);
       }
 
       $extra = array();
@@ -617,19 +627,19 @@ function apachesolr_search_process_response($response, DrupalSolrQueryInterface 
         'link' => url($doc->path, array('absolute' => TRUE)),
         // template_preprocess_search_result() runs check_plain() on the title
         // again.  Decode to correct the display.
-        'title' => htmlspecialchars_decode($doc->title, ENT_QUOTES),
+        'title' => htmlspecialchars_decode($doc->label, ENT_QUOTES),
         // These values are not required by the search module but are provided
         // to give entity callbacks and themers more flexibility.
         'score' => $doc->score,
         'snippets' => $snippets,
         'snippet' => $snippet,
         'fields' => $fields,
-        'entity_type' => $doc->entity,
+        'entity_type' => $doc->entity_type,
         'bundle' => $doc->bundle,
       );
 
       // Call entity-type-specific callbacks for extra handling.
-      $function = apachesolr_entity_get_callback($doc->entity, 'result callback');
+      $function = apachesolr_entity_get_callback($doc->entity_type, 'result callback');
       if (function_exists($function)) {
         $function($doc, $result, $extra);
       }
@@ -676,14 +686,15 @@ function apachesolr_search_entity_info_alter(&$entity_info) {
  */
 function apachesolr_search_node_result($doc, &$result, &$extra) {
   $result += array(
-    'type' => apachesolr_search_get_type($doc->type),
+    'type' => apachesolr_search_get_type($doc->bundle),
     'user' => theme('username', array('account' => $doc)),
-    'date' => $doc->created,
+    'date' => isset($doc->created) ? $doc->created : 0,
     'node' => $doc,
+    'uid' => $doc->is_uid,
   );
 
-  if (isset($doc->comment_count)) {
-    $extra['comments'] = format_plural($doc->comment_count, '1 comment', '@count comments');
+  if (isset($doc->is_comment_count)) {
+    $extra['comments'] = format_plural($doc->is_comment_count, '1 comment', '@count comments');
   }
 }
 
@@ -778,24 +789,24 @@ function apachesolr_search_apachesolr_facets() {
   $facets = array();
   $facets['type'] = array(
     'info' => t('Node attribute: Filter by content type'),
-    'facet_field' => 'type',
+    'facet_field' => 'bundle',
   );
-  $facets['uid'] = array(
+  $facets['is_uid'] = array(
     'info' => t('Node attribute: Filter by author'),
-    'facet_field' => 'uid',
+    'facet_field' => 'is_uid',
   );
-  $facets['language'] = array(
+  $facets['ss_language'] = array(
     'info' => t('Node attribute: Filter by language'),
-    'facet_field' => 'language',
+    'facet_field' => 'ss_language',
   );
 
-  $facets['changed'] = array(
+  $facets['ds_changed'] = array(
     'info' => t('Node attribute: Filter by updated date'),
-    'facet_field' => 'changed',
+    'facet_field' => 'ds_changed',
   );
-  $facets['created'] = array(
+  $facets['ds_created'] = array(
     'info' => t('Node attribute: Filter by post date'),
-    'facet_field' => 'created',
+    'facet_field' => 'ds_created',
   );
 
   // A book module facet.
@@ -868,15 +879,15 @@ function apachesolr_search_block_view($delta = '') {
         return apachesolr_search_currentsearch_block($response, $query);
       case 'is_book_bid':
         return apachesolr_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by book'), 'apachesolr_search_get_book');
-      case 'language':
+      case 'ss_language':
         return apachesolr_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by language'), 'apachesolr_search_language_name');
-      case 'uid':
+      case 'is_uid':
         return apachesolr_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by author'), 'apachesolr_search_get_username');
       case 'type':
-        return apachesolr_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by type'), 'apachesolr_search_get_type');
-      case 'changed':
+        return apachesolr_facet_block($response, $query, 'apachesolr_search', 'bundle', t('Filter by type'), 'apachesolr_search_get_type');
+      case 'ds_changed':
         return apachesolr_date_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by modification date'));
-      case 'created':
+      case 'ds_created':
         return apachesolr_date_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by post date'));
       default:
         if ($fields = apachesolr_entity_fields('node')) {
@@ -1233,13 +1244,13 @@ function apachesolr_search_theme() {
     'apachesolr_breadcrumb_is_book_bid' => array(
       'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
-    'apachesolr_breadcrumb_uid' => array(
+    'apachesolr_breadcrumb_is_uid' => array(
       'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
     'apachesolr_breadcrumb_tid' => array(
       'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
-    'apachesolr_breadcrumb_type' => array(
+    'apachesolr_breadcrumb_bundle' => array(
       'variables' => array('field' => NULL, 'exclude' => FALSE),
     ),
     'apachesolr_breadcrumb_language' => array(
@@ -1248,11 +1259,11 @@ function apachesolr_search_theme() {
     'apachesolr_breadcrumb_field' => array(
       'variables' => array('field' => NULL),
     ),
-    'apachesolr_breadcrumb_changed' => array(
+    'apachesolr_breadcrumb_ds_changed' => array(
       'variables' => array('field' => NULL),
       'function' => 'theme_apachesolr_breadcrumb_date_range',
     ),
-    'apachesolr_breadcrumb_created' => array(
+    'apachesolr_breadcrumb_ds_created' => array(
       'variables' => array('field' => NULL),
       'function' => 'theme_apachesolr_breadcrumb_date_range',
     ),
@@ -1316,7 +1327,7 @@ function theme_apachesolr_breadcrumb_field($vars) {
   return $field['#value'];
 }
 
-function theme_apachesolr_breadcrumb_language($vars) {
+function theme_apachesolr_breadcrumb_ss_language($vars) {
   $field = $vars['field'];
   return apachesolr_search_language_name($field['#value']);
 }
@@ -1335,7 +1346,7 @@ function theme_apachesolr_breadcrumb_date_range($vars) {
 /**
  * Return the username from $uid
  */
-function theme_apachesolr_breadcrumb_uid($vars) {
+function theme_apachesolr_breadcrumb_is_uid($vars) {
   $field = $vars['field'];
   if ($field['#value'] == 0) {
     return variable_get('anonymous', t('Anonymous'));
@@ -1361,7 +1372,7 @@ function theme_apachesolr_breadcrumb_tid($vars) {
 /**
  * Return the human readable text for a content type.
  */
-function theme_apachesolr_breadcrumb_type($vars) {
+function theme_apachesolr_breadcrumb_bundle($vars) {
   $field = $vars['field'];
   return node_type_get_name($field['#value']);
 }

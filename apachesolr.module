@@ -1946,6 +1946,13 @@ function apachesolr_index_key($field) {
   switch ($field['index_type']) {
     case 'text':
       $type_prefix = 't';
+      // We only support multi-valued text
+      $field['multiple'] = TRUE;
+      break;
+    case 'text-omit-norms':
+      $type_prefix = 'o';
+      // We only support multi-valued text
+      $field['multiple'] = TRUE;
       break;
     case 'string':
       $type_prefix = 's';
@@ -1993,10 +2000,10 @@ function apachesolr_field_name_map($field_name) {
 
   if (!isset($map)) {
     $map = array(
-      'body' => t('Body text - the full, rendered content'),
-      'title' => t('Title'),
-      'teaser' => t('Teaser'),
-      'name' => t('Author name'),
+      'content' => t('The full, rendered content (e.g. the rendered node body)'),
+      'label' => t('Title or label'),
+      'teaser' => t('Teaser or preview'),
+      'om_name' => t('Author name'),
       'path_alias' => t('Path alias'),
       'taxonomy_names' => t('All taxonomy term names'),
       'tags_h1' => t('Body text inside H1 tags'),

@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#1088208 by pwolanin | Janusman: simplify the schmea to eliminate node-specific fields.
 #1089692 by jpmckinney: Use apachesolr_clear_last_index where possible.
 #1089342 by elliotttf: Content Biasing not working.
 #996800  by elliotttf: trim host, port, and path strings to prevent connection errors.

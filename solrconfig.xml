@@ -453,16 +453,13 @@
   <!-- Note how you can register the same handler multiple times with
        different names (and different init parameters)
     -->
-  <requestHandler name="partitioned" class="solr.SearchHandler" default="true">
+  <requestHandler name="drupal" class="solr.SearchHandler" default="true">
     <lst name="defaults">
      <str name="defType">dismax</str>
      <str name="echoParams">explicit</str>
      <float name="tie">0.01</float>
-     <str name="qf">
-        body^40.0 title^5.0 name^3.0 taxonomy_names^2.0 tags_h1^5.0 tags_h2_h3^3.0 tags_h4_h5_h6^2.0 tags_inline^1.0
-     </str>
      <str name="pf">
-        body^2.0
+        content^2.0
      </str>
      <int name="ps">15</int>
      <!-- Abort any searches longer than 4 seconds -->
@@ -474,7 +471,7 @@
 
    <!-- example highlighter config, enable per-query with hl=true -->
      <str name="hl">true</str>
-     <str name="hl.fl">body</str>
+     <str name="hl.fl">content</str>
      <int name="hl.snippets">3</int>
      <str name="hl.mergeContiguous">true</str>
    <!-- instructs Solr to return the field itself if no query terms are
