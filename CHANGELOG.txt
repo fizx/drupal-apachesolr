@@ -4,6 +4,8 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#1089692 by jpmckinney: Use apachesolr_clear_last_index where possible.
+#1089342 by elliotttf: Content Biasing not working.
 #996800  by elliotttf: trim host, port, and path strings to prevent connection errors.
 #1020780 by jpmckinney, pwolanin: cleanup of variable_get to apachesolr_server_variable_get conversion.
 #1085630 by pwolanin: Index taxonomy term ancestors into term reference-based field.

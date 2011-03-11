@@ -68,7 +68,7 @@ function apachesolr_search_cron() {
  */
 function apachesolr_search_apachesolr_types_exclude($namespace) {
   if ($namespace == 'apachesolr_search') {
-    $excluded_types = variable_get('apachesolr_search_excluded_types', array());
+    $excluded_types = apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_search_excluded_types', array());
     return array_filter($excluded_types);
   }
 }
