@@ -498,10 +498,11 @@ function apachesolr_search_add_facet_params(DrupalSolrQueryInterface $query) {
 }
 
 function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
+  $server_id = $query->solr('get_server_id');
   $params = &$query->params;
   // Note - we have query fields set in solrconfig.xml, which will operate when
   // none are set.
-  $qf = variable_get('apachesolr_search_query_fields', array());
+  $qf = apachesolr_server_variable_get($server_id, 'apachesolr_search_query_fields', array());
   $fields = $query->solr('getFields');
   if ($qf && $fields) {
     foreach ($fields as $field_name => $field) {
@@ -515,7 +516,6 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
     }
   }
 
-  $server_id = $query->solr('get_server_id');
   $date_settings = apachesolr_server_variable_get($server_id, 'apachesolr_search_date_boost', '0:0');
   $comment_settings = apachesolr_server_variable_get($server_id, 'apachesolr_search_comment_boost', '0:0');
   $changed_settings = apachesolr_server_variable_get($server_id, 'apachesolr_search_changed_boost', '0:0');
