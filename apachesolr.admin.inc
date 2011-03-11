@@ -141,9 +141,12 @@ function apachesolr_server_test_submit($form, &$form_state) {
 }
 
 function apachesolr_server_save_validate($form, &$form_state) {
+  // Trim the hostname
+  $form_state['values']['host'] = trim($form_state['values']['host']);
   // Normalize the path to have just a leading slash.
-  $form_state['values']['path'] = '/' . trim($form_state['values']['path'], '/');
+  $form_state['values']['path'] = '/' . trim($form_state['values']['path'], '/ \t\r\n\0\x0B');
   if (isset($form['port']) && isset($form_state['values']['port'])) {
+    $form_state['values']['port'] = trim($form_state['values']['port']);
     $port = $form_state['values']['port'];
     // TODO: Port range should be 0-65535, but 0 crashes apachesolr
     if (!ctype_digit($port) || $port < 1 || $port > 65535) {
