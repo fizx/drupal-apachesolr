@@ -136,8 +136,10 @@ behavior:
  - apachesolr_tags_to_index: the list of HTML tags that the module will index
    (see apachesolr_add_tags_to_document()).
 
- - apachesolr_exclude_comments_types: an array of node types.  Any type listed
-   will have any attached comments excluded from the index.
+- apachesolr_exclude_nodeapi_types: an array of node types each of which is
+   an array of one or more module names, such as 'comment'.  Any type listed
+   will have any listed modules' hook_node_update_index() implementation skipped
+   when indexing. This can be useful for excluding comments or taxonomy links.
 
  - apachesolr_ping_timeout: the timeout (in seconds) after which the module will
    consider the Apache Solr server unavailable.
