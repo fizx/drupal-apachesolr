@@ -8,6 +8,11 @@
 define('APACHESOLR_READ_WRITE', 0);
 define('APACHESOLR_READ_ONLY', 1);
 
+// Display modes for child facets in a hierarchy.
+define('APACHESOLR_SHOW_CHILDREN_WHEN_SELECTED', 0);
+define('APACHESOLR_SHOW_CHILDREN_ALWAYS', 1);
+define('APACHESOLR_SHOW_CHILDREN_WITHOUT_HIERARCHY', 2);
+
 /**
  * Implements hook_menu().
  */
@@ -1038,6 +1043,27 @@ function apachesolr_form_block_admin_configure_alter(&$form, $form_state) {
 
   $facet_info = apachesolr_get_facet_definitions();
 
+  // If this facet is hierarchical, add option to disregard hierarchy, and clarify other options.
+  if (isset($facet_info[$module][$delta]['hierarchical']) && $facet_info[$module][$delta]['hierarchical'] == TRUE) {
+    $form['settings']['apachesolr_facet_show_children']['#title'] = t('Child facet display mode');
+    $form['settings']['apachesolr_facet_show_children']['#description'] = t('Select how to display parent/child facets. Note that they will always act in a hierarchical manner, so searching for a parent term will always include child terms in the search. The hierarchy may not show in full when using the AND operator for this facet.');
+    $form['settings']['apachesolr_facet_show_children']['#options'] = array(
+      APACHESOLR_SHOW_CHILDREN_WITHOUT_HIERARCHY => t('Show children without using a hierarchy'),
+      APACHESOLR_SHOW_CHILDREN_WHEN_SELECTED => t('Only show in hierarchy if parent facet is selected (default)'),
+      APACHESOLR_SHOW_CHILDREN_ALWAYS => t('Always show in hierarchy'),
+    );
+    $form['settings']['apachesolr_facet_sort_active']['#description'] .= t(' This may produce unwanted effects when displaying child terms in a hierarchy.');
+  }
+  if ($facet_info[$module][$delta]['field']['type'] == 'taxonomy_term_reference') {
+    $form['settings']['apachesolr_facet_query_sort']['#options']['weight asc'] = t('Weight, ascending');
+    $form['settings']['apachesolr_facet_query_sort']['#options']['weight desc'] = t('Weight, descending');
+    $form['settings']['apachesolr_facet_query_sort']['#description'] = t('The sort order of facet links in this block. %Count, which is the default, will show facets with the most results first. %Alphabetical will sort alphabetically, and %Numeric numerically, either ascending or descending. %Weight sorting is only supported on fields with weights (currently only taxonomy) and may produce unspecified results on other fields.', array(
+        '%Count' => t('Count'),
+        '%Alphabetical' => t('Alphanumeric'),
+        '%Numeric' => t('Numeric'),
+        '%Weight' => t('Weight'),
+    ));
+  }
   if (isset($facet_info[$module][$delta]['content_types'])) {
     $type_filter_settings = variable_get('apachesolr_type_filter', array());
     // Set up some variables for the verbiage of the form element.
@@ -1090,9 +1116,14 @@ function apachesolr_block_admin_configure_submit($form, &$form_state) {
  *
  * The $delta param is the Solr index field name.
  */
-function apachesolr_facet_block($response, DrupalSolrQueryInterface $query, $module, $delta, $filter_by, $facet_callback = FALSE) {
+function apachesolr_facet_block($response, DrupalSolrQueryInterface $query, $module, $delta, $filter_by, $facet_callback = FALSE, $field_info = NULL) {
   if (!empty($response->facet_counts->facet_fields->$delta)) {
     $facet_query_sorts = variable_get('apachesolr_facet_query_sorts', array());
+    $facet_sort_active = variable_get('apachesolr_facet_sort_active', array());
+    // Set default setting for sorting active facets first to 1.
+    if (!isset($facet_sort_active[$module][$delta])) {
+      $facet_sort_active[$module][$delta] = 1;
+    }
     $contains_active = FALSE;
     $items = array();
     foreach ($response->facet_counts->facet_fields->$delta as $facet => $count) {
@@ -1118,7 +1149,9 @@ function apachesolr_facet_block($response, DrupalSolrQueryInterface $query, $mod
 
       $active = $query->has_filter($delta, $facet);
 
-      if ($active) {
+      // Set default setting for sorting active facets first to 1.
+      $sort_by_active = (isset($facet_sort_active[$module][$delta]) ? $facet_sort_active[$module][$delta] : 1);
+      if ($active && $sort_by_active) {
         // '*' sorts before all numbers.
         $sortpre = '*';
       }
@@ -1129,6 +1162,9 @@ function apachesolr_facet_block($response, DrupalSolrQueryInterface $query, $mod
       elseif (isset($facet_query_sorts[$module][$delta]) && strpos($facet_query_sorts[$module][$delta], 'index') === 0) {
         // If this block is to be alphabetically/numerically sorted by value, change $sortpre.
         $sortpre = $facet_text;
+      }
+      elseif (isset($facet_query_sorts[$module][$delta]) && strpos($facet_query_sorts[$module][$delta], 'weight') === 0) {
+        $sortpre = isset($facet['#weight']) ? $facet['#weight'] : 0;
       }
       elseif ($exclude) {
         // '-' sorts before all numbers, but after '*'.
@@ -1176,10 +1212,12 @@ function apachesolr_facet_block($response, DrupalSolrQueryInterface $query, $mod
           break;
         case 'index desc':
         case 'index key desc':
+        case 'weight desc':
           krsort($items, SORT_STRING);
           break;
         case 'index asc':
         case 'index key asc':
+        case 'weight asc':
         default:
           ksort($items, SORT_STRING);
           break;
@@ -1450,6 +1488,7 @@ function apachesolr_facetcount_form($module, $delta) {
   $sorts = variable_get('apachesolr_facet_query_sorts', array());
   $children = variable_get('apachesolr_facet_show_children', array());
   $facet_missing = variable_get('apachesolr_facet_missing', array());
+  $facet_sort_active = variable_get('apachesolr_facet_sort_active', array());
 
   $limit = drupal_map_assoc(array(50, 40, 30, 20, 15, 10, 5, 3));
 
@@ -1492,12 +1531,18 @@ function apachesolr_facetcount_form($module, $delta) {
       '#default_value' => isset($sorts[$module][$delta]) ? $sorts[$module][$delta] : 'count',
     );
   }
+  $form['apachesolr_facet_sort_active'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Sort active facet links above inactive facets'),
+    '#description' => t('A selected facet would by default be sorted before other facets.'),
+    '#default_value' => isset($facet_sort_active[$module][$delta]) ? $facet_sort_active[$module][$delta] : 1,
+  );
   $form['apachesolr_facet_show_children'] = array(
     '#type' => 'radios',
     '#title' => t('Always show child facets'),
-    '#options' => array(0 => t('No'), 1 => t('Yes')),
+    '#options' => array(APACHESOLR_SHOW_CHILDREN_WHEN_SELECTED => t('No'), APACHESOLR_SHOW_CHILDREN_ALWAYS => t('Yes')),
     '#description' => t('Show the child facets even if the parent facet is not selected.'),
-    '#default_value' => isset($children[$module][$delta]) ? $children[$module][$delta] : 0,
+    '#default_value' => isset($children[$module][$delta]) ? $children[$module][$delta] : APACHESOLR_SHOW_CHILDREN_WHEN_SELECTED,
   );
   $form['apachesolr_facet_missing'] = array(
     '#type' => 'radios',
@@ -1532,6 +1577,9 @@ function apachesolr_facetcount_save($edit) {
   $facet_missing = variable_get('apachesolr_facet_missing', array());
   $facet_missing[$module][$delta] = (int)$edit['apachesolr_facet_missing'];
   variable_set('apachesolr_facet_missing', $facet_missing);
+  $facet_sort_active = variable_get('apachesolr_facet_sort_active', array());
+  $facet_sort_active[$module][$delta] = (int)$edit['apachesolr_facet_sort_active'];
+  variable_set('apachesolr_facet_sort_active', $facet_sort_active);
 }
 
 /**
@@ -2471,6 +2519,7 @@ function field_apachesolr_field_mappings() {
       'display_callback' => 'apachesolr_taxonomy_get_term',
       'indexing_callback' => 'apachesolr_term_reference_indexing_callback',
       'index_type' => 'integer',
+      'facet_block_callback' => 'apachesolr_search_taxonomy_facet_block',
     ),
   );
 

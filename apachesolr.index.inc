@@ -167,6 +167,10 @@ function apachesolr_term_reference_indexing_callback($node, $field_name, $index_
         $ancestors[$item['tid']] = taxonomy_get_parents_all($item['tid']);
       }
       foreach ($ancestors[$item['tid']] as $ancestor) {
+        // Index parent term against the field. Note that this happens
+        // regardless of whether the facet is set to show as a hierarchy or not.
+        // We would need a separate field if we were to index terms without any
+        // hierarchy at all.
         $fields[] = array(
           'key' => $index_key,
           'value' => $ancestor->tid,
