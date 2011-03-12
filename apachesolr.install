@@ -149,6 +149,7 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_mlt_blocks');
   variable_del('apachesolr_cron_limit');
   variable_del('apachesolr_enabled_facets');
+  variable_del('apachesolr_exclude_nodeapi_types');
   // Remove tables.
   drupal_uninstall_schema('apachesolr');
   // Remove blocks.
@@ -261,4 +262,20 @@ function apachesolr_update_6005() {
   $table['description'] = 'Cache table for apachesolr to store Luke data and indexing information.';
   db_create_table($ret, 'cache_apachesolr', $table);
   return $ret;
+}
+
+/**
+ * Move excluded comment types into a new variable.
+ */
+function apachesolr_update_6006() {
+  $exclude_comment_types = variable_get('apachesolr_exclude_comments_types', NULL);
+  if (is_array($exclude_comment_types)) {
+    $exclude = array();
+    foreach ($exclude_comment_types as $type) {
+      $exclude[$type]['comment'] = TRUE;
+    }
+    variable_set('apachesolr_exclude_nodeapi_types', $exclude);
+  }
+  variable_del('apachesolr_exclude_comments_types');
+  return array();
 }
