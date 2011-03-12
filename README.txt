@@ -136,7 +136,7 @@ behavior:
 
  - apachesolr_exclude_nodeapi_types: an array of node types each of which is
    an array of one or more module names, such as 'comment'.  Any type listed
-   will have any list module's nodeapi 'update_index' implementation skipped
+   will have any listed modules' nodeapi 'update_index' implementation skipped
    when indexing. This can be useful for excluding comments or taxonomy links.
 
  - apachesolr_ping_timeout: the timeout (in seconds) after which the module will
