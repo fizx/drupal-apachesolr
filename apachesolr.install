@@ -96,11 +96,11 @@ function apachesolr_requirements($phase) {
  */
 function apachesolr_install() {
   // Create one MLT block.
-  require_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.admin.inc');
-  apachesolr_mlt_save_block(array('name' => t('More like this')));
+  require_once(drupal_get_path('module', 'apachesolr') . '/apachesolr.admin.inc');
+  apachesolr_mlt_save_block(array('name' => st('More like this')));
   db_insert('apachesolr_server')->fields(array('server_id' => 'solr', 'name' => 'Apache Solr server', 'host' => 'localhost', 'port' => '8983', 'path' => '/solr'))->execute();
   variable_set('apachesolr_default_server', 'solr');
-  drupal_set_message(t('Apache Solr is enabled. Visit the <a href="!settings_link">settings page</a>.', array('!settings_link' => url('admin/config/search/apachesolr'))));
+  drupal_set_message(st('Apache Solr is enabled. Visit the <a href="!settings_link">settings page</a>.', array('!settings_link' => url('admin/config/search/apachesolr'))));
 }
 
 /**

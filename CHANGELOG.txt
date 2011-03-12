@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+#1078766 by elliotttf: code-style cleanup according Coder module.
 #1049114 by Steven Jones, james.williams, Janusman: restore hierarchical taxonomy facets.
 #1088208 by pwolanin | Janusman: simplify the schmea to eliminate node-specific fields.
 #1089692 by jpmckinney: Use apachesolr_clear_last_index where possible.

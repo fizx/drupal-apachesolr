@@ -156,7 +156,7 @@ function apachesolr_drush_solr_search() {
   $keys = implode(' ', $args);
   foreach (apachesolr_search_execute($keys, '', '') as $result) {
     $output = 'node/' . $result['node']->nid . ' ' . dt('by @name (user/@uid)', array('@name' => strip_tags($result['user']), '@uid' => $result['node']->uid)) . "\n";
-    $output .= dt('title: ') .  $result['title'] . "\n";
+    $output .= dt('title: ') . $result['title'] . "\n";
     $output .= preg_replace('/[\s]+/', ' ', strip_tags($result['snippet'])) . "\n\n";
     drush_print($output);
   }

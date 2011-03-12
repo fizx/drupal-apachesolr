@@ -234,37 +234,37 @@ function apachesolr_taxonomy_term_update($term) {
  */
 
 /**
- * Implements hook_comment_insert()
+ * Implements hook_comment_insert().
  */
-function apachesolr_comment_insert($comment){
+function apachesolr_comment_insert($comment) {
   apachesolr_mark_node($comment->nid);
 }
 
 /**
- * Implements hook_comment_update()
+ * Implements hook_comment_update().
  */
-function apachesolr_comment_update($comment){
+function apachesolr_comment_update($comment) {
   apachesolr_mark_node($comment->nid);
 }
 
 /**
  * Implements hook_comment_delete()
  */
-function apachesolr_comment_delete($comment){
+function apachesolr_comment_delete($comment) {
   apachesolr_mark_node($comment->nid);
 }
 
 /**
  * Implements hook_comment_publish()
  */
-function apachesolr_comment_publish($comment){
+function apachesolr_comment_publish($comment) {
   apachesolr_mark_node($comment->nid);
 }
 
 /**
  * Implements hook_comment_unpublish()
  */
-function apachesolr_comment_unpublish($comment){
+function apachesolr_comment_unpublish($comment) {
   apachesolr_mark_node($comment->nid);
 }
 
@@ -388,8 +388,8 @@ function apachesolr_get_excluded_types($namespace) {
   return $excluded_types;
 }
 
-function apachesolr_query_add_excluded_types($query, $excluded_types){
-  if($excluded_types){
+function apachesolr_query_add_excluded_types($query, $excluded_types) {
+  if ($excluded_types) {
     $query->innerJoin('node', 'n', 'n.nid = asn.nid');
     $query->condition('n.type', $excluded_types, 'NOT IN');
   }
@@ -905,7 +905,7 @@ function apachesolr_block_view($delta = '') {
  */
 function apachesolr_block_configure($delta = '') {
   if ($delta != 'sort') {
-    require_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.admin.inc');
+    require_once(drupal_get_path('module', 'apachesolr') . '/apachesolr.admin.inc');
     return apachesolr_mlt_block_form($delta);
   }
 }
@@ -915,7 +915,7 @@ function apachesolr_block_configure($delta = '') {
  */
 function apachesolr_block_save($delta = '', $edit = array()) {
   if ($delta != 'sort') {
-    require_once(drupal_get_path('module', 'apachesolr') .'/apachesolr.admin.inc');
+    require_once(drupal_get_path('module', 'apachesolr') . '/apachesolr.admin.inc');
     apachesolr_mlt_save_block($edit, $delta);
   }
 }
@@ -1308,7 +1308,7 @@ function apachesolr_date_facet_block($response, DrupalSolrQueryInterface $query,
         $facet_text = apachesolr_date_format_iso_by_gap(substr($gap, 2), $facet);
       }
       $new_query = clone $query;
-      $new_query->add_filter($facet_field, '['. $facet .' TO '. $range_end[$facet] .']');
+      $new_query->add_filter($facet_field, '[' . $facet . ' TO ' . $range_end[$facet] . ']');
       $options['query'] = $new_query->get_url_queryvalues();
       $items[] = theme('apachesolr_facet_link', array(
         'facet_text' => $facet_text,
@@ -1625,7 +1625,7 @@ function apachesolr_modify_query(DrupalSolrQueryInterface $query, $caller) {
   // Add sort if present.
   // TODO: make this process internal to the query object.
   if ($sort = $query->get_solrsort()) {
-    $sortstring = $sort['#name'] .' '. $sort['#direction'];
+    $sortstring = $sort['#name'] . ' ' . $sort['#direction'];
     // We don't bother telling Solr to do its default sort.
     if ($sortstring != 'score desc') {
       $query->params['sort'] = $sortstring;
@@ -2063,8 +2063,8 @@ function apachesolr_field_name_map($field_name) {
     );
     if (module_exists('taxonomy')) {
       foreach (taxonomy_get_vocabularies() as $vocab) {
-        $map['tm_vid_'. $vocab->vid .'_names'] = t('Taxonomy term names only from the %name vocabulary', array('%name' => $vocab->name));
-        $map['im_vid_'. $vocab->vid] = t('Taxonomy term IDs from the %name vocabulary', array('%name' => $vocab->name));
+        $map['tm_vid_' . $vocab->vid . '_names'] = t('Taxonomy term names only from the %name vocabulary', array('%name' => $vocab->name));
+        $map['im_vid_' . $vocab->vid] = t('Taxonomy term IDs from the %name vocabulary', array('%name' => $vocab->name));
       }
     }
     foreach (apachesolr_entity_fields('node') as $field_nm => $field_info) {
@@ -2471,7 +2471,7 @@ function apachesolr_mlt_suggestions($settings, $id, $solr = NULL) {
 function apachesolr_form_block_admin_display_form_alter(&$form) {
   foreach ($form as $key => $block) {
     if ((strpos($key, "apachesolr_mlt-") === 0) && $block['module']['#value'] == 'apachesolr') {
-      $form[$key]['delete'] = array('#value' => l(t('delete'), 'admin/config/search/apachesolr/mlt/delete_block/'. $block['delta']['#value']));
+      $form[$key]['delete'] = array('#value' => l(t('delete'), 'admin/config/search/apachesolr/mlt/delete_block/' . $block['delta']['#value']));
     }
   }
 }
@@ -2585,7 +2585,7 @@ function theme_apachesolr_facet_link($vars) {
     $vars['options']['attributes']['class'][] = 'active';
   }
   $vars['options']['attributes']['class'] = implode(' ', $vars['options']['attributes']['class']);
-  return apachesolr_l($vars['facet_text'] ." ({$vars['count']})",  $vars['path'], $vars['options']);
+  return apachesolr_l($vars['facet_text'] . " ({$vars['count']})",  $vars['path'], $vars['options']);
 }
 
 /**
@@ -2619,7 +2619,7 @@ function apachesolr_l($text, $path, $options = array()) {
   $get = array_diff_key($_GET, array('q' => 1, 'page' => 1), $options['query'], $query->get_url_queryvalues());
   $options['query'] += $get;
 
-  return '<a href="'. check_url(url($path, $options)) .'"'. drupal_attributes($options['attributes']) .'>'. ($options['html'] ? $text : check_plain($text)) .'</a>';
+  return '<a href="' . check_url(url($path, $options)) . '"' . drupal_attributes($options['attributes']) . '>' . ($options['html'] ? $text : check_plain($text)) . '</a>';
 }
 
 function apachesolr_js() {
@@ -2659,13 +2659,13 @@ function theme_apachesolr_unclick_link($vars) {
     unset($vars['options']['html']);
   }
   $vars['options']['attributes']['class'] = 'apachesolr-unclick';
-  return apachesolr_l("(-)", $vars['path'], $vars['options']) . ' '. $vars['facet_text'];
+  return apachesolr_l("(-)", $vars['path'], $vars['options']) . ' ' . $vars['facet_text'];
 }
 
 function theme_apachesolr_sort_link($vars) {
   $icon = '';
   if ($vars['direction']) {
-    $icon = ' '. theme('tablesort_indicator', array('style' => $vars['direction']));
+    $icon = ' ' . theme('tablesort_indicator', array('style' => $vars['direction']));
   }
   if ($vars['active']) {
     if (isset($vars['options']['attributes']['class'])) {

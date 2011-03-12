@@ -104,20 +104,20 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
   );
   $form['save'] = array(
     '#type' => 'submit',
-    '#validate' =>array('apachesolr_server_save_validate'),
-    '#submit' =>array('apachesolr_server_save_submit'),
+    '#validate' => array('apachesolr_server_save_validate'),
+    '#submit' => array('apachesolr_server_save_submit'),
     '#value' => t('Save'),
   );
   $form['test'] = array(
     '#type' => 'submit',
-    '#validate' =>array('apachesolr_server_save_validate'),
-    '#submit' =>array('apachesolr_server_test_submit'),
+    '#validate' => array('apachesolr_server_save_validate'),
+    '#submit' => array('apachesolr_server_test_submit'),
     '#value' => t('Test connection'),
   );
   if (!empty($server['server_id']) && !$is_default) {
     $form['delete'] = array(
       '#type' => 'submit',
-      '#submit' =>array('apachesolr_server_delete_submit'),
+      '#submit' => array('apachesolr_server_delete_submit'),
       '#value' => t('Delete'),
     );
   }
@@ -212,13 +212,13 @@ function apachesolr_settings($form, &$form_state) {
     }
     else {
       $type = 'none';
-      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr/server/' . $data['server_id'] .'/delete'));
+      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr/server/' . $data['server_id'] . '/delete'));
     }
     $rows[] = array('data' =>
       array(
         // Cells
         array('class' => 'icon'),
-        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['server_id'] .'/edit')),
+        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['server_id'] . '/edit')),
         $delete_link,
         check_plain($data['name']),
         check_plain($data['host']),
@@ -567,7 +567,7 @@ function apachesolr_index_action_form() {
       '#return_value' => $key,
       '#parents' => array('action'),
       '#description' => $action['description'],
-      '#id' => drupal_clean_css_identifier('edit-'. implode('-', array('action', $key))),
+      '#id' => drupal_clean_css_identifier('edit-' . implode('-', array('action', $key))),
     );
   }
 
@@ -688,7 +688,7 @@ function apachesolr_mlt_add_block_form() {
 
 function apachesolr_mlt_add_block_form_submit($form, &$form_state) {
   apachesolr_mlt_save_block($form_state['values']);
-  drupal_set_message('New content recommendation block created.  Drag it into a region to enable it');
+  drupal_set_message(t('New content recommendation block created. Drag it into a region to enable it'));
   $form_state['redirect'] = 'admin/structure/block';
 }
 
@@ -713,7 +713,7 @@ function apachesolr_config_files_overview() {
     foreach ($files as $file) {
       $atr = $file->attributes();
       $name = (string) $atr[0];
-      $str = l($name, 'admin/reports/apachesolr/conf/'. $name);
+      $str = l($name, 'admin/reports/apachesolr/conf/' . $name);
       $str .= '<br />' . format_date(strtotime((string) $file->date));
       $str .= '<br />' . t('Size (bytes): @bytes', array('@bytes' => (string) $file->long));
       $items[$name] = $str;
@@ -1050,7 +1050,7 @@ function apachesolr_batch_index_finished($success, $results, $operations) {
   else {
     // An error occurred. $operations contains the unprocessed operations.
     $error_operation = reset($operations);
-    $message .= ' '. t('An error occurred while processing @num with arguments :', array('@num' => $error_operation[0])) . print_r($error_operation[0], TRUE);
+    $message .= ' ' . t('An error occurred while processing @num with arguments :', array('@num' => $error_operation[0])) . print_r($error_operation[0], TRUE);
     $type = 'error';
   }
   drupal_set_message($message, $type);
