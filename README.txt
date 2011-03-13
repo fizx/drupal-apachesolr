@@ -5,8 +5,8 @@ features and better performance. Among the extra features is the ability to have
 faceted search on facets ranging from content author to taxonomy to arbitrary
 Field API fields.
 
-The module comes with a schema.xml and solrconfig.xml file which must be used
-in your Solr installation.
+The module comes with a schema.xml, solrconfig.xml, and protwords.txt file which
+must be used in your Solr installation.
 
 This module depends on the search framework in core.  When used in combination
 with core search module, Apache Solr is not the default search. Access it via a
@@ -97,19 +97,6 @@ apache-solr-1.4.1/example, and executing the command java -jar start.jar
 
 Test that your solr server is now available by visiting
 http://localhost:8983/solr/admin/
-
-For those using PHP 5.1, you must either install the PECL json extension
-into PHP on your sever, or you may use the Zend framework Json library.
-for the PECL extension see:  http://pecl.php.net/package/json
-The Solr client has been tested with Zend framework release 1.7.7.
-To get this code, you may use svn from the apachesolr directory:
-svn co http://framework.zend.com/svn/framework/standard/tags/release-1.7.7/library/Zend
-However, the only required parts are:
-http://framework.zend.com/svn/framework/standard/tags/release-1.7.7/library/Zend/Exception.php
-http://framework.zend.com/svn/framework/standard/tags/release-1.7.7/library/Zend/Json/
-The 'Zend' directory should normally be under the apachesolr
-directory, but may be elsewhere if you set that location to be
-in your PHP include path.
 
 Now, you should enable the "Apache Solr framework" and "Apache Solr search" 
 modules. Check that you can connect to Solr at ?q=admin/setting/apachesolr
