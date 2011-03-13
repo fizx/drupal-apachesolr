@@ -127,6 +127,11 @@ function apachesolr_settings_validate($form, &$form_state) {
     if (!ctype_digit($port) || $port < 1 || $port > 65535) {
       form_set_error('apachesolr_port', t('The port has to be an integer between 1 and 65535.'));
     }
+    else {
+      $form_state['values']['apachesolr_host'] = trim($form_state['values']['apachesolr_host']);
+      $form_state['values']['apachesolr_port'] = trim($form_state['values']['apachesolr_port']);
+      $form_state['values']['apachesolr_path'] = '/' . trim($form_state['values']['apachesolr_path'], "/ \t\r\n\0\x0B");
+    }
   }
 }
 
