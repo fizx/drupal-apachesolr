@@ -41,15 +41,16 @@ function apachesolr_node_to_document($node, $namespace) {
     // because we want a keyed array to come back. Only in this way can we decide
     // whether to index comments or not.
     $extra = array();
-    $exclude_comments = in_array($node->type, variable_get('apachesolr_exclude_comments_types', array()), TRUE);
+    $excludes = variable_get('apachesolr_exclude_nodeapi_types', array());
+    $exclude_nodeapi = isset($excludes[$node->type]) ? $excludes[$node->type] : array();
     foreach (module_implements('nodeapi') as $module) {
-      if ($exclude_comments && $module == 'comment') {
-        // Don't add comments.
-        continue;
-      }
-      $function = $module .'_nodeapi';
-      if ($output = $function($node, 'update index', FALSE, FALSE)) {
-        $extra[$module] = $output;
+      // Invoke nodeapi if this module has not been excluded, for example,
+      // exclude 'comment' for a type to skip indexing its comments.
+      if (empty($exclude_nodeapi[$module])) {
+        $function = $module .'_nodeapi';
+        if ($output = $function($node, 'update index', FALSE, FALSE)) {
+          $extra[$module] = $output;
+        }
       }
 
     }

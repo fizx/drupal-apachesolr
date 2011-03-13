@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#1050000 by pwolanin: More generically prevent calling nodeapi update_index when indexing.
 #996800 by pwolanin: Connection strings (host, port, path) should use trim().
 #890314 by quaoar: avoid searching twice when using the search block.
 #1064782 by jpmckinney: Use module_load_include, module_load_install instead of include_once
