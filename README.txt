@@ -5,8 +5,8 @@ features and better performance. Among the extra features is the ability to have
 faceted search on facets ranging from content author to taxonomy to arbitrary
 CCK fields.
 
-The module comes with a schema.xml and solrconfig.xml file which should be used
-in your Solr installation.
+The module comes with a schema.xml, solrconfig.xml, and protwords.txt file which
+must be used in your Solr installation.
 
 This module depends on the search framework in core. However, you may not want
 the core searches and only want Solr search. If that is the case, you want to
