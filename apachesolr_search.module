@@ -405,7 +405,7 @@ function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '',
 
 function apachesolr_search_basic_params(DrupalSolrQueryInterface $query = NULL) {
   $params = array(
-    'fl' => 'id,entity_id,entity_type,bundle,bundle_name,label,is_comment_count,ds_created,ds_changed,score,path,url,is_uid,name',
+    'fl' => 'id,entity_id,entity_type,bundle,bundle_name,label,is_comment_count,ds_created,ds_changed,score,path,url,is_uid,tos_name',
     'rows' => variable_get('apachesolr_rows', 10),
     'facet' => 'true',
     'facet.mincount' => 1,
@@ -512,7 +512,7 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
   $defaults = array(
     'content' => '1.0',
     'label' => '5.0',
-    'om_name' => '3.0',
+    'tos_name' => '3.0',
     'taxonomy_names' => '2.0',
     'tags_h1' => '5.0',
     'tags_h2_h3' => '3.0',
@@ -525,8 +525,8 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
   if ($qf && $fields) {
     foreach ($fields as $field_name => $field) {
       if (!empty($qf[$field_name])) {
-        if ($field_name == 'body') {
-          // Body is the only normed field.
+        if ($field_name == 'content') {
+          // content is the only normed field.
           $qf[$field_name] *= 40.0;
         }
         $params['qf'][] = $field_name . '^' . $qf[$field_name];
@@ -621,6 +621,9 @@ function apachesolr_search_process_response($response, DrupalSolrQueryInterface 
       }
       if (isset($doc->ds_changed)) {
         $doc->changed = strtotime($doc->ds_changed);
+      }
+      if (isset($doc->tos_name)) {
+        $doc->name = $doc->tos_name;
       }
 
       $extra = array();
@@ -795,7 +798,7 @@ function apachesolr_search_vocabulary_content_types($vid) {
  */
 function apachesolr_search_apachesolr_facets() {
   $facets = array();
-  $facets['type'] = array(
+  $facets['bundle'] = array(
     'info' => t('Node attribute: Filter by content type'),
     'facet_field' => 'bundle',
   );
@@ -903,8 +906,8 @@ function apachesolr_search_block_view($delta = '') {
         return apachesolr_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by language'), 'apachesolr_search_language_name');
       case 'is_uid':
         return apachesolr_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by author'), 'apachesolr_search_get_username');
-      case 'type':
-        return apachesolr_facet_block($response, $query, 'apachesolr_search', 'bundle', t('Filter by type'), 'apachesolr_search_get_type');
+      case 'bundle':
+        return apachesolr_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by type'), 'apachesolr_search_get_type');
       case 'ds_changed':
         return apachesolr_date_facet_block($response, $query, 'apachesolr_search', $delta, t('Filter by modification date'));
       case 'ds_created':

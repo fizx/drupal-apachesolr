@@ -76,7 +76,7 @@ function apachesolr_node_to_document($node, $namespace) {
 
     $document->ss_name = $node->name;
     // We want the name to ale be searchable for keywords.
-    $document->om_name = $node->name;
+    $document->tos_name = $node->name;
 
     // Everything else uses dynamic fields
     $document->is_uid = $node->uid;

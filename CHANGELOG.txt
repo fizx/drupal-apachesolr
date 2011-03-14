@@ -4,6 +4,10 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+
+Apache Solr integration 7.x-1.0-BETA4, xxxx-xx-xx
+------------------------------
+#1090530 by pwolanin: Further schema-related code fixes following from #1088208.
 #783366  by elliotttf: Invoke hook_apachesolr_prepare_query() in apachesolr_search_browse
 #1078766 by elliotttf: code-style cleanup according Coder module.
 #1049114 by Steven Jones, james.williams, Janusman: restore hierarchical taxonomy facets.

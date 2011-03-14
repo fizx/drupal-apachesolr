@@ -1998,22 +1998,21 @@ function apachesolr_index_key($field) {
   switch ($field['index_type']) {
     case 'text':
       $type_prefix = 't';
-      // We only support multi-valued text
-      $field['multiple'] = TRUE;
       break;
-    case 'text-omit-norms':
-      $type_prefix = 'o';
-      // We only support multi-valued text
-      $field['multiple'] = TRUE;
+    case 'text-omitNorms':
+      $type_prefix = 'to';
       break;
-    case 'string':
-      $type_prefix = 's';
+    case 'text-edgeNgram':
+      $type_prefix = 'te';
+      break;
+    case 'text-whiteSpace':
+      $type_prefix = 'tw';
       break;
     case 'integer':
-      $type_prefix = 'i';
+      $type_prefix = 'i'; // long integer
       break;
     case 'sint':
-      $type_prefix = 'si';
+      $type_prefix = 'is'; // long integer sortable
       break;
     case 'double':
       $type_prefix = 'p'; // reserve d for date
@@ -2022,20 +2021,18 @@ function apachesolr_index_key($field) {
       $type_prefix = 'b';
       break;
     case 'date':
-      $type_prefix = 'd';
-      break;
-    case 'float':
-      $type_prefix = 'f';
+      $type_prefix = 'd'; // date trie
       break;
     case 'tint':
-      $type_prefix = 'ti';
+      $type_prefix = 'it'; // long integer trie (sortable)
       break;
-    case 'tfloat':
-      $type_prefix = 'tf';
+    case 'float':
+      $type_prefix = 'ft'; // float trie
       break;
     case 'tdouble':
-      $type_prefix = 'tp';
+      $type_prefix = 'pt'; // double trie
       break;
+    case 'string':
     default:
       $type_prefix = 's'; // String
   }
@@ -2055,7 +2052,7 @@ function apachesolr_field_name_map($field_name) {
       'content' => t('The full, rendered content (e.g. the rendered node body)'),
       'label' => t('Title or label'),
       'teaser' => t('Teaser or preview'),
-      'om_name' => t('Author name'),
+      'tos_name' => t('Author name'),
       'path_alias' => t('Path alias'),
       'taxonomy_names' => t('All taxonomy term names'),
       'tags_h1' => t('Body text inside H1 tags'),
@@ -2427,7 +2424,7 @@ function apachesolr_mlt_suggestions($settings, $id, $solr = NULL) {
     $query = apachesolr_drupal_query('id:' . $id, '', '', '', $solr);
     $query->params = array(
       'qt' => 'mlt',
-      'fl' => 'nid,title,path,url',
+      'fl' => 'entity_id,entity_type,label,path,url',
       'mlt.fl' => implode(',', $settings['mlt_fl']),
       'start' => 0,
       'rows' => $settings['num_results'],
@@ -2577,8 +2574,8 @@ function theme_apachesolr_mlt_recommendation_block($vars) {
   $docs = $vars['docs'];
   $links = array();
   foreach ($docs as $result) {
-    // Suitable for single-site mode.
-    $links[] = l($result->title, $result->path, array('html' => TRUE));
+    // Suitable for single-site mode. Label is already safe.
+    $links[] = l($result->label, $result->path, array('html' => TRUE));
   }
   return theme('item_list', array('items' => $links));
 }

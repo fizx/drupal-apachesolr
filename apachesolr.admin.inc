@@ -785,7 +785,7 @@ function apachesolr_mlt_block_form($delta = NULL) {
   $form['mlt_fl'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Fields for finding related content'),
-    '#description' => t('Choose the fields to be used in calculating similarity. The default combination of %taxonomy_names and %title will provide relevant results for typical sites.', array("%taxonomy_names" => apachesolr_field_name_map("taxonomy_names"), "%title" => apachesolr_field_name_map("title"))),
+    '#description' => t('Choose the fields to be used in calculating similarity. The default combination of %taxonomy_names and %title will provide relevant results for typical sites.', array("%taxonomy_names" => apachesolr_field_name_map("taxonomy_names"), "%title" => apachesolr_field_name_map("label"))),
     '#options' => apachesolr_mlt_get_fields(),
     '#required' => TRUE,
     '#default_value' => $block['mlt_fl'],
@@ -860,12 +860,12 @@ function apachesolr_mlt_block_form($delta = NULL) {
     '#type' => 'textfield',
     '#title' => t('Additional Query'),
     '#description' => t('An additional query, in Lucene syntax, which will further filter the similarity suggestions. Ex. \'title:strategy\' will filter related content further to only those with strategy in the title. ' .
-                        'Likewise \'body:HDTV^3\' will boost the term HDTV by a factor of 3. Here are some more examples:' .
+                        'Likewise \'content:HDTV^3\' will boost the term HDTV by a factor of 3. Here are some more examples:' .
                         '<ul>
                             <li>language:fr</li>
                             <li>tid:5 OR tid 7</li>
-                            <li>created:[2009-05-01T23:59:59Z TO 2009-07-28T12:30:00Z]</li>
-                            <li>-uid:0 AND -uid:1</li>
+                            <li>ds_created:[2009-05-01T23:59:59Z TO 2009-07-28T12:30:00Z]</li>
+                            <li>-is_uid:0 AND -is_uid:1</li>
                         </ul>'),
     '#required' => FALSE,
     '#default_value' => $block['mlt_custom_filters'],
@@ -883,7 +883,7 @@ function apachesolr_mlt_block_defaults($block = array()) {
     'name' => '',
     'num_results' => '5',
     'mlt_fl' => array(
-      'title' => 'title',
+      'label' => 'label',
       'taxonomy_names' => 'taxonomy_names',
     ),
     'mlt_mintf' => '1',

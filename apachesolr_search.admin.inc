@@ -120,7 +120,7 @@ function apachesolr_search_settings_form($form, &$form_state, $fields, $server_i
   $defaults = array(
     'content' => '1.0',
     'label' => '5.0',
-    'om_name' => '3.0',
+    'os_name' => '3.0',
     'taxonomy_names' => '2.0',
     'tags_h1' => '5.0',
     'tags_h2_h3' => '3.0',
