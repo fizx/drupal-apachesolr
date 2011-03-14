@@ -258,6 +258,14 @@ function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $ba
     'facet.sort' => 'true'
   );
   apachesolr_search_add_facet_params($query);
+
+  // Allow modules to alter the query prior to statically caching it.
+  // This can e.g. be used to add available sorts.
+  foreach (module_implements('apachesolr_prepare_query') as $module) {
+    $function_name = $module . '_apachesolr_prepare_query';
+    $function_name($query, 'apachesolr');
+  }
+
   apachesolr_current_query($query);
   apachesolr_modify_query($query, 'apachesolr');
   $response = $query->search();
