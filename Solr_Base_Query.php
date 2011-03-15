@@ -300,9 +300,9 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
     return array(
       'score' => array('title' => t('Relevancy'), 'default' => 'desc'),
       'sort_title' => array('title' => t('Title'), 'default' => 'asc'),
-      'type' => array('title' => t('Type'), 'default' => 'asc'),
+      'bundle' => array('title' => t('Type'), 'default' => 'asc'),
       'sort_name' => array('title' => t('Author'), 'default' => 'asc'),
-      'created' => array('title' => t('Date'), 'default' => 'desc'),
+      'ds_created' => array('title' => t('Date'), 'default' => 'desc'),
     );
   }
 

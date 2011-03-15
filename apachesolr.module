@@ -1510,7 +1510,7 @@ function apachesolr_facetcount_form($module, $delta) {
 
   // TODO: Generalize how we know what type a facet block is by putting field
   // type into the facet definition. 'created' and 'changed' are date blocks.
-  if ($delta != 'created' && $delta != 'changed') {
+  if ($delta != 'ds_created' && $delta != 'ds_changed') {
     $form['apachesolr_facet_query_sort'] = array(
       '#type' => 'radios',
       '#title' => t('Sort order of facet links'),

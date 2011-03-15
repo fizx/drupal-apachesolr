@@ -41,7 +41,7 @@ function apachesolr_taxonomy_term_page($term) {
   );
 
   $filters = 'tid:' . $term->tid;
-  $solrsort = variable_get('apachesolr_search_taxonomy_sort', 'created desc');
+  $solrsort = variable_get('apachesolr_search_taxonomy_sort', 'ds_created desc');
   $page = isset($_GET['page']) ? $_GET['page'] : 0;
   $type = 'apachesolr_search';
   $_GET['retain-filters'] = 1; //?? 

@@ -471,7 +471,7 @@ function apachesolr_search_add_facet_params(DrupalSolrQueryInterface $query) {
             $params['f.' . $facet_field . '.facet.date.gap'] = $gap;
           }
         }
-        elseif ($module == 'apachesolr_search' && ($facet_field == 'created' || $facet_field == 'changed')) {
+        elseif ($module == 'apachesolr_search' && ($facet_field == 'ds_created' || $facet_field == 'ds_changed')) {
           list($start, $end, $gap) = apachesolr_search_date_range($query, $facet_field);
           if ($gap) {
             $params['facet.date'][] = $facet_field;
