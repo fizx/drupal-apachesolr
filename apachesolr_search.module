@@ -696,6 +696,7 @@ function apachesolr_search_entity_info_alter(&$entity_info) {
  *   The result array for this record to which to add.
  */
 function apachesolr_search_node_result($doc, &$result, &$extra) {
+  $doc->uid = $doc->is_uid;
   $result += array(
     'type' => apachesolr_search_get_type($doc->bundle),
     'user' => theme('username', array('account' => $doc)),
@@ -1606,9 +1607,9 @@ function theme_apachesolr_search_snippets($vars) {
   $result = '';
   if (is_array($vars['snippets'])) {
     $snippets = $vars['snippets'];
-    if (isset($snippets['body'])) {
-      $result .= $snippets['body'];
-      unset($snippets['body']);
+    if (isset($snippets['content'])) {
+      $result .= $snippets['content'];
+      unset($snippets['content']);
     }
     if (isset($snippets['teaser'])) {
       $result .= (strlen($result) > 0) ? ' ... ' : '';

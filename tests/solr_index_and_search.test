@@ -105,7 +105,7 @@ class DrupalSolrMatchTestCase extends DrupalSolrWebTestCase {
 
     variable_set('minimum_word_size', 3);
     for ($i = 1; $i <= 7; ++$i) {
-      $documents[] = $this->_solr_build_document($i, array('nid' => $i, 'text' => $this->getText($i)));
+      $documents[] = $this->_solr_build_document($i, array('entity_id' => $i, 'content' => $this->getText($i)));
     }
 
     $this->_solr_index($documents);
@@ -223,7 +223,7 @@ class DrupalSolrMatchTestCase extends DrupalSolrWebTestCase {
     // Get result IDs.
     $found = array();
     foreach ($set as $item) {
-      $found[] = $item->nid;
+      $found[] = $item->entity_id;
     }
     // Compare $results and $found.
     sort($found);

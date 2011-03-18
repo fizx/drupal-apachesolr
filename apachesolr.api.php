@@ -13,7 +13,7 @@
   */
 function hook_apachesolr_modify_query($query, $caller) {
   // I only want to see articles by the admin!
-  $query->add_filter("uid", 1);
+  $query->add_filter("is_uid", 1);
 }
 
 /**
@@ -32,7 +32,7 @@ function CALLER_finalize_query($query) {
  */
 function hook_apachesolr_prepare_query($query, $caller) {
   // Add a sort on the node ID.
-  $query->set_available_sort('nid', array(
+  $query->set_available_sort('entity_id', array(
     'title' => t('Node ID'),
     'default' => 'asc',
   ));

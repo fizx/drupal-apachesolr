@@ -3,7 +3,7 @@
 class SolrBaseQuery implements DrupalSolrQueryInterface {
 
   /**
-   * Extract all uses of one named field from a filter string e.g. 'type:book'
+   * Extract all uses of one named field from a filter string e.g. 'bundle:book'
    */
   public function filter_extract(&$filterstring, $name) {
     $extracted = array();
@@ -80,7 +80,7 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
   /**
    * A keyed array where the key is a position integer and the value
    * is an array with #name and #value properties.  Each value is a
-   * used for filter queries, e.g. array('#name' => 'uid', '#value' => 0)
+   * used for filter queries, e.g. array('#name' => 'is_uid', '#value' => 0)
    * for anonymous content.
    */
   protected $fields = array();
@@ -90,7 +90,7 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
   /**
    * The complete filter string for a query.  Usually from $_GET['filters']
    * Contains name:value pairs for filter queries.  For example,
-   * "type:book" for book nodes.
+   * "bundle:book" for book nodes.
    */
   protected $filterstring;
 
@@ -299,7 +299,7 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
     // The array keys must always be real Solr index fields.
     return array(
       'score' => array('title' => t('Relevancy'), 'default' => 'desc'),
-      'sort_title' => array('title' => t('Title'), 'default' => 'asc'),
+      'sort_label' => array('title' => t('Title'), 'default' => 'asc'),
       'bundle' => array('title' => t('Type'), 'default' => 'asc'),
       'sort_name' => array('title' => t('Author'), 'default' => 'asc'),
       'ds_created' => array('title' => t('Date'), 'default' => 'desc'),

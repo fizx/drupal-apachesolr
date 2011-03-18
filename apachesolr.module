@@ -525,7 +525,7 @@ function apachesolr_index_nodes($rows, $namespace) {
       $nids = array();
       if (!empty($docs)) {
         foreach ($docs as $doc) {
-          $nids[] = $doc->nid;
+          $nids[] = $doc->entity_id;
         }
       }
       watchdog('Apache Solr', 'Indexing failed on one of the following nodes: @nids <br /> !message', array(
@@ -944,7 +944,7 @@ function apachesolr_block_visibility(DrupalSolrQueryInterface $query, $module, $
       $has_filter = $query->get_filters($facet_info[$module][$delta]['facet_field']);
       $show = count($has_filter);
       foreach ($facet_info[$module][$delta]['content_types'] as $content_type) {
-        if ($query->has_filter('type', $content_type)) {
+        if ($query->has_filter('bundle', $content_type)) {
           $show = TRUE;
         }
       }
@@ -1589,7 +1589,7 @@ function apachesolr_facetcount_save($edit) {
  *
  * function my_module_apachesolr_modify_query($query, $caller) {
  *   // I only want to see articles by the admin!
- *   $query->add_filter("uid", 1);
+ *   $query->add_filter("is_uid", 1);
  *
  * }
  *
@@ -2439,7 +2439,7 @@ function apachesolr_mlt_suggestions($settings, $id, $solr = NULL) {
     $type_filters = array();
     if (is_array($settings['mlt_type_filters'])) {
       foreach ($settings['mlt_type_filters'] as $type_filter) {
-        $type_filters[] = "type:{$type_filter}";
+        $type_filters[] = "bundle:{$type_filter}";
       }
       $query->params['fq']['mlt'][] = '(' . implode(' OR ', $type_filters) . ') ';
     }

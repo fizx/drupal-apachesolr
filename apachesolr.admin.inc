@@ -657,7 +657,7 @@ function apachesolr_delete_index($type = NULL) {
   // Instantiate a new Solr object.
   $solr = apachesolr_get_solr();
   if ($type) {
-    $query = 'type:' . $type;
+    $query = 'bundle:' . $type;
   }
   else {
     $query = '*:*';
@@ -859,10 +859,10 @@ function apachesolr_mlt_block_form($delta = NULL) {
   $form['restrictions']['mlt_custom_filters'] = array(
     '#type' => 'textfield',
     '#title' => t('Additional Query'),
-    '#description' => t('An additional query, in Lucene syntax, which will further filter the similarity suggestions. Ex. \'title:strategy\' will filter related content further to only those with strategy in the title. ' .
+    '#description' => t('An additional query, in Lucene syntax, which will further filter the similarity suggestions. Ex. \'label:strategy\' will filter related content further to only those with strategy in the title. ' .
                         'Likewise \'content:HDTV^3\' will boost the term HDTV by a factor of 3. Here are some more examples:' .
                         '<ul>
-                            <li>language:fr</li>
+                            <li>ss_language:fr</li>
                             <li>tid:5 OR tid 7</li>
                             <li>ds_created:[2009-05-01T23:59:59Z TO 2009-07-28T12:30:00Z]</li>
                             <li>-is_uid:0 AND -is_uid:1</li>

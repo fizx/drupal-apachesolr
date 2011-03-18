@@ -3,12 +3,12 @@
 class DummySolr {
   function getFields() {
     return (object) array(
-       'uid' =>
+       'is_uid' =>
       (object) array(
          'type' => 'long',
          'schema' => 'I-S----OF-----',
       ),
-       'body' =>
+       'content' =>
       (object) array(
          'type' => 'text',
          'schema' => 'ITS-V---------',
@@ -19,12 +19,12 @@ class DummySolr {
          'schema' => 'I-SM---OF-----',
          'dynamicBase' => 'im_*',
       ),
-       'entity' =>
+       'entity_type' =>
       (object) array(
          'type' => 'string',
          'schema' => 'I-S----OF----l',
       ),
-       'last_comment_or_change' =>
+       'ds_last_comment_or_change' =>
       (object) array(
          'type' => 'tdate',
          'schema' => 'ITS----OF-----',
@@ -35,22 +35,12 @@ class DummySolr {
          'schema' => 'I--M---OF-----',
          'dynamicBase' => 'nodeaccess*',
       ),
-       'type' =>
-      (object) array(
-         'type' => 'string',
-         'schema' => 'I-S----OF----l',
-      ),
        'entity_id' =>
       (object) array(
          'type' => 'tlong',
          'schema' => 'ITS----OF-----',
       ),
-       'sname' =>
-      (object) array(
-         'type' => 'string',
-         'schema' => 'I------OF----l',
-      ),
-       'changed' =>
+       'ds_changed' =>
       (object) array(
          'type' => 'tdate',
          'schema' => 'ITS----OF-----',
@@ -65,7 +55,7 @@ class DummySolr {
          'type' => 'date',
          'schema' => 'I-S----OF----l',
       ),
-       'title' =>
+       'label' =>
       (object) array(
          'type' => 'text',
          'schema' => 'ITS-V--O------',
@@ -76,12 +66,12 @@ class DummySolr {
          'schema' => 'I--M---OF-----',
          'dynamicBase' => 'nodeaccess*',
       ),
-       'created' =>
+       'ds_created' =>
       (object) array(
          'type' => 'tdate',
          'schema' => 'ITS----OF-----',
       ),
-       'name' =>
+       'ss_name' =>
       (object) array(
          'type' => 'text',
          'schema' => 'ITS-V---------',
@@ -106,7 +96,7 @@ class DummySolr {
          'type' => 'long',
          'schema' => 'I-SM---OF-----',
       ),
-       'tnid' =>
+       'is_tnid' =>
       (object) array(
          'type' => 'long',
          'schema' => 'I-S----OF-----',
@@ -133,7 +123,7 @@ class DummySolr {
          'type' => 'string',
          'schema' => 'I-S----OF----l',
       ),
-       'comment_count' =>
+       'is_comment_count' =>
       (object) array(
          'type' => 'tint',
          'schema' => 'ITS----OF-----',
@@ -148,12 +138,12 @@ class DummySolr {
          'type' => 'string',
          'schema' => 'I-S----OF----l',
       ),
-       'status' =>
+       'bs_status' =>
       (object) array(
          'type' => 'boolean',
          'schema' => 'I-S----OF----l',
       ),
-       'nid' =>
+       'entity_id' =>
       (object) array(
          'type' => 'long',
          'schema' => 'I-S----OF-----',
@@ -180,12 +170,12 @@ class DummySolr {
          'schema' => 'IT-----O------',
          'dynamicBase' => 'tags_*',
       ),
-       'sticky' =>
+       'bs_sticky' =>
       (object) array(
          'type' => 'boolean',
          'schema' => 'I-S----OF----l',
       ),
-       'promote' =>
+       'bs_promote' =>
       (object) array(
          'type' => 'boolean',
          'schema' => 'I-S----OF----l',
@@ -195,28 +185,23 @@ class DummySolr {
          'type' => 'text',
          'schema' => '-TS-----------',
       ),
-       'type_name' =>
-      (object) array(
-         'type' => 'string',
-         'schema' => 'I-S----OF----l',
-      ),
        'im_vid_1' =>
       (object) array(
          'type' => 'long',
          'schema' => 'I-SM---OF-----',
          'dynamicBase' => 'im_*',
       ),
-       'translate' =>
+       'bs_translate' =>
       (object) array(
          'type' => 'boolean',
          'schema' => 'I-S----OF----l',
       ),
-       'sort_title' =>
+       'sort_label' =>
       (object) array(
          'type' => 'sortString',
          'schema' => 'IT-----O-----l',
       ),
-       'language' =>
+       'ss_language' =>
       (object) array(
          'type' => 'string',
          'schema' => 'I-S----OF----l',
@@ -254,11 +239,11 @@ class SolrBaseQueryTests extends DrupalUnitTestCase {
    * Regression test for http://drupal.org/node/891962
    */
   function testParseFilters() {
-    $filterstring = 'tid:3 sort_title:hello tid:11 tid:1 tid:12 title:hello';
+    $filterstring = 'tid:3 sort_label:hello tid:11 tid:1 tid:12 label:hello';
     // Setup dummy Solr object.
     $query = new SolrBaseQuery(new DummySolr(), 'mykeys', $filterstring, '', '');
-    $this->assertFalse($query->has_filter('title', 'Hello'));
-    $this->assertTrue($query->has_filter('title', 'hello'));
+    $this->assertFalse($query->has_filter('label', 'Hello'));
+    $this->assertTrue($query->has_filter('label', 'hello'));
     $filters = $query->get_filters();
     $this->assertEqual(count($filters), 6, count($filters) . ' filters found, expected 6 filters');
     // Check positions of filters
@@ -272,11 +257,11 @@ class SolrBaseQueryTests extends DrupalUnitTestCase {
     $query->remove_filter('tid', '11');
     $filters = $query->get_filters();
     $this->assertEqual(count($filters), 5, count($filters) . ' filters found, expected 5 filters');
-    $this->assertEqual(array('filters' => 'tid:3 sort_title:hello tid:1 tid:12 title:hello'), $query->get_url_queryvalues());
+    $this->assertEqual(array('filters' => 'tid:3 sort_label:hello tid:1 tid:12 label:hello'), $query->get_url_queryvalues());
     $query->remove_filter('tid');
     $filters = $query->get_filters();
     $this->assertEqual(count($filters), 2, count($filters) . ' filters found, expected 2 filters');
-    $this->assertEqual(array('filters' => 'sort_title:hello title:hello'), $query->get_url_queryvalues());
+    $this->assertEqual(array('filters' => 'sort_label:hello label:hello'), $query->get_url_queryvalues());
   }
 }
 
