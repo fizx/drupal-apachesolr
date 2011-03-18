@@ -18,7 +18,9 @@ function apachesolr_search_enable() {
  * Implements hook_uninstall().
  */
 function apachesolr_search_uninstall() {
-  apachesolr_clear_last_index('apachesolr_search');
+  $stored = variable_get('apachesolr_index_last', array());
+  unset($stored['apachesolr_search']);
+  variable_set('apachesolr_index_last', $stored);
   // Remove blocks.
   db_delete('block')->condition('module', 'apachesolr_search')->execute();
   $active = variable_get('search_active_modules', array('node', 'user'));

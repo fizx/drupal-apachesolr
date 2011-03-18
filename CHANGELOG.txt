@@ -13,7 +13,6 @@ Apache Solr integration 7.x-1.0-BETA4, xxxx-xx-xx
 #1078766 by elliotttf: code-style cleanup according Coder module.
 #1049114 by Steven Jones, james.williams, Janusman: restore hierarchical taxonomy facets.
 #1088208 by pwolanin | Janusman: simplify the schmea to eliminate node-specific fields.
-#1089692 by jpmckinney: Use apachesolr_clear_last_index where possible.
 #1089342 by elliotttf: Content Biasing not working.
 #996800  by elliotttf: trim host, port, and path strings to prevent connection errors.
 #1020780 by jpmckinney, pwolanin: cleanup of variable_get to apachesolr_server_variable_get conversion.
