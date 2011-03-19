@@ -78,7 +78,7 @@ class DrupalApacheSolrNodeAccess extends DrupalWebTestCase {
     $subquery = apachesolr_access_build_subquery($basic_user);
 
     $expected_criterion = array(
-      'access_node_all' => 0,
+      'access__all' => 0,
       'access_node_' . apachesolr_site_hash() . '_all' => 0,
       // @todo - we need to check grants provided by node_access_test module.
  //     'access_node_' . apachesolr_site_hash() . '_nodeaccess_rid' => array(2, $assigned_role),

@@ -22,7 +22,8 @@ function apachesolr_access_apachesolr_update_index(&$document, $node, $namespace
   else {
     // Add the generic view grant if we are not using
     // node access or the node is viewable by anonymous users.
-    $document->setMultiValue('access_node_all', 0);
+    // We assume we'll never have an entity with the name '_all'.
+    $document->setMultiValue('access__all', 0);
   }
 }
 
@@ -40,7 +41,7 @@ function apachesolr_access_build_subquery($account) {
   $node_access_query = apachesolr_drupal_query();
   if (user_access('bypass node access', $account)) {
     // Access all content from the current site, or public content.
-    $node_access_query->add_filter('access_node_all', 0);
+    $node_access_query->add_filter('access__all', 0);
     $node_access_query->add_filter('hash', apachesolr_site_hash());
   }
   else {
@@ -51,7 +52,7 @@ function apachesolr_access_build_subquery($account) {
         $node_access_query->add_filter('access_node_' . apachesolr_site_hash() . '_' . $realm, $gid);
       }
     }
-    $node_access_query->add_filter('access_node_all', 0);
+    $node_access_query->add_filter('access__all', 0);
   }
   return $node_access_query;
 }
