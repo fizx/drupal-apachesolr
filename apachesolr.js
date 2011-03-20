@@ -41,13 +41,16 @@ Drupal.apachesolr.Redirect.prototype.gotoHref = function() {
 }
 
 Drupal.apachesolr.addCheckbox = function() {
-  // Create an unchecked checkbox.
-  var checkbox = $('<input type="checkbox" class="facet-checkbox" />');
-  // Get the href of the link that is this DOM object.
-  var href = $(this).attr('href');
-  redirect = new Drupal.apachesolr.Redirect(href);
-  checkbox.click($.proxy(redirect, 'gotoHref'));
-  $(this).before(checkbox).before('&nbsp;');
+  if (!$(this).hasClass('facet-checkbox-processed')) {
+    // Create an unchecked checkbox.
+    var checkbox = $('<input type="checkbox" class="facet-checkbox" />');
+    // Get the href of the link that is this DOM object.
+    var href = $(this).attr('href');
+    redirect = new Drupal.apachesolr.Redirect(href);
+    checkbox.click($.proxy(redirect, 'gotoHref'));
+    $(this).before(checkbox).before('&nbsp;');
+    $(this).addClass('facet-checkbox-processed');
+  }
 }
 
 Drupal.apachesolr.makeCheckbox = function() {
