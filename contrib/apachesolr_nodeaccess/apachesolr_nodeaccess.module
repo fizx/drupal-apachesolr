@@ -128,7 +128,6 @@ function apachesolr_nodeaccess_form_alter(&$form, $form_state, $form_id) {
  */
 function apachesolr_nodeaccess_rebuild_nodeaccess(&$form, $form_state) {
   drupal_set_message(t('Solr search index will be rebuilt.'));
-  node_access_needs_rebuild(TRUE);
   apachesolr_clear_last_index();
 }
 
