@@ -63,7 +63,7 @@ function apachesolr_access_build_subquery($account) {
 function apachesolr_access_apachesolr_modify_query(DrupalSolrQueryInterface $query, $caller = 'apachesolr_search') {
   global $user;
   try {
-    $subquery = apachesolr_nodeaccess_build_subquery($user);
+    $subquery = apachesolr_access_build_subquery($user);
     $query->add_subquery($subquery, 'OR');
   }
   catch (Exception $e) {

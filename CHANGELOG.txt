@@ -7,6 +7,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-BETA4, xxxx-xx-xx
 ------------------------------
+#1099390 by jpmckinney: Fatal error: Call to undefined function apachesolr_nodeaccess_build_subquery().
 #1098222 by pwolanin: Rename and make the nodeaccess module more generic.
 #1092910 by pwolanin: missing date field conversions from #1088208.
 #1090530 by pwolanin: Further schema-related code fixes following from #1088208.
