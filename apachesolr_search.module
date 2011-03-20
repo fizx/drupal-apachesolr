@@ -572,10 +572,9 @@ function apachesolr_search_process_response($response, $query, $params) {
       $data = array($doc);
       $data['__drupal_alter_by_ref'] = array(&$extra);
       drupal_alter('apachesolr_search_result', $data);
-      $fields = array();
-      foreach ($doc->getFieldNames() as $field_name) {
-        $fields[$field_name] = $doc->getField($field_name);
-      }
+
+      $fields = (array) $doc;
+
       $results[] = array(
         'link' => url($doc->path, array('absolute' => TRUE)),
         'type' => apachesolr_search_get_type($doc->type),
