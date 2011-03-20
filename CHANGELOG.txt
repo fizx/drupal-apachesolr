@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#883106 by jpmckinney | pwolanin: move the OR facet code to the finalize hook.
 #993448 by pwolanin, scor: get Solr result docs as stdClass instead of Apache_Solr_Document.
 #1050000 by pwolanin: More generically prevent calling nodeapi update_index when indexing.
 #996800 by pwolanin: Connection strings (host, port, path) should use trim().

@@ -237,6 +237,53 @@ function apachesolr_search_apachesolr_document_handlers($type, $namespace) {
 }
 
 /**
+ * Implementation of hook_finalize_query().
+ *
+ * Handle OR facets.
+ */
+function apachesolr_search_finalize_query(&$query, &$params) {
+  $ors = array();
+  $facet_info = apachesolr_get_facet_definitions();
+  foreach ($facet_info as $infos) {
+    foreach ($infos as $delta => $facet) {
+      if ($facet['operator'] == 'OR') {
+        $ors[] = $delta;
+      }
+    }
+  }
+
+  if (isset($query->params['fq'])) {
+    $filter_queries = $query->params['fq'];
+    foreach ($filter_queries as $delta => $values) {
+      $fq = $tag = '';
+      $op = 'AND';
+      $fields = array($delta);
+      // CCK and taxonomy facet field block deltas are not the same as their Solr index field names.
+      if (strpos($delta, '_cck_') !== FALSE) {
+        $fields[] = trim(drupal_substr($delta, 7, drupal_strlen($delta)));
+      }
+      elseif ($delta == 'tid') {
+        if (function_exists('taxonomy_get_term')) {
+          foreach ($values as $value) {
+            $filters = $query->filter_extract($value, 'tid');
+            $term = taxonomy_get_term($filters[0]['#value']);
+            $fields[] = 'im_vid_' . $term->vid;
+          }
+        }
+      }
+
+      if (array_intersect($fields, $ors)) {
+        $tag = "{!tag=$delta}";
+        $op = 'OR';
+      }
+      $fq = implode(" $op ", $query->params['fq'][$delta]);
+      $query->params['fq'][] = $tag . $fq;
+      unset($query->params['fq'][$delta]);
+    }
+  }
+}
+
+/**
  * Execute an empty search (match all documents) and show a listing of all enabled facets.
  */
 function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $base_path = '') {
