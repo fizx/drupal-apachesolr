@@ -24,14 +24,17 @@ Drupal.behaviors.apachesolr = function(context) {
 Drupal.apachesolr = {}
 
 Drupal.apachesolr.addCheckbox = function() {
-  // Put href in context scope to be visible in the anonymous function.
-  var href = $(this).attr('href');
-  $(this).before($('<input type="checkbox" />')
-    .attr('class', 'facet-checkbox')
-    .click(function(){
-      window.location.href = href;
-    })
-  );
+  if (!$(this).hasClass('facet-checkbox-processed')) {
+    // Put href in context scope to be visible in the anonymous function.
+    var href = $(this).attr('href');
+    $(this).before($('<input type="checkbox" />')
+      .attr('class', 'facet-checkbox')
+      .click(function(){
+        window.location.href = href;
+      })
+    );
+    $(this).addClass('facet-checkbox-processed');
+  }
 }
 
 Drupal.apachesolr.makeCheckbox = function() {
