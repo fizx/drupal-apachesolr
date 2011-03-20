@@ -1331,16 +1331,28 @@ function apachesolr_search_form_search_form_alter(&$form, $form_state) {
 
           // Show only if suggestion is different than current query.
           if ($query->get_query_basic() != $new_keywords) {
-            $form['apachesolr_Search']['suggestion'] = array(
-              '#prefix' => '<div class="spelling-suggestions">',
-              '#suffix' => '</div>',
-              '#markup' => '<label>' . t('Did you mean') . '</label>' . l($new_keywords, $query->get_path($new_keywords)),
+            $form['apachesolr_search']['suggestion'] = array(
+              '#theme' => 'apachesolr_search_suggestions',
+              '#links' => array(l($new_keywords, $query->get_path($new_keywords))),
             );
           }
         }
       }
     }
   }
+}
+
+/**
+ * Default theme function for spelling suggestions.
+ */
+function theme_apachesolr_search_suggestions($variables) {
+  $output = '<div class="spelling-suggestions">';
+  $output .= '<dl class="form-item"><dt><strong>' . t('Did you mean') . '</strong></dt>';
+  foreach ((array) $variables['links'] as $link) {
+    $output .= '<dd>' . $link . '</dd>';
+  }
+  $output .= '</dl></div>';
+  return $output;
 }
 
 /**
@@ -1462,6 +1474,9 @@ function apachesolr_search_theme() {
     ),
     'apachesolr_search_noresults' => array(
       'variables' => array(),
+    ),
+    'apachesolr_search_suggestions' => array(
+      'variables' => array('links' => NULL),
     ),
   );
 }
