@@ -10,6 +10,26 @@ class Drupal_Apache_Solr_Service extends Apache_Solr_Service {
   const STATS_SERVLET = 'admin/stats.jsp';
 
   /**
+   * Whether {@link Apache_Solr_Response} objects should create {@link Apache_Solr_Document}s in
+   * the returned parsed data
+   *
+   * @var boolean
+   *
+   * @override to FALSE by default.
+   */
+  protected $_createDocuments = FALSE;
+
+  /**
+   * Whether {@link Apache_Solr_Response} objects should have multivalue fields with only a single value
+   * collapsed to appear as a single value would.
+   *
+   * @var boolean
+   *
+   * @override to FALSE by default
+   */
+  protected $_collapseSingleValueArrays = FALSE;
+
+  /**
    * Call the /admin/ping servlet, to test the connection to the server.
    *
    * @param $timeout

@@ -420,10 +420,8 @@ function apachesolr_process_response($response, $query, $params) {
       if (isset($doc->is_upload_count)) {
         $extra[] = format_plural($doc->is_upload_count, '1 attachment', '@count attachments');
       }
-      $fields = array();
-      foreach ($doc->getFieldNames() as $field_name) {
-        $fields[$field_name] = $doc->$field_name;
-      }
+
+      $fields = (array) $doc;
 
       $results[] = array(
         'link' => url($doc->path, array('absolute' => TRUE)),
