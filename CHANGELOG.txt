@@ -4,6 +4,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 5.x-2.x, 2010-xx-xx
 ------------------------------
+#562214 by ecofinn, wmostry, jpmckinney: Problems with double-encoded ampersands.
 #957652  by aegnor, pwolanin: fix str_replace may remove a substring in filter_extract.
 #983572 by amateescu, pwolanin: fix for empty filter values causing Solr error.
 #899560 by robertDouglass: Fixed apachesolr_do_query() has to take $params by reference.

@@ -1695,12 +1695,12 @@ function apachesolr_l($text, $path, $options = array()) {
   $options_query = drupal_query_string_encode($options['query']);
   $url = $options_query ? url($path, $options_query): url($path);
   
-  return '<a href="'. check_url($url) .'"'. drupal_attributes($options['attributes']) .'>'. ($options['html'] ? $text : check_plain($text)) .'</a>';
+  return '<a href="'. check_url($url) .'"'. drupal_attributes($options['attributes']) .'>'. ($options['html'] ? $text : check_plain(html_entity_decode($text))) .'</a>';
 }
 
 function theme_apachesolr_unclick_link($facet_text, $path, $options = array()) {
   if (empty($options['html'])) {
-    $facet_text = check_plain($facet_text);
+    $facet_text = check_plain(html_entity_decode($facet_text));
   }
   else {
     // Don't pass this option as TRUE into apachesolr_l().
