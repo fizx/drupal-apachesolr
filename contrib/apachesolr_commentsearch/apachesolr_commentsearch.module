@@ -39,6 +39,7 @@ function apachesolr_commentsearch_node_to_comments($node, $namespace) {
     }
     $document->id = apachesolr_document_id($comment->cid, 'comment');
     $document->is_cid = $comment->cid;
+    $document->ss_thread = $comment->thread;
     $document->site = url(NULL, array('absolute' => TRUE));
     $document->hash = apachesolr_site_hash();
     $document->entity = 'comment';
@@ -76,9 +77,7 @@ function apachesolr_commentsearch_node_to_comments($node, $namespace) {
 }
 
 function apachesolr_commentsearch_apachesolr_modify_query(&$query, &$params, $caller) {
-  $fls = array_filter(explode(',', $params['fl']));
-  $fls[] = 'is_cid';
-  $params['fl'] =  implode(',', $fls);
+  $params['fl'] .= ',is_cid,ss_thread';
 }
 
 function apachesolr_commentsearch_apachesolr_process_results(&$results) {
@@ -95,7 +94,7 @@ function apachesolr_commentsearch_apachesolr_search_result_alter(&$doc, &$extra)
     $nid = $doc->nid;
     $extra['cid'] = $doc->is_cid;
     $node = node_load($nid);
-    $query = apachesolr_commentsearch_page_count(comment_num_all($nid), $node, $doc->is_cid);
+    $query = apachesolr_commentsearch_page_count(comment_num_all($nid), $node, $doc->is_cid, $doc->ss_thread);
     $doc->path = url($doc->path, array('absolute' => TRUE, 'fragment' => "comment-{$doc->is_cid}", 'query' => $query));
   }
 }
@@ -180,55 +179,70 @@ function apachesolr_commentsearch_theme() {
 }
 
 /**
- * Calculate page number for first new comment.
+ * Calculate the page number for the given comment.
  *
- * @param $num_comments
- *   Number of comments.
- * @param $node
- *   The node to whom the comments belong.
- * @param $cid
- *   The cid of the comment we're looking for.
- * @return
+ * @param int $num_comments
+ *   Total number of comments.
+ * @param object $node
+ *   The node the comment belong to.
+ * @param int $cid
+ *   The comment's cid.
+ * @param string $thread
+ *   The comment's thread.
+ *
+ * @return string
  *   "page=X" if the page number is greater than zero; NULL otherwise.
+ *
+ * @see comment_render()
  */
-function apachesolr_commentsearch_page_count($num_comments, $node, $cid) {
+function apachesolr_commentsearch_page_count($num_comments, $node, $cid, $thread) {
   $comments_per_page = _comment_get_display_setting('comments_per_page', $node);
+
+  if ($num_comments <= $comments_per_page) {
+    // If only one page of comments, the comment will always be on first page.
+    return NULL;
+  }
+
   $mode = _comment_get_display_setting('mode', $node);
   $order = _comment_get_display_setting('sort', $node);
-  $pagenum = NULL;
-  $flat = in_array($mode, array(COMMENT_MODE_FLAT_COLLAPSED, COMMENT_MODE_FLAT_EXPANDED));
-  if ($num_comments <= $comments_per_page || ($flat && $order == COMMENT_ORDER_NEWEST_FIRST)) {
-    // Only one page of comments or flat forum and newest first.
-    // First new comment will always be on first page.
-    $pageno = 0;
+
+  // Count the number of comments to display before the given comment.
+  $query = 'SELECT COUNT(*) FROM {comments} c WHERE c.nid = %d';
+  $query_args = array($node->nid);
+
+  if (!user_access('administer comments')) {
+    $query .= ' AND c.status = %d';
+    $query_args[] = COMMENT_PUBLISHED;
   }
-  else {
-    if ($flat) {
-      // Flat comments and oldest first.
-      $count = $num_comments;
+
+  if ($order == COMMENT_ORDER_NEWEST_FIRST) {
+    if ($mode == COMMENT_MODE_FLAT_COLLAPSED || $mode == COMMENT_MODE_FLAT_EXPANDED) {
+      $query .= ' AND c.cid > %d ORDER BY c.cid DESC';
+      $query_args[] = $cid;
     }
     else {
-      // Threaded comments. See the documentation for comment_render().
-      if ($order == COMMENT_ORDER_NEWEST_FIRST) {
-        // Newest first: find the last thread with new comment
-        $result = db_query('(SELECT cid, thread FROM {comments} WHERE nid = %d AND status = 0 ORDER BY timestamp DESC) ORDER BY thread', $node->nid);
-      }
-      else {
-        // Oldest first: find the first thread with new comment
-        $result = db_query('(SELECT thread FROM {comments} WHERE nid = %d AND status = 0 ORDER BY timestamp DESC) ORDER BY SUBSTRING(thread, 1, (LENGTH(thread) - 1))', $node->nid);
-      }
-      $count = 0;
-      while ($row = db_fetch_object($result)) {
-        $count++;
-        if ($row->cid == $cid) {
-          break;
-        }
-      }
+      $query .= ' AND c.thread > "%s" ORDER BY c.thread DESC';
+      $query_args[] = $thread;
     }
-    $pageno =  $count / $comments_per_page;
   }
+  else if ($order == COMMENT_ORDER_OLDEST_FIRST) {
+    if ($mode == COMMENT_MODE_FLAT_COLLAPSED || $mode == COMMENT_MODE_FLAT_EXPANDED) {
+      $query .= ' AND c.cid < %d ORDER BY c.cid';
+      $query_args[] = $cid;
+    }
+    else {
+      $query .= ' AND SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1)) < "%s" ORDER BY SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1))';
+      $query_args[] = $thread;
+    }
+  }
+
+  $query = db_rewrite_sql($query, 'c', 'cid');
+  $count = db_result(db_query($query, $query_args));
+
+  $pageno = $count / $comments_per_page;
   if ($pageno >= 1) {
-    $pagenum = "page=". intval($pageno);
+    return 'page=' . intval($pageno);
   }
-  return $pagenum;
+
+  return NULL;
 }
