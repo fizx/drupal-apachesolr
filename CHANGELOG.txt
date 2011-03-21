@@ -7,6 +7,7 @@ Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.3, xxxx-xx-xx
 ------------------------------
+#562214 by ecofinn, wmostry, jpmckinney: Problems with double-encoded ampersands.
 #533044 by janusman | jpmckinney: Document that "hijack taxonomy pages" only displays indexed content.
 #1033630 by jpmckinney | Patrizio: Apache Solr node access broken permissions rebuilding.
 #979194 by janusman: Missing 'module' element in menu_alter for taxonomy hijack.
