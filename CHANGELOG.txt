@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#562214 by ecofinn, wmostry, jpmckinney: Problems with double-encoded ampersands.
 #673914 by jpmckinney: Links comments to page containing newest comment, instead of page containing current comment.
 #533044 by janusman | jpmckinney: Document that "hijack taxonomy pages" only displays indexed content.
 #1099738 by jpmckinney: per_field should be per-field.
