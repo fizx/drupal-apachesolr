@@ -29,6 +29,7 @@ function apachesolr_date_apachesolr_facets() {
               // 'facet_field' will later be block deltas.
               'facet_field' => apachesolr_index_key($field) . '_end',
               'content_types' => $field['content_types'],
+              'display_callback' => 'apachesolr_date_display_callback',
             )
           );
         }
