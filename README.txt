@@ -5,8 +5,8 @@ features and better performance. Among the extra features is the ability to have
 faceted search on facets ranging from content author to taxonomy to arbitrary
 CCK fields.
 
-The module comes with a schema.xml and solrconfig.xml file which should be used
-in your Solr installation.
+The module comes with a schema.xml, solrconfig.xml, and protwords.txt file which
+must be used in your Solr installation.
 
 This module depends on the search framework in core. However, you may not want
 the core searches and only want Solr search. If that is the case, you want to
@@ -84,6 +84,10 @@ ApacheSolr Drupal module to take its place.
 
 Similarly, move apache-solr-1.4.1/example/solr/conf/solrconfig.xml and rename
 it like solrconfig.bak. Then move the solrconfig.xml that comes with the
+ApacheSolr Drupal module to take its place.
+
+Finally, move apache-solr-1.4.1/example/solr/conf/protwords.txt and rename
+it like protwords.bak. Then move the protwords.txt that comes with the
 ApacheSolr Drupal module to take its place.
 
 Now start the solr application by opening a shell, changing directory to

@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#528086 by pwolanin, jpmckinney: Fix for special html entity search and display bugs.
 #864014 by jpmckinney: Current search block doesn't theme apachesolr_date facets properly.
 #562214 by ecofinn, wmostry, jpmckinney: Problems with double-encoded ampersands.
 #673914 by jpmckinney: Links comments to page containing newest comment, instead of page containing current comment.
