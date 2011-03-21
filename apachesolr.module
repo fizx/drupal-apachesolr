@@ -1378,7 +1378,7 @@ function apachesolr_do_query($caller, $current_query, &$params = array('rows' =>
     foreach ($params['fq'] as $delta => $value) {
       // Move the fq param if it has no local params and is not negative.
       if (!preg_match('/^(?:\{!|-)/', $value)) {
-        $qalt[] = $value;
+        $qalt[] = '(' . $value . ')';
         unset($params['fq'][$delta]);
       }
     }
