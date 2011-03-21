@@ -2008,7 +2008,7 @@ function apachesolr_cck_fields() {
         $field_type = $instance['type'];
         $field_name = $instance['field_name'];
         $widget_type = $instance['widget']['type'];
-        if (!isset($mappings[$field_type][$widget_type]) && !isset($mappings['per_field'][$field_name]) && isset($mappings[$field_type]['default'])) {
+        if (!isset($mappings[$field_type][$widget_type]) && !isset($mappings['per-field'][$field_name]) && isset($mappings[$field_type]['default'])) {
           $widget_type = 'default';
         }
         // Only deal with fields that have index mappings and that have not been marked for exclusion.

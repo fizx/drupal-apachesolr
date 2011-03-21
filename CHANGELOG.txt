@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#1099738 by jpmckinney: per_field should be per-field.
 #997480 by jpmckinney | davidwhthomas: Facet checkboxes are duplicated following other javascript activity on page.
 #1033630 by jpmckinney | Patrizio: Apache Solr node access broken permissions rebuilding.
 #979194 by janusman: Missing 'module' element in menu_alter for taxonomy hijack.
