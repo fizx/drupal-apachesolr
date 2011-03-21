@@ -692,14 +692,13 @@ function apachesolr_mlt_block_form($delta = NULL) {
   $form['restrictions']['mlt_custom_filters'] = array(
     '#type' => 'textfield',
     '#title' => t('Additional Query'),
-    '#description' => t('An additional query, in Lucene syntax, which will further filter the similarity suggestions. Ex. \'title:strategy\' will filter related content further to only those with strategy in the title. ' .
-                        'Likewise \'body:HDTV^3\' will boost the term HDTV by a factor of 3. Here are some more examples:' .
+    '#description' => t("An additional query, in Lucene syntax, which will further filter the similarity suggestions. Ex. 'title:strategy' will filter related content further to only those with strategy in the title. Likewise 'body:HDTV^3' will boost the term HDTV by a factor of 3. Here are some more examples:") .
                         '<ul>
                             <li>language:fr</li>
                             <li>tid:5 OR tid 7</li>
                             <li>created:[2009-05-01T23:59:59Z TO 2009-07-28T12:30:00Z]</li>
                             <li>-uid:0 AND -uid:1</li>
-                        </ul>'),
+                        </ul>',
     '#required' => FALSE,
     '#default_value' => $block['mlt_custom_filters'],
     '#weight' => '-1',
