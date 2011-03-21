@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#533044 by janusman | jpmckinney: Document that "hijack taxonomy pages" only displays indexed content.
 #1099738 by jpmckinney: per_field should be per-field.
 #997480 by jpmckinney | davidwhthomas: Facet checkboxes are duplicated following other javascript activity on page.
 #1033630 by jpmckinney | Patrizio: Apache Solr node access broken permissions rebuilding.
