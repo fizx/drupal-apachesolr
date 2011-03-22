@@ -253,8 +253,8 @@ function apachesolr_search_finalize_query(&$query, &$params) {
     }
   }
 
-  if (isset($query->params['fq'])) {
-    $filter_queries = $query->params['fq'];
+  if (isset($params['fq'])) {
+    $filter_queries = $params['fq'];
     foreach ($filter_queries as $delta => $values) {
       $fq = $tag = '';
       $op = 'AND';
@@ -277,9 +277,9 @@ function apachesolr_search_finalize_query(&$query, &$params) {
         $tag = "{!tag=$delta}";
         $op = 'OR';
       }
-      $fq = implode(" $op ", $query->params['fq'][$delta]);
-      $query->params['fq'][] = $tag . $fq;
-      unset($query->params['fq'][$delta]);
+      $fq = implode(" $op ", $params['fq'][$delta]);
+      $params['fq'][] = $tag . $fq;
+      unset($params['fq'][$delta]);
     }
   }
 }
