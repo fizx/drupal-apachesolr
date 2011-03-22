@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#903802 by jpmckinney: BLOCK_CACHE_PER_PAGE conflicts with theme_apachesolr_facet_list.
 #882638 by pwolanin, jpmckinney: Clean the text inside indexed tags.
 #528086 by pwolanin, jpmckinney: Fix for special html entity search and display bugs.
 #864014 by jpmckinney: Current search block doesn't theme apachesolr_date facets properly.

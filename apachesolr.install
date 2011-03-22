@@ -279,3 +279,14 @@ function apachesolr_update_6006() {
   variable_del('apachesolr_exclude_comments_types');
   return array();
 }
+
+/**
+ * Fix block caching settings.
+ */
+function apachesolr_update_6007() {
+  $ret = array();
+
+  $ret[] = update_sql("UPDATE {blocks} set cache = " . (BLOCK_CACHE_PER_ROLE | BLOCK_CACHE_PER_PAGE) . " WHERE module LIKE 'apachesolr%' AND cache = " . BLOCK_CACHE_PER_PAGE . " AND delta != 'currentsearch' AND delta != 'sort'");
+
+  return $ret;
+}
