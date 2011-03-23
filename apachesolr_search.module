@@ -459,19 +459,7 @@ function apachesolr_search_add_facet_params(DrupalSolrQueryInterface $query) {
       if (apachesolr_block_visibility($query, $module, $delta)) {
         // TODO: generalize handling of date and range facets.
         // TODO: put field type in the facet definitions.
-        // NOTE: This is a dependency on the apachesolr_date module. Using function_exists to avoid problems.
-        if (isset($facet_info[$module][$delta]['field_type'])
-              && in_array($facet_info[$module][$delta]['field_type'], array('date', 'datetime', 'datestamp'))
-              && function_exists('apachesolr_date_search_date_range')) {
-          list($start, $end, $gap) = apachesolr_date_search_date_range($query, $facet_field);
-          if ($gap) {
-            $params['facet.date'][] = $facet_field;
-            $params['f.' . $facet_field . '.facet.date.start'] = $start;
-            $params['f.' . $facet_field . '.facet.date.end'] = $end;
-            $params['f.' . $facet_field . '.facet.date.gap'] = $gap;
-          }
-        }
-        elseif ($module == 'apachesolr_search' && ($facet_field == 'ds_created' || $facet_field == 'ds_changed')) {
+        if ($module == 'apachesolr_search' && ($facet_field == 'ds_created' || $facet_field == 'ds_changed')) {
           list($start, $end, $gap) = apachesolr_search_date_range($query, $facet_field);
           if ($gap) {
             $params['facet.date'][] = $facet_field;
@@ -760,12 +748,21 @@ function apachesolr_search_date_range(DrupalSolrQueryInterface $query, $facet_fi
   }
   // If there is no $delta field in query object, get initial
   // facet.date.* params from the DB and determine the best search
-  // gap to use.  This callback assumes $delta is 'changed' or 'created'.
+  // gap to use. This callback assumes $facet_field is 'ds_changed' or
+  // 'ds_created'.
+  switch ($facet_field) {
+    case 'ds_created' :
+      $field = 'created';
+      break;
+    case 'ds_changed' :
+      $field = 'changed';
+      break;
+  }
   if (!isset($start_iso)) {
-    $start_iso = apachesolr_date_iso(db_query("SELECT MIN($facet_field) FROM {node} WHERE status = 1")->fetchField());
+    $start_iso = apachesolr_date_iso(db_query("SELECT MIN($field) FROM {node} WHERE status = 1")->fetchField());
     // Subtract one second, so that this range's $end_iso is not equal to the
     // next range's $start_iso.
-    $end_iso = apachesolr_date_iso(db_query("SELECT MAX($facet_field) FROM {node} WHERE status = 1")->fetchField() - 1);
+    $end_iso = apachesolr_date_iso(db_query("SELECT MAX($field) FROM {node} WHERE status = 1")->fetchField() - 1);
     $gap = apachesolr_date_determine_gap($start_iso, $end_iso);
   }
   // Return a query range from the beginning of a gap period to the beginning
