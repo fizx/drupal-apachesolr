@@ -183,8 +183,12 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
 
   public function add_filter($field, $value, $exclude = FALSE, $callbacks = array()) {
     $filter = array('#exclude' => $exclude, '#name' => $field, '#value' => trim($value), '#callbacks' => $callbacks);
-    $this->fields[] = $filter;
+    // Record the addition.
     $this->fields_added[] = $filter;
+    // Add to the public list of filters.
+    $this->fields[] = $filter;
+    // Remove from the record of removed filters.
+    $this->unset_filter($this->fields_removed, $name, $value);
     return $this;
   }
 
@@ -197,7 +201,7 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
     $this->fields_removed[$name][] = $value;
     // Remove from the public list of filters.
     $this->unset_filter($this->fields, $name, $value);
-    // Remove from the list of filters added with add_filter()
+    // Remove from the record of added filters.
     $this->unset_filter($this->fields_added, $name, $value);
     return $this;
   }
