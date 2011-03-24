@@ -176,8 +176,8 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
     return FALSE;
   }
 
-  public function add_filter($field, $value, $exclude = FALSE, $callbacks = array()) {
-    $filter = array('#exclude' => $exclude, '#name' => $field, '#value' => trim($value), '#callbacks' => $callbacks);
+  public function add_filter($name, $value, $exclude = FALSE, $callbacks = array()) {
+    $filter = array('#exclude' => $exclude, '#name' => $name, '#value' => trim($value), '#callbacks' => $callbacks);
     // Record the addition.
     $this->fields_added[] = $filter;
     // Add to the public list of filters.
