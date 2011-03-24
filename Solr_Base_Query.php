@@ -415,8 +415,13 @@ class Solr_Base_Query implements Drupal_Solr_Query_Interface {
       // Get the values for $name
       $extracted = $this->filter_extract($filterstring, $alias);
       if (count($extracted)) {
+        // A trailing space is required since we match all individual
+        // filter terms using a trailing space.
+        $filter_pos_string = $this->filterstring . ' ';
         foreach ($extracted as $filter) {
-          $pos = strpos($this->filterstring, $filter['#query']);
+          // The trailing space on $filter['#query'] avoids incorrect
+          // matches to a substring. See http://drupal.org/node/891962
+          $pos = strpos($filter_pos_string, $filter['#query'] . ' ');
           // $solr_keys and $solr_crumbs are keyed on $pos so that query order
           // is maintained. This is important for breadcrumbs.
           $filter['#name'] = $name;
