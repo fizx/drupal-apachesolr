@@ -114,9 +114,7 @@ function apachesolr_settings_validate($form, &$form_state) {
       $form_state['values']['apachesolr_path'] = '/' . trim($form_state['values']['apachesolr_path'], "/ \t\r\n\0\x0B");
     }
   }
-}
 
-function apachesolr_settings_validate($form, &$form_state) {
   $intval = intval($form_state['values']['apachesolr_rows']);
   // TODO: does the max need to be variable?
   $max = 200;
