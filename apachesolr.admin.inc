@@ -54,12 +54,10 @@ function apachesolr_settings() {
     '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce the number of items to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status')))
   );
 
-  $options = drupal_map_assoc(array(5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100));
   $form['apachesolr_rows'] = array(
-    '#type' => 'select',
+    '#type' => 'textfield',
     '#title' => t('Results per page'),
     '#default_value' => variable_get('apachesolr_rows', 10),
-    '#options' => $options,
     '#description' => t('The number of results that will be shown per page.'),
   );
   $form['apachesolr_failure'] = array(
@@ -115,6 +113,19 @@ function apachesolr_settings_validate($form, &$form_state) {
       $form_state['values']['apachesolr_port'] = trim($form_state['values']['apachesolr_port']);
       $form_state['values']['apachesolr_path'] = '/' . trim($form_state['values']['apachesolr_path'], "/ \t\r\n\0\x0B");
     }
+  }
+}
+
+function apachesolr_settings_validate($form, &$form_state) {
+  $intval = intval($form_state['values']['apachesolr_rows']);
+  // TODO: does the max need to be variable?
+  $max = 200;
+  if (!is_numeric($form_state['values']['apachesolr_rows']) || $intval < 0 || $intval > $max) {
+    form_set_error('apachesolr_rows', t('Results per page should be non-negative integer less than @max.', array('@max' => $max)));
+  }
+  else {
+    // Set the integer value as the one we are saving to the variable.
+    $form_state['values']['apachesolr_rows'] = $intval;
   }
 }
 
