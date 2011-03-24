@@ -235,7 +235,7 @@ function apachesolr_search_page_browse($empty_search_behavior) {
       }
       catch (Exception $e) {
         watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
-        apachesolr_failure(t('Solr search'), $keys);
+        apachesolr_failure(t('Solr search'), '');
       }
       break;
   }
