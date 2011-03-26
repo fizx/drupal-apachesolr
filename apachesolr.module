@@ -157,19 +157,24 @@ function apachesolr_init() {
  *   The search query that was issued at the time of failure.
  */
 function apachesolr_failure($search_name, $querystring) {
-  $fail_rule = variable_get('apachesolr_failure', 'show_error');
+  $fail_rule = variable_get('apachesolr_failure', 'apachesolr:show_error');
 
   switch ($fail_rule) {
-    case 'show_error':
+    case 'apachesolr:show_error':
       drupal_set_message(t('The Apache Solr search engine is not available. Please contact your site administrator.'), 'error');
       break;
-    case 'show_drupal_results':
-      drupal_set_message(t("%search_name is not available. Your search is being redirected.", array('%search_name' => $search_name)));
-      // TODO - apachesolr_server_variable_get()
-      drupal_goto('search/node/' . drupal_encode_path($querystring));
+    case 'apachesolr:show_no_results':
+      // Do nothing.
       break;
-    case 'show_no_results':
-      return;
+    default:
+      // If we're failing over to another module make sure the search is available.
+      $search_info = search_get_info();
+      if (isset($search_info[$fail_rule])) {
+        $search_info = $search_info[$fail_rule];
+        drupal_set_message(t("%search_name is not available. Your search is being redirected.", array('%search_name' => $search_name)));
+        drupal_goto('search/' . $search_info['path'] . '/' . drupal_encode_path($querystring));
+      }
+      break;
   }
 }
 

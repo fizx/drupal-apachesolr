@@ -274,14 +274,22 @@ function apachesolr_settings($form, &$form_state) {
     '#default_value' => variable_get('apachesolr_facetstyle', 'checkboxes'),
     '#options' => array('links' => t('Links only'), 'checkboxes' => t('Links with checkboxes')),
   );
+
+  $options = array('apachesolr:show_error' => t('Show error message'));
+  $system_info = system_get_info('module');
+  foreach (search_get_info() as $module => $search_info) {
+    // Don't allow apachesolr to return results on failure of apachesolr.
+    if ($module == 'apachesolr_search') {
+      continue;
+    }
+    $options[$module] = t('Show @name search results', array('@name' => $system_info[$module]['name']));
+  }
+  $options['apachesolr:show_no_results'] = t('Show no results');
   $form['apachesolr_failure'] = array(
     '#type' => 'select',
     '#title' => t('On failure'),
-    '#options' => array('show_error' => t('Show error message'),
-      'show_drupal_results' => t('Show core Drupal results'),
-      'show_no_results' => t('Show no results')
-    ),
-    '#default_value' => variable_get('apachesolr_failure', 'show_error'),
+    '#options' => $options,
+    '#default_value' => variable_get('apachesolr_failure', 'apachesolr:show_error'),
     '#description' => t('What to display if Apache Solr search is not available.'),
   );
 

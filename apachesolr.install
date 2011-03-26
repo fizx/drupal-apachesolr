@@ -407,3 +407,21 @@ function apachesolr_update_7003() {
   variable_del('apachesolr_exclude_comments_types');
 }
 
+/**
+ * Update apachesolr_failure variable.
+ */
+function apachesolr_update_7004() {
+  $failure = variable_get('apachesolr_failure', NULL);
+  switch ($failure) {
+    case 'show_error':
+      variable_set('apachesolr_failure', 'apachesolr:show_error');
+      break;
+    case 'show_drupal_results':
+      variable_set('apachesolr_failure', 'node');
+      break;
+    case 'show_no_results':
+      variable_set('apachesolr_failure', 'apachesolr:show_no_results');
+      break;
+  }
+}
+
