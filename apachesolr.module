@@ -831,12 +831,9 @@ function apachesolr_block_info() {
 function apachesolr_block_view($delta = '') {
   if ($delta != 'sort' && ($node = menu_get_object()) && (!arg(2) || arg(2) == 'view')) {
     $suggestions = array();
-    // Determine whether the user can view the current node.
-    if (!isset($access)) {
-      $access = node_access('view', $node);
-    }
+    // Determine whether the user can view the current node. Probably not necessary.
     $block = apachesolr_mlt_load_block($delta);
-    if ($access && $block) {
+    if ($block && node_access('view', $node)) {
       $docs = apachesolr_mlt_suggestions($block, apachesolr_document_id($node->nid));
       if (!empty($docs)) {
         $suggestions['subject'] = check_plain($block['name']);
@@ -1031,9 +1028,9 @@ function apachesolr_form_field_ui_field_edit_form_alter(&$form, $form_state) {
  * Add a checkbox to enable type-specific visibility.
  */
 function apachesolr_form_block_admin_configure_alter(&$form, $form_state) {
-  // Hide the core title field.
+  // Hide the core title field on MLT blocks.
   if ($form['module']['#value'] == 'apachesolr' && $form['delta']['#value'] != 'sort') {
-    $form['block_settings']['title']['#access'] = FALSE;
+    $form['settings']['title']['#access'] = FALSE;
   }
 
   // Add a type-specific visibility checkbox.
