@@ -451,7 +451,7 @@ function apachesolr_search_add_facet_params(DrupalSolrQueryInterface $query) {
   $facet_missing = variable_get('apachesolr_facet_missing', array());
   $facet_info = apachesolr_get_facet_definitions();
   $params = &$query->params;
-  $server_id = $query->solr('get_server_id');
+  $server_id = $query->solr('getServerId');
   foreach (apachesolr_get_enabled_facets($server_id) as $module => $module_facets) {
     foreach ($module_facets as $delta => $facet_field) {
       // Checking the block visibility saves us from adding facet fields to the query
@@ -494,7 +494,7 @@ function apachesolr_search_add_facet_params(DrupalSolrQueryInterface $query) {
 }
 
 function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
-  $server_id = $query->solr('get_server_id');
+  $server_id = $query->solr('getServerId');
   $params = &$query->params;
 
   $defaults = array(

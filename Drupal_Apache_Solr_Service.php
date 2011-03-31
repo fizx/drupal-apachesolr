@@ -119,7 +119,11 @@ class DrupalApacheSolrService {
     }
     $pingUrl = $this->_constructUrl(self::PING_SERVLET);
     // Attempt a HEAD request to the solr ping url.
-    $response = $this->_makeHttpRequest($pingUrl, 'HEAD', array(), NULL, $timeout);
+    $options = array(
+      'method' => 'HEAD',
+      'timeout' => $timeout,
+    );
+    $response = $this->_makeHttpRequest($pingUrl, $options);
 
     if ($response->code == 200) {
       // Add 0.1 ms to the ping time so we never return 0.0.
@@ -136,16 +140,20 @@ class DrupalApacheSolrService {
   protected function setLuke($num_terms = 0) {
     if (empty($this->luke[$num_terms])) {
       $url = $this->_constructUrl(self::LUKE_SERVLET, array('numTerms' => "$num_terms", 'wt' => 'json'));
-      $cid = $this->server_id . ":luke:" . drupal_hash_base64($url);
-      $cache = cache_get($cid, 'cache_apachesolr');
-      if (isset($cache->data)) {
-        $this->luke = $cache->data;
+      if ($this->server_id) {
+        $cid = $this->server_id . ":luke:" . drupal_hash_base64($url);
+        $cache = cache_get($cid, 'cache_apachesolr');
+        if (isset($cache->data)) {
+          $this->luke = $cache->data;
+        }
       }
     }
     // Second pass to populate the cache if necessary.
     if (empty($this->luke[$num_terms])) {
       $this->luke[$num_terms] = $this->_sendRawGet($url);
-      cache_set($cid, $this->luke, 'cache_apachesolr');
+      if ($this->server_id) {
+        cache_set($cid, $this->luke, 'cache_apachesolr');
+      }
     }
   }
 
@@ -174,15 +182,20 @@ class DrupalApacheSolrService {
     // Only try to get stats if we have connected to the index.
     if (empty($this->stats) && isset($data->index->numDocs)) {
       $url = $this->_constructUrl(self::STATS_SERVLET);
-      $this->stats_cid = $this->server_id . ":stats:" . drupal_hash_base64($url);
-      $cache = cache_get($this->stats_cid, 'cache_apachesolr');
-      if (isset($cache->data)) {
-        $this->stats = simplexml_load_string($cache->data);
+      if ($this->server_id) {
+        $this->stats_cid = $this->server_id . ":stats:" . drupal_hash_base64($url);
+        $cache = cache_get($this->stats_cid, 'cache_apachesolr');
+        if (isset($cache->data)) {
+          $this->stats = simplexml_load_string($cache->data);
+        }
       }
-      else {
+      // Second pass to populate the cache if necessary.
+      if (empty($this->stats)) {
         $response = $this->_sendRawGet($url);
         $this->stats = simplexml_load_string($response->data);
-        cache_set($this->stats_cid, $response->data, 'cache_apachesolr');
+        if ($this->server_id) {
+          cache_set($this->stats_cid, $response->data, 'cache_apachesolr');
+        }
       }
     }
   }
@@ -251,59 +264,12 @@ class DrupalApacheSolrService {
   }
 
   protected function _clearCache() {
-    cache_clear_all($this->server_id . ":stats:", 'cache_apachesolr', TRUE);
-    cache_clear_all($this->server_id . ":luke:", 'cache_apachesolr', TRUE);
+    if ($this->server_id) {
+      cache_clear_all($this->server_id . ":stats:", 'cache_apachesolr', TRUE);
+      cache_clear_all($this->server_id . ":luke:", 'cache_apachesolr', TRUE);
+    }
     $this->luke = array();
     $this->stats = NULL;
-  }
-
-  /**
-   * Make a request to a servlet (a path) that's not a standard path.
-   *
-   * @param string $servlet
-   *   A path to be added to the base Solr path. e.g. 'extract/tika'
-   *
-   * @param array $params
-   *   Any request parameters when constructing the URL.
-   *
-   * @param string $method
-   *   'GET', 'POST', 'PUT', or 'HEAD'.
-   *
-   * @param array $request_headers
-   *   Keyed array of header names and values.  Should include 'Content-Type'
-   *   for POST or PUT.
-   *
-   * @param string $rawPost
-   *   Must be an empty string unless method is POST or PUT.
-   *
-   * @param float $timeout
-   *   Read timeout in seconds or FALSE.
-   *
-   * @return
-   *  Apache_Solr_Response object
-   */
-  public function makeServletRequest($servlet, $params = array(), $method = 'GET', $request_headers = array(), $rawPost = '', $timeout = FALSE) {
-    if ($method == 'GET' || $method == 'HEAD') {
-      // Make sure we are not sending a request body.
-      $rawPost = '';
-    }
-    // Add default params.
-    $params += array(
-      'wt' => 'json',
-    );
-
-    $url = $this->_constructUrl($servlet, $params);
-    $response = $this->_makeHttpRequest($url, $method, $request_headers, $rawPost, $timeout);
-    $code = (int) $response->code;
-    if ($code != 200) {
-      $message = $response->status_message;
-      if ($code >= 400 && $code != 403 && $code != 404) {
-        // Add details, like Solr's exception message.
-        $message .= $response->data;
-      }
-      throw new Exception('"' . $code . '" Status: ' . $message);
-    }
-    return $response;
   }
 
   /**
@@ -329,58 +295,90 @@ class DrupalApacheSolrService {
     }
   }
 
-  function get_server_id() {
+  function getServerId() {
     return $this->server_id;
   }
 
   /**
-   * Central method for making a get operation against this Solr Server
+   * Check the reponse code and thow an exception if it's not 200.
    *
-   * @see Apache_Solr_Service::_sendRawGet()
+   * @param stdClass $response
+   *   response object.
+   *
+   * @return
+   *  response object
+   * @thows Exception
    */
-  protected function _sendRawGet($url, $timeout = FALSE) {
-    $response = $this->_makeHttpRequest($url, 'GET', array(), '', $timeout);
+  protected function checkResponse($response) {
     $code = (int) $response->code;
     if ($code != 200) {
-      $message = $response->status_message;
       if ($code >= 400 && $code != 403 && $code != 404) {
         // Add details, like Solr's exception message.
-        $message .= $response->data;
+        $response->status_message .= $response->data;
       }
-      throw new Exception('"' . $code . '" Status: ' . $message);
+      throw new Exception('"' . $code . '" Status: ' . $response->status_message);
     }
     return $response;
   }
 
   /**
-   * Central method for making a post operation against this Solr Server
+   * Make a request to a servlet (a path) that's not a standard path.
    *
-   * @see Apache_Solr_Service::_sendRawPost()
+   * @param string $servlet
+   *   A path to be added to the base Solr path. e.g. 'extract/tika'
+   *
+   * @param array $params
+   *   Any request parameters when constructing the URL.
+   *
+   * @param array $options
+   *  @see drupal_http_request() $options.
+   *
+   * @return
+   *  response object
+   *
+   * @thows Exception
    */
-  protected function _sendRawPost($url, $rawPost, $timeout = FALSE, $contentType = 'text/xml; charset=UTF-8') {
-    $request_headers = array('Content-Type' => $contentType);
-    $response = $this->_makeHttpRequest($url, 'POST', $request_headers, $rawPost, $timeout);
-    $code = (int) $response->code;
-    if ($code != 200) {
-      $message = $response->status_message;
-      if ($code >= 400 && $code != 403 && $code != 404) {
-        // Add details, like Solr's exception message.
-        $message .= $response->data;
-      }
-      throw new Exception('"' . $code . '" Status: ' . $message);
-    }
-    return $response;
-  }
-
-  protected function _makeHttpRequest($url, $method = 'GET', $headers = array(), $content = '', $timeout = FALSE) {
-    $options = array(
-      'headers' => $headers,
-      'method' => $method,
-      'data' => $content
+  public function makeServletRequest($servlet, $params = array(), $options = array()) {
+    // Add default params.
+    $params += array(
+      'wt' => 'json',
     );
 
-    if ($timeout) {
-      $options['timeout'] = $timeout;
+    $url = $this->_constructUrl($servlet, $params);
+    $response = $this->_makeHttpRequest($url, $options);
+    return $this->checkResponse($response);
+  }
+
+  /**
+   * Central method for making a GET operation against this Solr Server
+   */
+  protected function _sendRawGet($url, $options = array()) {
+    $response = $this->_makeHttpRequest($url, $options);
+    return $this->checkResponse($response);
+  }
+
+  /**
+   * Central method for making a POST operation against this Solr Server
+   */
+  protected function _sendRawPost($url, $options = array()) {
+    $options['method'] = 'POST';
+    // Normally we use POST to send XML documents.
+    if (!isset($options['headers']['Content-Type'])) {
+      $options['headers']['Content-Type'] = 'text/xml; charset=UTF-8';
+    }
+    $response = $this->_makeHttpRequest($url, $options);
+    return $this->checkResponse($response);
+  }
+
+  /**
+   * Central method for making the actual http request to the Solr Server
+   *
+   * This is just a wrapper around drupal_http_request().
+   */
+  protected function _makeHttpRequest($url, $options = array()) {
+    if (!isset($options['method']) || $options['method'] == 'GET' || $options['method'] == 'HEAD') {
+      // Make sure we are not sending a request body.
+      $options['data'] = NULL;
     }
 
     $result = drupal_http_request($url, $options);
@@ -466,7 +464,7 @@ class DrupalApacheSolrService {
    */
   protected function _constructUrl($servlet, $params = array(), $added_query_string = NULL) {
     // PHP's built in http_build_query() doesn't give us the format Solr wants.
-    $query_string = $this->http_build_query($params);
+    $query_string = $this->httpBuildQuery($params);
 
     if ($query_string) {
       $query_string = '?' . $query_string;
@@ -539,12 +537,17 @@ class DrupalApacheSolrService {
    * @throws Exception If an error occurs during the service call
    */
   public function update($rawPost, $timeout = FALSE) {
+    // @todo: throw exception if updates are disabled.
     if (empty($this->update_url)) {
       // Store the URL in an instance variable since many updates may be sent
       // via a single instance of this class.
       $this->update_url = $this->_constructUrl(self::UPDATE_SERVLET, array('wt' => 'json'));
     }
-    return $this->_sendRawPost($this->update_url, $rawPost, $timeout);
+    $options['data'] = $rawPost;
+    if ($timeout) {
+      $options['timeout'] = $timeout;
+    }
+    return $this->_sendRawPost($this->update_url, $options);
   }
 
   /**
@@ -673,7 +676,10 @@ class DrupalApacheSolrService {
     return $this->update($rawPost, $timeout);
   }
 
-  public function http_build_query(array $query, $parent = '') {
+  /**
+   * Like PHP's built in http_build_query(), but uses rawurlencode() and no [] for repeated params.
+   */
+  public function httpBuildQuery(array $query, $parent = '') {
     $params = array();
 
     foreach ($query as $key => $value) {
@@ -681,7 +687,7 @@ class DrupalApacheSolrService {
 
       // Recurse into children.
       if (is_array($value)) {
-        $params[] = $this->http_build_query($value, $key);
+        $params[] = $this->httpBuildQuery($value, $key);
       }
       // If a query parameter value is NULL, only append its key.
       elseif (!isset($value)) {
@@ -719,7 +725,7 @@ class DrupalApacheSolrService {
       $params['q'] = $query;
     }
     // PHP's built in http_build_query() doesn't give us the format Solr wants.
-    $queryString = $this->http_build_query($params);
+    $queryString = $this->httpBuildQuery($params);
     // @todo - switch to POST if this is too long.
 
     if ($method == 'GET') {
@@ -728,7 +734,9 @@ class DrupalApacheSolrService {
     }
     else if ($method == 'POST') {
       $searchUrl = $this->_constructUrl(self::SEARCH_SERVLET);
-      return $this->_sendRawPost($searchUrl, $queryString, FALSE, 'application/x-www-form-urlencoded');
+      $options['data'] = $queryString;
+      $options['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
+      return $this->_sendRawPost($searchUrl, $options);
     }
     else {
       throw new Exception("Unsupported method '$method' for search(), use GET or POST");
