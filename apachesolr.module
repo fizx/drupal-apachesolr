@@ -1541,20 +1541,20 @@ function apachesolr_cck_fields() {
       $cck_field_instances = content_field_instance_read();
       // A single default mapping for all text fields using optionwidgets.
       $mappings['text'] = array(
-        'optionwidgets_select' => array('callback' => '', 'index_type' => 'string'),
-        'optionwidgets_buttons' => array('callback' => '', 'index_type' => 'string'),
-        'optionwidgets_onoff' => array('callback' => '', 'index_type' => 'string'),
+        'optionwidgets_select' => array('callback' => '', 'index_type' => 'string', 'facets' => TRUE),
+        'optionwidgets_buttons' => array('callback' => '', 'index_type' => 'string', 'facets' => TRUE),
+        'optionwidgets_onoff' => array('callback' => '', 'index_type' => 'string', 'facets' => TRUE),
       );
       // A single default mapping for all integer fields using optionwidgets.
       $mappings['number_integer'] = array(
-        'optionwidgets_select' => array('callback' => '', 'index_type' => 'sint'),
-        'optionwidgets_buttons' => array('callback' => '', 'index_type' => 'sint'),
-        'optionwidgets_onoff' => array('callback' => '', 'index_type' => 'sint'),
+        'optionwidgets_select' => array('callback' => '', 'index_type' => 'sint', 'facets' => TRUE),
+        'optionwidgets_buttons' => array('callback' => '', 'index_type' => 'sint', 'facets' => TRUE),
+        'optionwidgets_onoff' => array('callback' => '', 'index_type' => 'sint', 'facets' => TRUE),
       );
       // A field-specific mapping would look like:
-      // $mappings['per-field']['field_model_name'] = array('callback' => '', 'index_type' => 'string');
+      // $mappings['per-field']['field_model_name'] = array('callback' => '', 'index_type' => 'string', 'facets' => TRUE);
       // or
-      // $mappings['per-field']['field_model_price'] = array('callback' => '', 'index_type' => 'float');
+      // $mappings['per-field']['field_model_price'] = array('callback' => '', 'index_type' => 'float', 'facets' => TRUE);
       // Allow other modules to add or alter mappings.
       drupal_alter('apachesolr_cck_fields', $mappings);
       foreach ($cck_field_instances as $instance) {
@@ -1562,14 +1562,20 @@ function apachesolr_cck_fields() {
         $field_name = $instance['field_name'];
         $widget_type = $instance['widget']['type'];
         // Only deal with fields that have index mappings and that have not been marked for exclusion.
-        if ((isset($mappings[$field_type][$widget_type]) || isset($mappings['per-field'][$field_name])) && empty($instance['display_settings'][NODE_BUILD_SEARCH_INDEX]['exclude'])) {
+        if ((isset($mappings[$field_type][$widget_type]) ||
+              isset($mappings['per-field'][$field_name])) &&
+              empty($instance['display_settings'][NODE_BUILD_SEARCH_INDEX]['exclude'])) {
           if (isset($mappings['per-field'][$field_name])) {
             $instance['index_type'] = $mappings['per-field'][$field_name]['index_type'];
             $instance['callback'] = $mappings['per-field'][$field_name]['callback'];
+            // Default 'facets' to TRUE for backwards compatibility.
+            $instance['facets'] = isset($mappings['per-field'][$field_name]['facets']) ? $mappings['per-field'][$field_name]['facets'] : TRUE;
           }
           else {
             $instance['index_type'] = $mappings[$field_type][$widget_type]['index_type'];
             $instance['callback'] = $mappings[$field_type][$widget_type]['callback'];
+            // Default 'facets' to TRUE for backwards compatibility.
+            $instance['facets'] = isset($mappings[$field_type][$widget_type]['facets']) ? $mappings[$field_type][$widget_type]['facets'] : TRUE;
           }
           $instance['multiple'] = (bool) $instance['multiple'];
           $instance['name'] = 'cck_' . $field_name;

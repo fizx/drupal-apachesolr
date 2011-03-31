@@ -241,6 +241,11 @@ hook_apachesolr_cck_fields_alter(&$mappings)
 
     $mappings['per-field']['field_model_price'] = array('callback' => '', 'index_type' => 'float');
 
+  If a custom field needs to be searchable but does not need to be faceted you can change the 'facets'
+  parameter to FALSE, like:
+
+    $mappings['number_integer']['number'] = array('callback' => '', 'index_type' => 'integer', 'facets' => FALSE);
+
 hook_apachesolr_types_exclude($namespace)
 
   

@@ -534,12 +534,14 @@ function apachesolr_search_apachesolr_facets() {
   $fields = apachesolr_cck_fields();
   if ($fields) {
     foreach ($fields as $name => $field) {
-      // $delta can only be 32 chars, and the CCK field name may be this
-      // long also, so we cannot add anything to it.
-      $facets[$field['field_name']] = array(
-        'info' => t('Apache Solr Search: Filter by @field', array('@field' => $field['widget']['label'])),
-        'facet_field' => apachesolr_index_key($field),
-      );
+      if (!empty($field['facets'])) {
+        // $delta can only be 32 chars, and the CCK field name may be this
+        // long also, so we cannot add anything to it.
+        $facets[$field['field_name']] = array(
+          'info' => t('Apache Solr Search: Filter by @field', array('@field' => $field['widget']['label'])),
+          'facet_field' => apachesolr_index_key($field),
+        );
+      }
     }
   }
   return $facets;
