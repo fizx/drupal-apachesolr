@@ -29,7 +29,12 @@ Before enabling it, you must also do the following:
 
 Get the PHP library from the external project. The project is
 found at:  http://code.google.com/p/solr-php-client/
-From the apachesolr module directory, run this command:
+
+If you use drush make, run this command from the apachesolr module directory:
+
+drush make --no-core -y  --contrib-destination=. apachesolr.make
+
+Otherwise, from the apachesolr module directory, run this command:
 
 svn checkout -r22 http://solr-php-client.googlecode.com/svn/trunk/ SolrPhpClient
 
