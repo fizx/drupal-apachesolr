@@ -736,7 +736,7 @@ function apachesolr_search_apachesolr_facets() {
   $fields = apachesolr_cck_fields();
   if ($fields) {
     foreach ($fields as $name => $field) {
-      if ($field['facets']) {
+      if (!empty($field['facets'])) {
         // $delta can only be 32 chars, and the CCK field name may be this
         // long also, so we cannot add anything to it.
         $placeholders = array('@field_type' => $field['field_type'], '@field' => $field['widget']['label'], '@field_name' => $field['field_name']);

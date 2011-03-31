@@ -8,6 +8,7 @@ function apachesolr_text_apachesolr_cck_fields_alter(&$mappings) {
     'display_callback' => 'apachesolr_cck_text_field_callback',
     'indexing_callback' => 'apachesolr_cck_text_indexing_callback',
     'index_type' => 'text',
+    'facets' => TRUE,
   );
   // Reroute the indexing callbacks for the optionwidget fields to this
   // module's version, apachesolr_text_cck_text_indexing_callback,

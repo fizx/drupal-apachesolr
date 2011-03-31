@@ -222,22 +222,27 @@ hook_apachesolr_cck_fields_alter(&$mappings)
   text fields with option widgets:
 
     $mappings['text'] = array(
-      'optionwidgets_select' => array('indexing_callback' => '', 'index_type' => 'string'),
-      'optionwidgets_buttons' => array('indexing_callback' => '', 'index_type' => 'string')
+      'optionwidgets_select' => array('indexing_callback' => '', 'index_type' => 'string', 'facets' => TRUE),
+      'optionwidgets_buttons' => array('indexing_callback' => '', 'index_type' => 'string', 'facets' => TRUE)
     );
 
   In your _alter hook implementation you can add additional field types such as:
 
-    $mappings['number_integer']['number'] = array('indexing_callback' => '', 'index_type' => 'integer');
+    $mappings['number_integer']['number'] = array('indexing_callback' => '', 'index_type' => 'integer', 'facets' => TRUE);
 
   You can allso add a mapping for a specific field.  This will take precedence over any
   mapping for a general field type. A field-specific mapping would look like:
 
-    $mappings['per-field']['field_model_name'] = array('indexing_callback' => '', 'index_type' => 'string');
+    $mappings['per-field']['field_model_name'] = array('indexing_callback' => '', 'index_type' => 'string', 'facets' => TRUE);
 
   or
 
-    $mappings['per-field']['field_model_price'] = array('indexing_callback' => '', 'index_type' => 'float');
+    $mappings['per-field']['field_model_price'] = array('indexing_callback' => '', 'index_type' => 'float', 'facets' => TRUE);
+
+  If a custom field needs to be searchable but does not need to be faceted you can change the 'facets'
+  parameter to FALSE, like:
+
+    $mappings['number_integer']['number'] = array('callback' => '', 'index_type' => 'integer', 'facets' => FALSE);
 
 hook_apachesolr_types_exclude($namespace)
 
