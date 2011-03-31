@@ -830,20 +830,22 @@ function apachesolr_search_apachesolr_facets() {
   // Get field facets.
   $fields = apachesolr_entity_fields('node');
   foreach ($fields as $index_key => $field_info) {
-    $facets[$index_key] = array(
+    if (!empty($field_info['facets'])) {
+      $facets[$index_key] = array(
         'info' => t('@module_name Field: Filter by @field_dname (@field_name)', array('@module_name' => $field_info['module_name'], '@field_name' => $field_info['field']['field_name'], '@field_dname' => $field_info['display_name'])),
         'facet_field' => $index_key,
         'content_types' => $field_info['bundles'],
-    ) + $field_info;
+      ) + $field_info;
 
-    // If we're a single hierarchical vocabulary, declare as hierarchical.
-    if ($field_info['field']['module'] == 'taxonomy' && $field_info['field']['type'] == 'taxonomy_term_reference') {
-      $vocabs = $field_info['field']['settings']['allowed_values'];
-      if ((count($vocabs) == 1)) {
-        $vocab = array_shift($vocabs);
-        $vocab = taxonomy_vocabulary_machine_name_load($vocab['vocabulary']);
-        if ($vocab->hierarchy == 1) {
-          $facets[$index_key]['hierarchical'] = TRUE;
+      // If we're a single hierarchical vocabulary, declare as hierarchical.
+      if ($field_info['field']['module'] == 'taxonomy' && $field_info['field']['type'] == 'taxonomy_term_reference') {
+        $vocabs = $field_info['field']['settings']['allowed_values'];
+        if ((count($vocabs) == 1)) {
+          $vocab = array_shift($vocabs);
+          $vocab = taxonomy_vocabulary_machine_name_load($vocab['vocabulary']);
+          if ($vocab->hierarchy == 1) {
+            $facets[$index_key]['hierarchical'] = TRUE;
+          }
         }
       }
     }
@@ -1304,7 +1306,7 @@ function apachesolr_search_form_search_form_alter(&$form, $form_state) {
       '#type' => 'hidden',
       '#default_value' => json_encode(array_diff_key($_GET, array('q' => 1, 'page' => 1, 'filters' => 1, 'solrsort' => 1, 'retain-filters' => 1))),
     );
-    //drupal_set_message('<pre>'.print_r($form_state,1));
+
     if ($queryvalues || isset($form_state['input']['apachesolr_search']['retain-filters'])) {
       $form['basic']['apachesolr_search']['retain-filters'] = array(
         '#type' => 'checkbox',

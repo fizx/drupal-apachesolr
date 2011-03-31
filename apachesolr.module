@@ -1690,9 +1690,6 @@ function apachesolr_get_solr($id = NULL) {
     $id = apachesolr_default_server();
   }
 
-  $host = $servers[$id]['host'];
-  $port = $servers[$id]['port'];
-  $path = $servers[$id]['path'];
   $class = $servers[$id]['service_class'];
 
   if (empty($solr_cache[$id])) {
@@ -1701,7 +1698,7 @@ function apachesolr_get_solr($id = NULL) {
       $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
     }
     // Takes advantage of auto-loading.
-    $solr = new $class($id, $host, $port, $path);
+    $solr = new $class($servers[$id]['url'], $id);
     $solr_cache[$id] = $solr;
   }
   return $solr_cache[$id];
@@ -1750,7 +1747,7 @@ function apachesolr_server_delete($server_id) {
 }
 
 function apachesolr_server_save($server, $original_id = NULL) {
-  $default = array('server_id' => NULL, 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
+  $default = array('server_id' => NULL, 'name' => '', 'url' => '', 'service_class' => '');
   $conf = isset($server['conf']) ? $server['conf'] : array();
   // Remove any unexpected fields.
   // @todo - getthis from the schema, or maybe use drupal_write_record().
@@ -1835,14 +1832,14 @@ function apachesolr_server_variable_del($server_id, $name) {
  *
  * @return boolean TRUE if the server can be pinged, FALSE otherwise.
  */
-function apachesolr_server_status($host, $port, $path, $class = NULL) {
+function apachesolr_server_status($url, $class = NULL) {
   if (empty($class)) {
     $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
   }
   $ping = FALSE;
   try {
     // Takes advantage of auto-loading.
-    $solr = new $class('', $host, $port, $path);
+    $solr = new $class($url);
     $ping = @$solr->ping(variable_get('apachesolr_ping_timeout', 4));
   }
   catch (Exception $e) {
@@ -2502,27 +2499,32 @@ function field_apachesolr_field_mappings() {
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'string',
+      'facets' => TRUE,
     ),
     'list_float' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'string',
+      'facets' => TRUE,
     ),
     'list_text' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'string',
+      'facets' => TRUE,
     ),
     'list_boolean' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'boolean',
+      'facets' => TRUE,
     ),
     'taxonomy_term_reference' => array(
       'display_callback' => 'apachesolr_taxonomy_get_term',
       'indexing_callback' => 'apachesolr_term_reference_indexing_callback',
       'index_type' => 'integer',
       'facet_block_callback' => 'apachesolr_search_taxonomy_facet_block',
+      'facets' => TRUE,
     ),
   );
 
