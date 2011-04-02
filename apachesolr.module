@@ -1056,7 +1056,7 @@ function apachesolr_form_block_admin_configure_alter(&$form, $form_state) {
     );
     $form['settings']['apachesolr_facet_sort_active']['#description'] .= t(' This may produce unwanted effects when displaying child terms in a hierarchy.');
   }
-  if ($facet_info[$module][$delta]['field']['type'] == 'taxonomy_term_reference') {
+  if (isset($facet_info[$module][$delta]['field']['type']) && $facet_info[$module][$delta]['field']['type'] == 'taxonomy_term_reference') {
     $form['settings']['apachesolr_facet_query_sort']['#options']['weight asc'] = t('Weight, ascending');
     $form['settings']['apachesolr_facet_query_sort']['#options']['weight desc'] = t('Weight, descending');
     $form['settings']['apachesolr_facet_query_sort']['#description'] = t('The sort order of facet links in this block. %Count, which is the default, will show facets with the most results first. %Alphabetical will sort alphabetically, and %Numeric numerically, either ascending or descending. %Weight sorting is only supported on fields with weights (currently only taxonomy) and may produce unspecified results on other fields.', array(
