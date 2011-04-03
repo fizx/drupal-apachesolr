@@ -1695,6 +1695,9 @@ function apachesolr_search_currentsearch_block($response, DrupalSolrQueryInterfa
 
   // We don't directly render any items with a parent.
   foreach ($fields as $index => $field) {
+    $fields[$index] += array(
+      'delta' => $field['#name'],
+    );
     $fields[$index]['#active'] = TRUE;
     if (!empty($fields[$index]['#parent']) || !$field['#name']) {
       // We will render it via its parent.
