@@ -700,7 +700,7 @@ function apachesolr_search_node_result($doc, &$result, &$extra) {
   $result += array(
     'type' => apachesolr_search_get_type($doc->bundle),
     'user' => theme('username', array('account' => $doc)),
-    'date' => isset($doc->created) ? $doc->created : 0,
+    'date' => isset($doc->changed) ? $doc->changed : 0,
     'node' => $doc,
     'uid' => $doc->is_uid,
   );

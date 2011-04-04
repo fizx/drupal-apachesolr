@@ -7,6 +7,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-BETA4, xxxx-xx-xx
 ------------------------------
+#920482  by jpmckinney: $info_split['date'] template variable should contain changed, not created, date.
 #379512  by pwolanin: separate schema field for indexing comments and "extra" information.
 #871440  by jpmckinney: Solr taxonomy page displays search form and blocks when the user has no access.
 #761990  by jhedstrom, pwolanin: switch to POST for long search ULRs. 
