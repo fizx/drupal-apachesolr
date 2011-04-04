@@ -50,7 +50,7 @@ function apachesolr_node_to_document($node, $namespace) {
 
     $text .= "\n\n" . implode(' ', $extra);
 
-    $document = new Apache_Solr_Document();
+    $document = new ApacheSolrDocument();
     $document->id = apachesolr_document_id($node->nid);
     $document->site = url(NULL, array('absolute' => TRUE));
     $document->hash = apachesolr_site_hash();

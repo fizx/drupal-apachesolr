@@ -412,7 +412,7 @@ class DrupalApacheSolrService {
   /**
    * Escape a value for special query characters such as ':', '(', ')', '*', '?', etc.
    *
-   * NOTE: inside a phrase fewer characters need escaped, use {@link Apache_Solr_Service::escapePhrase()} instead
+   * NOTE: inside a phrase fewer characters need escaped, use {@link DrupalApacheSolrService::escapePhrase()} instead
    *
    * @param string $value
    * @return string
@@ -553,7 +553,7 @@ class DrupalApacheSolrService {
   /**
    * Add an array of Solr Documents to the index all at once
    *
-   * @param array $documents Should be an array of Apache_Solr_Document instances
+   * @param array $documents Should be an array of ApacheSolrDocument instances
    * @param boolean $allowDups
    * @param boolean $overwritePending
    * @param boolean $overwriteCommitted
@@ -574,7 +574,7 @@ class DrupalApacheSolrService {
 
     $rawPost = "<add{$attr}>";
     foreach ($documents as $document) {
-      $rawPost .= Apache_Solr_Document::documentToXml($document);
+      $rawPost .= ApacheSolrDocument::documentToXml($document);
     }
     $rawPost .= '</add>';
 
@@ -645,7 +645,7 @@ class DrupalApacheSolrService {
    *
    * @param string $rawQuery Expected to be utf-8 encoded
    * @param float $timeout Maximum expected duration of the delete operation on the server (otherwise, will throw a communication exception)
-   * @return Apache_Solr_Response
+   * @return stdClass response object
    *
    * @throws Exception If an error occurs during the service call
    */

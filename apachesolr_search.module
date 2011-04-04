@@ -373,7 +373,7 @@ function theme_apachesolr_browse_blocks($vars) {
  *   For pagination.
  * @param $caller
  *
- * @return Apache_Solr_Response $response
+ * @return stdClass $response
  *
  * @throws Exception
  */

@@ -2885,8 +2885,8 @@ interface DrupalSolrQueryInterface {
    *   instance variables. The params for the search are taken from
    *   the public $query->params array.
    *
-   * @return Apache_Solr_Response
-   *   A response object.
+   * @return
+   *   A stdClass response object.
    */
   function search($keys = NULL);
 
