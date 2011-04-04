@@ -855,7 +855,11 @@ function apachesolr_search_apachesolr_facets() {
         if ((count($vocabs) == 1)) {
           $vocab = array_shift($vocabs);
           $vocab = taxonomy_vocabulary_machine_name_load($vocab['vocabulary']);
-          if ($vocab->hierarchy == 1) {
+          if (!is_object($vocab)) {
+            // Invalid machine name. Core bug? @see http://drupal.org/node/1103602
+            unset($facets[$index_key]);
+          }
+          elseif (isset($vocab->hierarchy) && $vocab->hierarchy == 1) {
             $facets[$index_key]['hierarchical'] = TRUE;
           }
         }

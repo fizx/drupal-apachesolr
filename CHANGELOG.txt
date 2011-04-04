@@ -7,6 +7,8 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-BETA4, xxxx-xx-xx
 ------------------------------
+#1103602 by pwolanin: prevent PHP Notice when there is an invalid term reference field.
+#1097988 by jpmckinney: avoid 'using default converter' warning on Solr startup.
 #920482  by jpmckinney: $info_split['date'] template variable should contain changed, not created, date.
 #379512  by pwolanin: separate schema field for indexing comments and "extra" information.
 #871440  by jpmckinney: Solr taxonomy page displays search form and blocks when the user has no access.
