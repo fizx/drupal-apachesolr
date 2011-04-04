@@ -7,6 +7,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-beta4, 2011-04-04
 ------------------------------
+#1116030 by cpliakas, pwolanin: Added titles to settings pages to add transparency as to which server's settings are being edited.
 #1112022 by pwolanin, elliotttf: index node last_comment_timestamp too.
 #1114798 by pwolanin: enhancements to config based on Solr 3.1 examples.
 #1108618 by pwolanin: make numeric fields in 7.x use a sortable data type by default.
