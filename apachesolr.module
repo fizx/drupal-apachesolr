@@ -2010,11 +2010,17 @@ function apachesolr_index_key($field) {
     case 'integer':
       $type_prefix = 'i'; // long integer
       break;
-    case 'sint':
-      $type_prefix = 'is'; // long integer sortable
+    case 'half-int':
+      $type_prefix = 'h'; // 32 bit integer
+      break;
+    case 'float':
+      $type_prefix = 'f'; // float; sortable.
       break;
     case 'double':
-      $type_prefix = 'p'; // reserve d for date
+      $type_prefix = 'p'; // double; sortable d was used for date.
+      break;
+      case 'sint':
+      $type_prefix = 'is'; // long integer sortable (deprecated)
       break;
     case 'boolean':
       $type_prefix = 'b';
@@ -2023,15 +2029,24 @@ function apachesolr_index_key($field) {
       $type_prefix = 'd'; // date trie
       break;
     case 'tint':
-      $type_prefix = 'it'; // long integer trie (sortable)
+      $type_prefix = 'it'; // long integer trie; sortable, best for range queries
       break;
-    case 'float':
-      $type_prefix = 'ft'; // float trie
+    case 'thalf-int':
+      $type_prefix = 'ht'; // 32 bit integer trie (sortable)
+      break;
+    case 'tfloat':
+      $type_prefix = 'ft'; // float trie; sortable, best for range queries.
       break;
     case 'tdouble':
-      $type_prefix = 'pt'; // double trie
+      $type_prefix = 'pt'; // double trie; d was used for date.
       break;
-    case 'string':
+    case 'sfloat':
+      $type_prefix = 'fs'; // float, sortable (use for sorting missing last).
+      break;
+    case 'sdouble':
+      $type_prefix = 'ps'; // double sortable; (use for sorting missing last).
+      break;
+     case 'string':
     default:
       $type_prefix = 's'; // String
   }
@@ -2500,13 +2515,13 @@ function field_apachesolr_field_mappings() {
     'list_integer' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
-      'index_type' => 'string',
+      'index_type' => 'integer',
       'facets' => TRUE,
     ),
     'list_float' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
-      'index_type' => 'string',
+      'index_type' => 'float',
       'facets' => TRUE,
     ),
     'list_text' => array(

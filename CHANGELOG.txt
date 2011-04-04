@@ -7,6 +7,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-beta4, 2011-04-04
 ------------------------------
+#1108618 by pwolanin: make numeric fields in 7.x use a sortable data type by default.
 #1103602 by pwolanin: prevent PHP Notice when there is an invalid term reference field.
 #1097988 by jpmckinney: avoid 'using default converter' warning on Solr startup.
 #920482  by jpmckinney: $info_split['date'] template variable should contain changed, not created, date.

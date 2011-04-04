@@ -51,15 +51,11 @@
          field first in an ascending sort and last in a descending sort.
     -->
 
-
-    <!-- numeric field types that store and index the text
-         value verbatim (and hence don't support range queries, since the
-         lexicographic ordering isn't equal to the numeric ordering) -->
-    <fieldType name="integer" class="solr.IntField" omitNorms="true"/>
-    <fieldType name="long" class="solr.LongField" omitNorms="true"/>
-    <fieldType name="float" class="solr.FloatField" omitNorms="true"/>
-    <fieldType name="double" class="solr.DoubleField" omitNorms="true"/>
-
+    <!-- numeric field types that can be sorted, but are not optimized for range queries -->
+    <fieldType name="integer" class="solr.TrieIntField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
 
     <!--
       Note:
@@ -297,10 +293,9 @@
      $document->id = $hash . '/node/' . $node->nid; -->
 
    <field name="id" type="string" indexed="true" stored="true" required="true" />
-   <!-- entity_id is tlong, since in some cases we may want to use it as a default sort to
-        get deterministic ordering of results -->
-   <field name="entity_id"  type="tlong" indexed="true" stored="true" required="true" />
-   <!-- entity is 'node', 'file', 'user', or some other Drupal object type -->
+   <!-- entity_id is the numeric object ID, e.g. Node ID, File ID -->
+   <field name="entity_id"  type="long" indexed="true" stored="true" required="true" />
+   <!-- entity_type is 'node', 'file', 'user', or some other Drupal object type -->
    <field name="entity_type" type="string" indexed="true" stored="true" required="true" />
    <!-- bundle is a node type, or as appropriate for other entity types -->
    <field name="bundle" type="string" indexed="true" stored="true"/>
@@ -332,7 +327,7 @@
 
    <!-- Here, default is used to create a "timestamp" field indicating
         when each document was indexed.-->
-   <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
+   <field name="timestamp" type="tdate" indexed="true" stored="true" default="NOW" multiValued="false"/>
 
 	<!-- This field is used to build the spellchecker index -->
    <field name="spell" type="textSpell" indexed="true" stored="true" multiValued="true"/>
