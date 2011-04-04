@@ -570,6 +570,8 @@
 
   </searchComponent>
 
+  <queryConverter name="queryConverter" class="solr.SpellingQueryConverter"/>
+
   <!-- a search component that enables you to configure the top results for
        a given query regardless of the normal lucene scoring.-->
   <searchComponent name="elevator" class="solr.QueryElevationComponent" >
