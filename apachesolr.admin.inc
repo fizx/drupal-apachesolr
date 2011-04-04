@@ -336,7 +336,15 @@ function apachesolr_index_page($server_id = NULL) {
     $server_id = apachesolr_default_server();
   }
 
-  $output = array();
+  // Initializes output with information about which server's setting we are
+  // editing, as it is otherwise not transparent to the end user.
+  $output = array(
+    'apachesolr_server' => array(
+      '#theme' => 'apachesolr_settings_title',
+      '#server_id' => $server_id,
+    ),
+  );
+
   $status_header = '';
   if (isset($data->index->numDocs)) {
     $pending_docs = $delay_msg = $delete_msg = '';
@@ -472,6 +480,16 @@ function apachesolr_enabled_facets_form($form, &$form_state, $server_id = NULL) 
   if (empty($server_id)) {
     $server_id = apachesolr_default_server();
   }
+
+  // Initializes output with information about which server's setting we are
+  // editing, as it is otherwise not transparent to the end user.
+  $form = array(
+    'apachesolr_server' => array(
+      '#theme' => 'apachesolr_settings_title',
+      '#server_id' => $server_id,
+    ),
+  );
+
   $facets = array();
   $module_facets = array();
   $module_list = array();
@@ -485,7 +503,6 @@ function apachesolr_enabled_facets_form($form, &$form_state, $server_id = NULL) 
   }
 
   $enabled_facets = apachesolr_get_enabled_facets($server_id);
-  $form = array();
   $form['#server_id'] = $server_id;
   $form['apachesolr_enabled_facets']['help'] = array(
     '#type' => 'item',

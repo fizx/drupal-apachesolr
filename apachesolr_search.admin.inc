@@ -12,11 +12,18 @@ function apachesolr_search_settings_page($server_id = NULL) {
   if (empty($server_id)) {
     $server_id = apachesolr_default_server();
   }
+
   // Try to fetch the schema fields.
   try {
     $solr = apachesolr_get_solr($server_id);
     $fields = $solr->getFields();
-    $output = drupal_get_form('apachesolr_search_settings_form', $fields, $server_id);
+    $output = array(
+      'apachesolr_server' => array(
+        '#theme' => 'apachesolr_settings_title',
+        '#server_id' => $server_id,
+      ),
+      'apachesolr_search_settings_form' => drupal_get_form('apachesolr_search_settings_form', $fields, $server_id)
+    );
   }
   catch (Exception $e) {
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
@@ -33,6 +40,17 @@ function apachesolr_boost_settings_page($server_id = NULL) {
   if (empty($server_id)) {
     $server_id = apachesolr_default_server();
   }
+
+  // Initializes output with information about which server's setting we are
+  // editing, as it is otherwise not transparent to the end user.
+  $output = array(
+    'apachesolr_server' => array(
+      '#theme' => 'apachesolr_settings_title',
+      '#server_id' => $server_id,
+    ),
+  );
+
+  // Adds content bias and type boost / exclusion forms.
   $output['apachesolr_search_bias_form'] = drupal_get_form('apachesolr_search_bias_form', $server_id);
   $output['apachesolr_search_type_boost_form'] = drupal_get_form('apachesolr_search_type_boost_form', $server_id);
   return $output;

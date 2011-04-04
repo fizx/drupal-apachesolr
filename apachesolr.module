@@ -2362,6 +2362,12 @@ function apachesolr_theme() {
     'apachesolr_mlt_recommendation_block' => array(
       'variables' => array('docs' => NULL, 'delta' => NULL),
     ),
+    /**
+     * Themes the title links in admin settings pages.
+     */
+    'apachesolr_settings_title' => array(
+      'variables' => array('server_id' => NULL),
+    ),
   );
 }
 
@@ -2723,6 +2729,31 @@ function theme_apachesolr_sort_list($vars) {
   // theme('item_list') expects a numerically indexed array.
   $vars['items'] = array_values($vars['items']);
   return theme('item_list', array('items' => $vars['items']));
+}
+
+/**
+ * Themes the title for settings pages.
+ */
+function theme_apachesolr_settings_title($vars) {
+  $output = '';
+
+  // Gets server information, builds header with nested link to the server's
+  // edit page. Skips building title if server info could not be retrieved.
+  if ($server = apachesolr_server_load($vars['server_id'])) {
+    $url = url(
+      'admin/config/search/apachesolr/server/' . $vars['server_id'] . '/edit',
+      array('query' => array('destination' => $_GET['q']))
+    );
+
+    $output .= '<h3>';
+    $output .= t(
+      'Settings for server: <a href="@url">@server</a>',
+      array('@url' => $url, '@server' => $server['name'])
+    );
+    $output .= '</h3>';
+  }
+
+  return $output;
 }
 
 /**
