@@ -382,17 +382,23 @@ function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '',
   $query = apachesolr_drupal_query($keys, $filterstring, $solrsort, $base_path);
 
   apachesolr_search_basic_params($query);
+  apachesolr_search_add_facet_params($query);
+  apachesolr_search_add_boost_params($query);
   if ($keys) {
     apachesolr_search_highlighting_params($query);
+    if (!isset($query->params['hl.fl'])) {
+      foreach (array('content', 'ts_comments') as $field) {
+        if (isset($query->params['qf'][$field])) {
+          $query->params['hl.fl'][] = $field;
+        }
+      }
+    }
     apachesolr_search_add_spellcheck_params($query);
   }
   else {
     // No highlighting, use the teaser as a snippet.
     $query->params['fl'] .= ',teaser';
   }
-  apachesolr_search_add_facet_params($query);
-  apachesolr_search_add_boost_params($query);
-
   list($final_query, $response) = apachesolr_do_query($caller, $query, $page);
   apachesolr_has_searched(TRUE);
   // Add search terms and filters onto the breadcrumb.
@@ -422,7 +428,7 @@ function apachesolr_search_basic_params(DrupalSolrQueryInterface $query = NULL) 
  *
  * These settings are set in solrconfig.xml.
  * See the defaults there.
- * If you wish to override them, you can via settings.php
+ * If you wish to override them, you can via settings.php or drush
  */
 function apachesolr_search_highlighting_params(DrupalSolrQueryInterface $query = NULL) {
   $params['hl'] = variable_get('apachesolr_hl_active', NULL);
@@ -430,6 +436,7 @@ function apachesolr_search_highlighting_params(DrupalSolrQueryInterface $query =
   $params['hl.simple.pre'] = variable_get('apachesolr_hl_pretag', NULL);
   $params['hl.simple.post'] = variable_get('apachesolr_hl_posttag', NULL);
   $params['hl.snippets'] = variable_get('apachesolr_hl_numsnippets', NULL);
+  // This should be an array of possible field names.
   $params['hl.fl'] = variable_get('apachesolr_hl_fieldtohightlight', NULL);
   if ($query) {
     $query->params += $params;
@@ -499,6 +506,8 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
 
   $defaults = array(
     'content' => '1.0',
+    'ts_comments' => '0.5',
+    'tos_content_extra' => '0.1',
     'label' => '5.0',
     'tos_name' => '3.0',
     'taxonomy_names' => '2.0',
@@ -513,11 +522,14 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
   if ($qf && $fields) {
     foreach ($fields as $field_name => $field) {
       if (!empty($qf[$field_name])) {
-        if ($field_name == 'content') {
-          // content is the only normed field.
+        $prefix = substr($field_name, 0, 3);
+        if ($field_name == 'content' || $prefix == 'ts_' || $prefix == 'tm_') {
+          // Normed fields tend to have a lower score. Multiplying by 40 is
+          // a rough attempt to bring the score in line with fields that are
+          // not normed.
           $qf[$field_name] *= 40.0;
         }
-        $params['qf'][] = $field_name . '^' . $qf[$field_name];
+        $params['qf'][$field_name] = $field_name . '^' . $qf[$field_name];
       }
     }
   }
@@ -570,8 +582,8 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
 
 function apachesolr_search_process_response($response, DrupalSolrQueryInterface $query) {
   $results = array();
-  // We default to getting snippets from the body.
-  $hl_fl = isset($query->params['hl.fl']) ? explode(',', $query->params['hl.fl']) : array('content');
+  // We default to getting snippets from the body content and comments.
+  $hl_fl = isset($query->params['hl.fl']) ? $query->params['hl.fl'] : array('content', 'ts_comments');
   $total = $response->response->numFound;
   pager_default_initialize($total, $query->params['rows']);
   if ($total > 0) {

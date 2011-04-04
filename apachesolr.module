@@ -2049,6 +2049,8 @@ function apachesolr_field_name_map($field_name) {
   if (!isset($map)) {
     $map = array(
       'content' => t('The full, rendered content (e.g. the rendered node body)'),
+      'ts_comments' => t('The rendered comments associated with a node'),
+      'tos_content_extra' => t('Extra rendered content or keywords'),
       'label' => t('Title or label'),
       'teaser' => t('Teaser or preview'),
       'tos_name' => t('Author name'),

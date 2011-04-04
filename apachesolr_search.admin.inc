@@ -119,8 +119,10 @@ function apachesolr_search_settings_form($form, &$form_state, $fields, $server_i
   // get the current weights
   $defaults = array(
     'content' => '1.0',
+    'ts_comments' => '0.5',
+    'tos_content_extra' => '0.1',
     'label' => '5.0',
-    'os_name' => '3.0',
+    'tos_name' => '3.0',
     'taxonomy_names' => '2.0',
     'tags_h1' => '5.0',
     'tags_h2_h3' => '3.0',
