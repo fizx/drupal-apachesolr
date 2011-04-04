@@ -76,8 +76,13 @@ function apachesolr_node_to_document($node, $namespace) {
     }
     $document->ds_created = apachesolr_date_iso($node->created);
     $document->ds_changed = apachesolr_date_iso($node->changed);
-    $last_change = (isset($node->last_comment_timestamp) && $node->last_comment_timestamp > $node->changed) ? $node->last_comment_timestamp : $node->changed;
-    $document->ds_last_comment_or_change = apachesolr_date_iso($last_change);
+    if (isset($node->last_comment_timestamp)) {
+      $document->ds_last_comment_timestamp = apachesolr_date_iso($node->last_comment_timestamp);
+      $document->ds_last_comment_or_change = apachesolr_date_iso(max($node->last_comment_timestamp, $node->changed));
+    }
+    else {
+      $document->ds_last_comment_or_change = apachesolr_date_iso($node->changed);
+    }
     $document->is_comment_count = isset($node->comment_count) ? $node->comment_count : 0;
 
     // Handle fields including taxonomy.
