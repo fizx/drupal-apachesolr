@@ -115,7 +115,7 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
   protected $base_path;
 
   /**
-   * Apache_Solr_Service object
+   * DrupalApacheSolrService object
    */
   protected $solr;
 
@@ -126,7 +126,7 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
 
   /**
    * @param $solr
-   *   An instantiated Apache_Solr_Service Object.
+   *   An instantiated DrupalApacheSolrService Object.
    *   Can be instantiated from apachesolr_get_solr().
    *
    * @param $keys
@@ -520,7 +520,7 @@ class SolrBaseQuery implements DrupalSolrQueryInterface {
     if (!isset($keys)) {
       $keys = $this->rebuild_query();
     }
-    return $this->solr->search($keys, $this->params['start'], $this->params['rows'], $this->params);
+    return $this->solr->search($keys, $this->params);
   }
 
   function solr($method) {

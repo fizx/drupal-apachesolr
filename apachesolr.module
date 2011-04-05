@@ -157,19 +157,24 @@ function apachesolr_init() {
  *   The search query that was issued at the time of failure.
  */
 function apachesolr_failure($search_name, $querystring) {
-  $fail_rule = variable_get('apachesolr_failure', 'show_error');
+  $fail_rule = variable_get('apachesolr_failure', 'apachesolr:show_error');
 
   switch ($fail_rule) {
-    case 'show_error':
+    case 'apachesolr:show_error':
       drupal_set_message(t('The Apache Solr search engine is not available. Please contact your site administrator.'), 'error');
       break;
-    case 'show_drupal_results':
-      drupal_set_message(t("%search_name is not available. Your search is being redirected.", array('%search_name' => $search_name)));
-      // TODO - apachesolr_server_variable_get()
-      drupal_goto('search/node/' . drupal_encode_path($querystring));
+    case 'apachesolr:show_no_results':
+      // Do nothing.
       break;
-    case 'show_no_results':
-      return;
+    default:
+      // If we're failing over to another module make sure the search is available.
+      $search_info = search_get_info();
+      if (isset($search_info[$fail_rule])) {
+        $search_info = $search_info[$fail_rule];
+        drupal_set_message(t("%search_name is not available. Your search is being redirected.", array('%search_name' => $search_name)));
+        drupal_goto('search/' . $search_info['path'] . '/' . drupal_encode_path($querystring));
+      }
+      break;
   }
 }
 
@@ -826,12 +831,9 @@ function apachesolr_block_info() {
 function apachesolr_block_view($delta = '') {
   if ($delta != 'sort' && ($node = menu_get_object()) && (!arg(2) || arg(2) == 'view')) {
     $suggestions = array();
-    // Determine whether the user can view the current node.
-    if (!isset($access)) {
-      $access = node_access('view', $node);
-    }
+    // Determine whether the user can view the current node. Probably not necessary.
     $block = apachesolr_mlt_load_block($delta);
-    if ($access && $block) {
+    if ($block && node_access('view', $node)) {
       $docs = apachesolr_mlt_suggestions($block, apachesolr_document_id($node->nid));
       if (!empty($docs)) {
         $suggestions['subject'] = check_plain($block['name']);
@@ -1026,9 +1028,9 @@ function apachesolr_form_field_ui_field_edit_form_alter(&$form, $form_state) {
  * Add a checkbox to enable type-specific visibility.
  */
 function apachesolr_form_block_admin_configure_alter(&$form, $form_state) {
-  // Hide the core title field.
+  // Hide the core title field on MLT blocks.
   if ($form['module']['#value'] == 'apachesolr' && $form['delta']['#value'] != 'sort') {
-    $form['block_settings']['title']['#access'] = FALSE;
+    $form['settings']['title']['#access'] = FALSE;
   }
 
   // Add a type-specific visibility checkbox.
@@ -1054,7 +1056,7 @@ function apachesolr_form_block_admin_configure_alter(&$form, $form_state) {
     );
     $form['settings']['apachesolr_facet_sort_active']['#description'] .= t(' This may produce unwanted effects when displaying child terms in a hierarchy.');
   }
-  if ($facet_info[$module][$delta]['field']['type'] == 'taxonomy_term_reference') {
+  if (isset($facet_info[$module][$delta]['field']['type']) && $facet_info[$module][$delta]['field']['type'] == 'taxonomy_term_reference') {
     $form['settings']['apachesolr_facet_query_sort']['#options']['weight asc'] = t('Weight, ascending');
     $form['settings']['apachesolr_facet_query_sort']['#options']['weight desc'] = t('Weight, descending');
     $form['settings']['apachesolr_facet_query_sort']['#description'] = t('The sort order of facet links in this block. %Count, which is the default, will show facets with the most results first. %Alphabetical will sort alphabetically, and %Numeric numerically, either ascending or descending. %Weight sorting is only supported on fields with weights (currently only taxonomy) and may produce unspecified results on other fields.', array(
@@ -1688,9 +1690,6 @@ function apachesolr_get_solr($id = NULL) {
     $id = apachesolr_default_server();
   }
 
-  $host = $servers[$id]['host'];
-  $port = $servers[$id]['port'];
-  $path = $servers[$id]['path'];
   $class = $servers[$id]['service_class'];
 
   if (empty($solr_cache[$id])) {
@@ -1699,7 +1698,7 @@ function apachesolr_get_solr($id = NULL) {
       $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
     }
     // Takes advantage of auto-loading.
-    $solr = new $class($id, $host, $port, $path);
+    $solr = new $class($servers[$id]['url'], $id);
     $solr_cache[$id] = $solr;
   }
   return $solr_cache[$id];
@@ -1748,7 +1747,7 @@ function apachesolr_server_delete($server_id) {
 }
 
 function apachesolr_server_save($server, $original_id = NULL) {
-  $default = array('server_id' => NULL, 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
+  $default = array('server_id' => NULL, 'name' => '', 'url' => '', 'service_class' => '');
   $conf = isset($server['conf']) ? $server['conf'] : array();
   // Remove any unexpected fields.
   // @todo - getthis from the schema, or maybe use drupal_write_record().
@@ -1833,14 +1832,14 @@ function apachesolr_server_variable_del($server_id, $name) {
  *
  * @return boolean TRUE if the server can be pinged, FALSE otherwise.
  */
-function apachesolr_server_status($host, $port, $path, $class = NULL) {
+function apachesolr_server_status($url, $class = NULL) {
   if (empty($class)) {
     $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
   }
   $ping = FALSE;
   try {
     // Takes advantage of auto-loading.
-    $solr = new $class('', $host, $port, $path);
+    $solr = new $class($url);
     $ping = @$solr->ping(variable_get('apachesolr_ping_timeout', 4));
   }
   catch (Exception $e) {
@@ -2011,11 +2010,17 @@ function apachesolr_index_key($field) {
     case 'integer':
       $type_prefix = 'i'; // long integer
       break;
-    case 'sint':
-      $type_prefix = 'is'; // long integer sortable
+    case 'half-int':
+      $type_prefix = 'h'; // 32 bit integer
+      break;
+    case 'float':
+      $type_prefix = 'f'; // float; sortable.
       break;
     case 'double':
-      $type_prefix = 'p'; // reserve d for date
+      $type_prefix = 'p'; // double; sortable d was used for date.
+      break;
+      case 'sint':
+      $type_prefix = 'is'; // long integer sortable (deprecated)
       break;
     case 'boolean':
       $type_prefix = 'b';
@@ -2024,15 +2029,24 @@ function apachesolr_index_key($field) {
       $type_prefix = 'd'; // date trie
       break;
     case 'tint':
-      $type_prefix = 'it'; // long integer trie (sortable)
+      $type_prefix = 'it'; // long integer trie; sortable, best for range queries
       break;
-    case 'float':
-      $type_prefix = 'ft'; // float trie
+    case 'thalf-int':
+      $type_prefix = 'ht'; // 32 bit integer trie (sortable)
+      break;
+    case 'tfloat':
+      $type_prefix = 'ft'; // float trie; sortable, best for range queries.
       break;
     case 'tdouble':
-      $type_prefix = 'pt'; // double trie
+      $type_prefix = 'pt'; // double trie; d was used for date.
       break;
-    case 'string':
+    case 'sfloat':
+      $type_prefix = 'fs'; // float, sortable (use for sorting missing last).
+      break;
+    case 'sdouble':
+      $type_prefix = 'ps'; // double sortable; (use for sorting missing last).
+      break;
+     case 'string':
     default:
       $type_prefix = 's'; // String
   }
@@ -2050,6 +2064,8 @@ function apachesolr_field_name_map($field_name) {
   if (!isset($map)) {
     $map = array(
       'content' => t('The full, rendered content (e.g. the rendered node body)'),
+      'ts_comments' => t('The rendered comments associated with a node'),
+      'tos_content_extra' => t('Extra rendered content or keywords'),
       'label' => t('Title or label'),
       'teaser' => t('Teaser or preview'),
       'tos_name' => t('Author name'),
@@ -2346,6 +2362,12 @@ function apachesolr_theme() {
     'apachesolr_mlt_recommendation_block' => array(
       'variables' => array('docs' => NULL, 'delta' => NULL),
     ),
+    /**
+     * Themes the title links in admin settings pages.
+     */
+    'apachesolr_settings_title' => array(
+      'variables' => array('server_id' => NULL),
+    ),
   );
 }
 
@@ -2499,28 +2521,33 @@ function field_apachesolr_field_mappings() {
     'list_integer' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
-      'index_type' => 'string',
+      'index_type' => 'integer',
+      'facets' => TRUE,
     ),
     'list_float' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
-      'index_type' => 'string',
+      'index_type' => 'float',
+      'facets' => TRUE,
     ),
     'list_text' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'string',
+      'facets' => TRUE,
     ),
     'list_boolean' => array(
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'boolean',
+      'facets' => TRUE,
     ),
     'taxonomy_term_reference' => array(
       'display_callback' => 'apachesolr_taxonomy_get_term',
       'indexing_callback' => 'apachesolr_term_reference_indexing_callback',
       'index_type' => 'integer',
       'facet_block_callback' => 'apachesolr_search_taxonomy_facet_block',
+      'facets' => TRUE,
     ),
   );
 
@@ -2705,6 +2732,31 @@ function theme_apachesolr_sort_list($vars) {
 }
 
 /**
+ * Themes the title for settings pages.
+ */
+function theme_apachesolr_settings_title($vars) {
+  $output = '';
+
+  // Gets server information, builds header with nested link to the server's
+  // edit page. Skips building title if server info could not be retrieved.
+  if ($server = apachesolr_server_load($vars['server_id'])) {
+    $url = url(
+      'admin/config/search/apachesolr/server/' . $vars['server_id'] . '/edit',
+      array('query' => array('destination' => $_GET['q']))
+    );
+
+    $output .= '<h3>';
+    $output .= t(
+      'Settings for server: <a href="@url">@server</a>',
+      array('@url' => $url, '@server' => $server['name'])
+    );
+    $output .= '</h3>';
+  }
+
+  return $output;
+}
+
+/**
  * The interface for all 'query' objects.
  */
 interface DrupalSolrQueryInterface {
@@ -2881,8 +2933,8 @@ interface DrupalSolrQueryInterface {
    *   instance variables. The params for the search are taken from
    *   the public $query->params array.
    *
-   * @return Apache_Solr_Response
-   *   A response object.
+   * @return
+   *   A stdClass response object.
    */
   function search($keys = NULL);
 

@@ -42,35 +42,21 @@ function apachesolr_server_delete_form_submit($form, &$form_state) {
  * Form builder for adding/editing a Solr server used as a menu callback.
  */
 function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
+  
   if (empty($server)) {
-    $server = array('server_id' => '', 'name' => '', 'scheme' => NULL, 'host' => '', 'port' => '', 'path' => '', 'service_class' => '');
+    $server = array();
   }
+  $server += array('server_id' => '', 'name' => '', 'url' => '', 'service_class' => '');
 
   $form['original_server_id'] = array(
     '#type' => 'value',
     '#value' => $server['server_id'],
   );
-  $form['host'] = array(
+  $form['url'] = array(
     '#type' => 'textfield',
-    '#title' => t('Solr host name'),
-    '#default_value' => $server['host'],
-    '#description' => t('Host name of your Solr server, e.g. <code>localhost</code> or <code>example.com</code>.'),
-    '#required' => TRUE,
-  );
-  $form['port'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Solr port'),
-    '#size' => 5,
-    '#maxlength' => 5,
-    '#default_value' => $server['port'],
-    '#description' => t('Port on which the Solr server listens. The Jetty example server is 8983, while Tomcat is 8080 by default.'),
-    '#required' => TRUE,
-  );
-  $form['path'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Solr path'),
-    '#default_value' => $server['path'],
-    '#description' => t('Path that identifies the Solr request handler to be used.'),
+    '#title' => t('Solr server URL'),
+    '#default_value' => $server['url'],
+    '#description' => t('URL that identifies the Solr server and request path to be used. E.g. http://localhost:8983/solr'),
     '#required' => TRUE,
   );
   $is_default = $server['server_id'] == variable_get('apachesolr_default_server', 'solr');
@@ -100,7 +86,7 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
   );
   $form['service_class'] = array(
     '#type' => 'value',
-    '#value' => '',
+    '#value' => $server['service_class'],
   );
   $form['save'] = array(
     '#type' => 'submit',
@@ -129,8 +115,7 @@ function apachesolr_server_delete_submit($form, &$form_state) {
 }
 
 function apachesolr_server_test_submit($form, &$form_state) {
-  extract($form_state['values']);
-  $ping = apachesolr_server_status($host, $port, $path, $service_class);
+  $ping = apachesolr_server_status($form_state['values']['url'], $form_state['values']['service_class']);
   if ($ping) {
     drupal_set_message(t('Your site has contacted the Apache Solr server.'));
   }
@@ -141,17 +126,20 @@ function apachesolr_server_test_submit($form, &$form_state) {
 }
 
 function apachesolr_server_save_validate($form, &$form_state) {
-  if (isset($form['port']) && isset($form_state['values']['port'])) {
-    $port = $form_state['values']['port'];
+  $parts = parse_url($form_state['values']['url']);
+  foreach (array('scheme', 'host', 'path') as $key) {
+    if (empty($parts[$key])) {
+      form_set_error('url', t('The Solr server URL needs to include a !part', array('!part' => $key)));
+    }
+  }
+  if (isset($parts['port'])) {
     // TODO: Port range should be 0-65535, but 0 crashes apachesolr
-    if (!ctype_digit($port) || $port < 1 || $port > 65535) {
+    if (!ctype_digit($parts['port']) || $parts['port'] < 1 || $parts['port'] > 65535) {
       form_set_error('port', t('The port has to be an integer between 1 and 65535.'));
     }
     else {
-      $form_state['values']['host'] = trim($form_state['values']['host']);
-      $form_state['values']['port'] = trim($form_state['values']['port']);
       // Normalize the path to have just a leading slash.
-      $form_state['values']['path'] = '/' . trim($form_state['values']['path'], "/ \t\r\n\0\x0B");
+      $form_state['values']['url'] = trim($form_state['values']['url'], "/ \t\r\n\0\x0B");
     }
   }
 }
@@ -201,9 +189,7 @@ function apachesolr_settings($form, &$form_state) {
     t('Default'),
     array('data' => t('Operations'), 'colspan' => 2),
     t('Name'),
-    t('Host'),
-    t('Port'),
-    t('Path'),
+    t('URL'),
   );
   foreach ($servers as $server_id => $data) {
     $is_default = $server_id == variable_get('apachesolr_default_server', 'solr');
@@ -222,9 +208,7 @@ function apachesolr_settings($form, &$form_state) {
         array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['server_id'] . '/edit')),
         $delete_link,
         check_plain($data['name']),
-        check_plain($data['host']),
-        check_plain($data['port']),
-        check_plain($data['path']),
+        check_plain($data['url']),
       ),
       // Attributes for tr
       'class' => array(drupal_html_class('apachesolr-' . $type)),
@@ -260,12 +244,10 @@ function apachesolr_settings($form, &$form_state) {
     '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce the number of items to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status')))
   );
 
-  $options = drupal_map_assoc(array(5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100));
   $form['apachesolr_rows'] = array(
-    '#type' => 'select',
+    '#type' => 'textfield',
     '#title' => t('Results per page'),
     '#default_value' => variable_get('apachesolr_rows', 10),
-    '#options' => $options,
     '#description' => t('The number of results that will be shown per page.'),
   );
   $form['apachesolr_facetstyle'] = array(
@@ -274,14 +256,22 @@ function apachesolr_settings($form, &$form_state) {
     '#default_value' => variable_get('apachesolr_facetstyle', 'checkboxes'),
     '#options' => array('links' => t('Links only'), 'checkboxes' => t('Links with checkboxes')),
   );
+
+  $options = array('apachesolr:show_error' => t('Show error message'));
+  $system_info = system_get_info('module');
+  foreach (search_get_info() as $module => $search_info) {
+    // Don't allow apachesolr to return results on failure of apachesolr.
+    if ($module == 'apachesolr_search') {
+      continue;
+    }
+    $options[$module] = t('Show @name search results', array('@name' => $system_info[$module]['name']));
+  }
+  $options['apachesolr:show_no_results'] = t('Show no results');
   $form['apachesolr_failure'] = array(
     '#type' => 'select',
     '#title' => t('On failure'),
-    '#options' => array('show_error' => t('Show error message'),
-      'show_drupal_results' => t('Show core Drupal results'),
-      'show_no_results' => t('Show no results')
-    ),
-    '#default_value' => variable_get('apachesolr_failure', 'show_error'),
+    '#options' => $options,
+    '#default_value' => variable_get('apachesolr_failure', 'apachesolr:show_error'),
     '#description' => t('What to display if Apache Solr search is not available.'),
   );
 
@@ -308,6 +298,22 @@ function apachesolr_settings($form, &$form_state) {
 }
 
 /**
+ * Validation function for the apachesolr_settings() form.
+ */
+function apachesolr_settings_validate($form, &$form_state) {
+  $intval = intval($form_state['values']['apachesolr_rows']);
+  // TODO: does the max need to be variable?
+  $max = 200;
+  if (!is_numeric($form_state['values']['apachesolr_rows']) || $intval < 0 || $intval > $max) {
+    form_set_error('apachesolr_rows', t('Results per page should be non-negative integer less than @max.', array('@max' => $max)));
+  }
+  else {
+    // Set the integer value as the one we are saving to the variable.
+    $form_state['values']['apachesolr_rows'] = $intval;
+  }
+}
+
+/**
  * Gets information about the fields already in solr index.
  */
 function apachesolr_index_page($server_id = NULL) {
@@ -330,7 +336,15 @@ function apachesolr_index_page($server_id = NULL) {
     $server_id = apachesolr_default_server();
   }
 
-  $output = array();
+  // Initializes output with information about which server's setting we are
+  // editing, as it is otherwise not transparent to the end user.
+  $output = array(
+    'apachesolr_server' => array(
+      '#theme' => 'apachesolr_settings_title',
+      '#server_id' => $server_id,
+    ),
+  );
+
   $status_header = '';
   if (isset($data->index->numDocs)) {
     $pending_docs = $delay_msg = $delete_msg = '';
@@ -466,6 +480,16 @@ function apachesolr_enabled_facets_form($form, &$form_state, $server_id = NULL) 
   if (empty($server_id)) {
     $server_id = apachesolr_default_server();
   }
+
+  // Initializes output with information about which server's setting we are
+  // editing, as it is otherwise not transparent to the end user.
+  $form = array(
+    'apachesolr_server' => array(
+      '#theme' => 'apachesolr_settings_title',
+      '#server_id' => $server_id,
+    ),
+  );
+
   $facets = array();
   $module_facets = array();
   $module_list = array();
@@ -479,7 +503,6 @@ function apachesolr_enabled_facets_form($form, &$form_state, $server_id = NULL) 
   }
 
   $enabled_facets = apachesolr_get_enabled_facets($server_id);
-  $form = array();
   $form['#server_id'] = $server_id;
   $form['apachesolr_enabled_facets']['help'] = array(
     '#type' => 'item',
@@ -702,7 +725,7 @@ function apachesolr_config_files_overview() {
   try {
     $solr = apachesolr_get_solr();
     $response = $solr->makeServletRequest('admin/file');
-    $xml = simplexml_load_string($response->getRawResponse());
+    $xml = simplexml_load_string($response->data);
   }
   catch (Exception $e) {
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
@@ -733,7 +756,7 @@ function apachesolr_config_file($name) {
   try {
     $solr = apachesolr_get_solr();
     $response = $solr->makeServletRequest('admin/file', array('file' => $name));
-    $raw_file = $response->getRawResponse();
+    $raw_file = $response->data;
     $output = '<pre>' . check_plain($raw_file) . '</pre>';
     drupal_set_title(check_plain($name));
   }

@@ -128,7 +128,7 @@ class DrupalSolrMatchTestCase extends DrupalSolrWebTestCase {
   }
 
   function _solr_build_document($nid, $values = array()) {
-    $document = new Apache_Solr_Document();
+    $document = new ApacheSolrDocument();
     $document->id = apachesolr_document_id($nid);
     foreach ($values as $key => $value) {
       $document->$key = $value;

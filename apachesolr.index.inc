@@ -20,37 +20,7 @@ function apachesolr_node_to_document($node, $namespace) {
   }
 
   if ($build_document) {
-    // Build the node body.
-    $build = node_view($node, 'search_index');
-    // Why do we need this?
-    unset($build['#theme']);
-    $text = drupal_render($build);
-
-    $node->title = apachesolr_clean_text($node->title);
-    // Fetch extra data normally not visible, including comments.
-    // We do this manually (with module_implements instead of node_invoke_nodeapi)
-    // because we want a keyed array to come back. Only in this way can we decide
-    // whether to index comments or not.
-    $extra = array();
-    $excludes = variable_get('apachesolr_exclude_nodeapi_types', array());
-    $exclude_nodeapi = isset($excludes[$node->type]) ? $excludes[$node->type] : array();
-    foreach (module_implements('node_update_index') as $module) {
-      // Invoke nodeapi if this module has not been excluded, for example,
-      // exclude 'comment' for a type to skip indexing its comments.
-      if (empty($exclude_nodeapi[$module])) {
-        $function = $module . '_node_update_index';
-        if ($output = $function($node)) {
-          $extra[$module] = $output;
-        }
-      }
-    }
-    if (!variable_get('apachesolr_index_comments_with_node', TRUE)) {
-      unset($extra['comment']);
-    }
-
-    $text .= "\n\n" . implode(' ', $extra);
-
-    $document = new Apache_Solr_Document();
+    $document = new ApacheSolrDocument();
     $document->id = apachesolr_document_id($node->nid);
     $document->site = url(NULL, array('absolute' => TRUE));
     $document->hash = apachesolr_site_hash();
@@ -58,10 +28,22 @@ function apachesolr_node_to_document($node, $namespace) {
     $document->entity_id = $node->nid;
     $document->bundle = $node->type;
     $document->bundle_name = node_type_get_name($node);
-    $document->label = $node->title;
+    $document->label = apachesolr_clean_text($node->title);
     $path = 'node/' . $node->nid;
     $document->url = url($path, array('absolute' => TRUE));
     $document->path = $path;
+    // Build the node body.
+    $build = node_view($node, 'search_index');
+    // Why do we need this?
+    unset($build['#theme']);
+    $text = drupal_render($build);
+    $document->content = apachesolr_clean_text($text);
+    if (isset($node->teaser)) {
+      $document->teaser = apachesolr_clean_text($node->teaser);
+    }
+    else {
+      $document->teaser = truncate_utf8($document->content, 300, TRUE);
+    }
     // Path aliases can have important information about the content.
     // Add them to the index as well.
     if (function_exists('drupal_get_path_alias')) {
@@ -92,20 +74,16 @@ function apachesolr_node_to_document($node, $namespace) {
     else {
       $document->ss_language = $node->language;
     }
-    $document->content = apachesolr_clean_text($text);
-    if (isset($node->teaser)) {
-      $document->teaser = apachesolr_clean_text($node->teaser);
-    }
-    else {
-      $document->teaser = truncate_utf8($document->content, 300, TRUE);
-    }
     $document->ds_created = apachesolr_date_iso($node->created);
     $document->ds_changed = apachesolr_date_iso($node->changed);
-    $last_change = (isset($node->last_comment_timestamp) && $node->last_comment_timestamp > $node->changed) ? $node->last_comment_timestamp : $node->changed;
-    $document->ds_last_comment_or_change = apachesolr_date_iso($last_change);
+    if (isset($node->last_comment_timestamp)) {
+      $document->ds_last_comment_timestamp = apachesolr_date_iso($node->last_comment_timestamp);
+      $document->ds_last_comment_or_change = apachesolr_date_iso(max($node->last_comment_timestamp, $node->changed));
+    }
+    else {
+      $document->ds_last_comment_or_change = apachesolr_date_iso($node->changed);
+    }
     $document->is_comment_count = isset($node->comment_count) ? $node->comment_count : 0;
-
-
 
     // Handle fields including taxonomy.
     $indexed_fields = apachesolr_entity_fields('node');
@@ -133,6 +111,33 @@ function apachesolr_node_to_document($node, $namespace) {
       $document->is_book_bid = (int) $node->book['bid'];
     }
     apachesolr_add_tags_to_document($document, $text);
+
+    // Fetch extra data normally not visible, including comments.
+    // We do this manually (with module_implements instead of node_invoke_nodeapi)
+    // because we want a keyed array to come back. Only in this way can we decide
+    // whether to index comments or not.
+    $extra = array();
+    $excludes = variable_get('apachesolr_exclude_nodeapi_types', array());
+    $exclude_nodeapi = isset($excludes[$node->type]) ? $excludes[$node->type] : array();
+    foreach (module_implements('node_update_index') as $module) {
+      // Invoke nodeapi if this module has not been excluded, for example,
+      // exclude 'comment' for a type to skip indexing its comments.
+      if (empty($exclude_nodeapi[$module])) {
+        $function = $module . '_node_update_index';
+        if ($output = $function($node)) {
+          $extra[$module] = $output;
+        }
+      }
+    }
+    if (isset($extra['comment'])) {
+      $comments = $extra['comment'];
+      unset($extra['comment']);
+      $document->ts_comments = apachesolr_clean_text($comments);
+      // @todo: do we want to reproduce apachesolr_add_tags_to_document() for comments?
+    }
+    // Use an omit-norms text field since this is generally going to be short; not
+    // really a full-text field.
+    $document->tos_content_extra = apachesolr_clean_text(implode(' ', $extra));
 
     // Let modules add to the document.
     foreach (module_implements('apachesolr_update_index') as $module) {

@@ -37,6 +37,8 @@
 
     <!-- boolean type: "true" or "false" -->
     <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
+    <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings -->
+    <fieldtype name="binary" class="solr.BinaryField"/>
 
     <!-- The optional sortMissingLast and sortMissingFirst attributes are
          currently supported on types that are sorted internally as strings.
@@ -51,15 +53,11 @@
          field first in an ascending sort and last in a descending sort.
     -->
 
-
-    <!-- numeric field types that store and index the text
-         value verbatim (and hence don't support range queries, since the
-         lexicographic ordering isn't equal to the numeric ordering) -->
-    <fieldType name="integer" class="solr.IntField" omitNorms="true"/>
-    <fieldType name="long" class="solr.LongField" omitNorms="true"/>
-    <fieldType name="float" class="solr.FloatField" omitNorms="true"/>
-    <fieldType name="double" class="solr.DoubleField" omitNorms="true"/>
-
+    <!-- numeric field types that can be sorted, but are not optimized for range queries -->
+    <fieldType name="integer" class="solr.TrieIntField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
 
     <!--
       Note:
@@ -137,7 +135,7 @@
     -->
 
     <!-- A text field that only splits on whitespace for exact matching of words -->
-    <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
+    <fieldType name="text_ws" class="solr.TextField" omitNorms="true" positionIncrementGap="100">
       <analyzer>
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
@@ -204,12 +202,46 @@
       </analyzer>
     </fieldType>
 
+    <!-- An unstemmed text field - good if one does not know the language of the field -->
+    <fieldType name="text_und" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.WordDelimiterFilterFactory"
+                protected="protwords.txt"
+                generateWordParts="1"
+                generateNumberParts="1"
+                catenateWords="1"
+                catenateNumbers="1"
+                catenateAll="0"
+                splitOnCaseChange="0"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+        <filter class="solr.StopFilterFactory"
+                ignoreCase="true"
+                words="stopwords.txt"
+                enablePositionIncrements="true"
+                />
+        <filter class="solr.WordDelimiterFilterFactory"
+                protected="protwords.txt"
+                generateWordParts="1"
+                generateNumberParts="1"
+                catenateWords="0"
+                catenateNumbers="0"
+                catenateAll="0"
+                splitOnCaseChange="0"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
 
     <!-- Edge N gram type - for example for matching against queries with results 
         KeywordTokenizer leaves input string intact as a single term.
         see: http://www.lucidimagination.com/blog/2009/09/08/auto-suggest-from-popular-queries-using-edgengrams/
    -->
-    <fieldType name="edge_n2_kw_text" class="solr.TextField" positionIncrementGap="100">
+    <fieldType name="edge_n2_kw_text" class="solr.TextField" omitNorms="true" positionIncrementGap="100">
      <analyzer type="index">
        <tokenizer class="solr.KeywordTokenizerFactory"/>
        <filter class="solr.LowerCaseFilterFactory"/>
@@ -297,10 +329,9 @@
      $document->id = $hash . '/node/' . $node->nid; -->
 
    <field name="id" type="string" indexed="true" stored="true" required="true" />
-   <!-- entity_id is tlong, since in some cases we may want to use it as a default sort to
-        get deterministic ordering of results -->
-   <field name="entity_id"  type="tlong" indexed="true" stored="true" required="true" />
-   <!-- entity is 'node', 'file', 'user', or some other Drupal object type -->
+   <!-- entity_id is the numeric object ID, e.g. Node ID, File ID -->
+   <field name="entity_id"  type="long" indexed="true" stored="true" required="true" />
+   <!-- entity_type is 'node', 'file', 'user', or some other Drupal object type -->
    <field name="entity_type" type="string" indexed="true" stored="true" required="true" />
    <!-- bundle is a node type, or as appropriate for other entity types -->
    <field name="bundle" type="string" indexed="true" stored="true"/>
@@ -318,7 +349,7 @@
    <field name="teaser" type="text" indexed="false" stored="true"/>
 
    <field name="path" type="string" indexed="true" stored="true"/>
-   <field name="path_alias" type="text" indexed="true" stored="true" termVectors="true"/>
+   <field name="path_alias" type="text" indexed="true" stored="true" termVectors="true" omitNorms="true"/>
 
  <!-- These are the fields that correspond to a Drupal node. The beauty of having
      Lucene store title, body, type, etc., is that we retrieve them with the search
@@ -332,7 +363,7 @@
 
    <!-- Here, default is used to create a "timestamp" field indicating
         when each document was indexed.-->
-   <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
+   <field name="timestamp" type="tdate" indexed="true" stored="true" default="NOW" multiValued="false"/>
 
 	<!-- This field is used to build the spellchecker index -->
    <field name="spell" type="textSpell" indexed="true" stored="true" multiValued="true"/>
@@ -368,12 +399,15 @@
    <!-- Normal text fields are for full text - the relevance of a match depends on the length of the text -->
    <dynamicField name="ts_*"  type="text"    indexed="true"  stored="true" multiValued="false" termVectors="true"/>
    <dynamicField name="tm_*"  type="text"    indexed="true"  stored="true" multiValued="true" termVectors="true"/>
+   <!-- Unstemmed text fields for full text - the relevance of a match depends on the length of the text -->
+   <dynamicField name="tus_*" type="text_und" indexed="true"  stored="true" multiValued="false" termVectors="true"/>
+   <dynamicField name="tum_*" type="text_und" indexed="true"  stored="true" multiValued="true" termVectors="true"/>
    <!-- These text fields omit norms - useful for extracted text like taxonomy_names -->
    <dynamicField name="tos_*" type="text"    indexed="true"  stored="true" multiValued="false" termVectors="true" omitNorms="true"/>
    <dynamicField name="tom_*" type="text"    indexed="true"  stored="true" multiValued="true" termVectors="true" omitNorms="true"/>
    <!-- Special-purpose text fields -->
-   <dynamicField name="tes_*" type="edge_n2_kw_text" indexed="true" stored="true" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
-   <dynamicField name="tem_*" type="edge_n2_kw_text" indexed="true" stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+   <dynamicField name="tes_*" type="edge_n2_kw_text" indexed="true" stored="true" multiValued="false" omitTermFreqAndPositions="true" />
+   <dynamicField name="tem_*" type="edge_n2_kw_text" indexed="true" stored="true" multiValued="true" omitTermFreqAndPositions="true" />
    <dynamicField name="tws_*" type="text_ws" indexed="true" stored="true" multiValued="false"/>
    <dynamicField name="twm_*" type="text_ws" indexed="true" stored="true" multiValued="true"/>
    <!-- trie dates are preferred, so give them the 2 letter prefix -->
@@ -387,7 +421,11 @@
    <dynamicField name="ftm_*" type="tfloat"  indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="pts_*" type="tdouble" indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="ptm_*" type="tdouble" indexed="true"  stored="true" multiValued="true"/>
-   <!-- In rare cases a date rather than tdate is needed for sortMissingLast -->
+   <!-- Binary fields can be populated using base64 encoded data. Useful e.g. for embedding
+        a small image in a search result using the data URI scheme -->
+   <dynamicField name="xs_*"  type="binary"  indexed="false" stored="true" multiValued="false"/>
+   <dynamicField name="xm_*"  type="binary"  indexed="false" stored="true" multiValued="true"/>
+   <!-- In rare cases a sfloat rather than tfloat is needed for sortMissingLast -->
    <dynamicField name="fss_*" type="sfloat"  indexed="true"  stored="true" multiValued="false"/>
    <dynamicField name="fsm_*" type="sfloat"  indexed="true"  stored="true" multiValued="true"/>
    <dynamicField name="pss_*" type="sdouble" indexed="true"  stored="true" multiValued="false"/>

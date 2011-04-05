@@ -123,7 +123,7 @@ behavior:
  - apachesolr_tags_to_index: the list of HTML tags that the module will index
    (see apachesolr_add_tags_to_document()).
 
-- apachesolr_exclude_nodeapi_types: an array of node types each of which is
+ - apachesolr_exclude_nodeapi_types: an array of node types each of which is
    an array of one or more module names, such as 'comment'.  Any type listed
    will have any listed modules' hook_node_update_index() implementation skipped
    when indexing. This can be useful for excluding comments or taxonomy links.
@@ -137,9 +137,6 @@ behavior:
  - apachesolr_cache_delay: the interval (in seconds) after an update after which
    the module will requery the Apache Solr for the index structure. Set it to
    your autocommit delay plus a few seconds.
-
- - apachesolr_service_class: the Apache_Solr_Service class used for communicating
-   with the Apache Solr server.
 
  - apachesolr_query_class: the default query class to use.
  

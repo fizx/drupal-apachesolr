@@ -10,26 +10,27 @@
  */
 function apachesolr_requirements($phase) {
   $requirements = array();
-  $file_exists = file_exists(dirname(__FILE__) . '/SolrPhpClient/Apache/Solr/Service.php');
+  if ($phase != 'runtime') {
+    return $requirements;
+  }
   // Ensure translations don't break at install time
   $t = get_t();
   $has_server_settings = FALSE;
-  if ($phase == 'runtime' && $file_exists) {
-    $server_id = variable_get('apachesolr_default_server', 'solr');
-      $server = apachesolr_server_load($server_id);
-      if (!$server || empty($server['host']) || empty($server['port']) || empty($server['path'])) {
-      $requirements['apachesolr'] = array(
-        'title' => $t('Apache Solr'),
-        'value' => $t('Missing server configuration'),
-        'description' => $t('Missing or invalid Solr server record for the default server ID %id.', array('%id' => $server_id)),
-        'severity' => REQUIREMENT_ERROR,
-      );
-    }
-    else {
-      $has_server_settings = TRUE;
-    }
+  $server_id = variable_get('apachesolr_default_server', 'solr');
+  $server = apachesolr_server_load($server_id);
+  if (!$server || empty($server['url'])) {
+    $requirements['apachesolr'] = array(
+      'title' => $t('Apache Solr'),
+      'value' => $t('Missing server configuration'),
+      'description' => $t('Missing or invalid Solr server record for the default server ID %id.', array('%id' => $server_id)),
+      'severity' => REQUIREMENT_ERROR,
+    );
   }
-  if ($phase == 'runtime' && $has_server_settings) {
+  else {
+    $has_server_settings = TRUE;
+  }
+
+  if ($has_server_settings) {
     $ping = FALSE;
     try {
       $solr = apachesolr_get_solr($server_id);
@@ -44,50 +45,14 @@ function apachesolr_requirements($phase) {
     }
     $value = $ping ? $t('Your site has contacted the Apache Solr server.') : $t('Your site was unable to contact the Apache Solr server.');
     $severity = $ping ? REQUIREMENT_OK : REQUIREMENT_ERROR;
-    $variables['items'] = array(
-      $t('Host: %host', array('%host' => $server['host'])),
-      $t('Port: %port', array('%port' => $server['port'])),
-      $t('Path: %path', array('%path' => $server['path'])),
-    );
-    $settings = theme('item_list', $variables);
     $requirements['apachesolr'] = array(
       'title' => $t('Apache Solr'),
       'value' => $value,
-      'description' => $t('Default server settings: !settings', array('!settings' => $settings)),
+      'description' => $t('Default server url: <br/> %url',  array('%url' => $server['url'])),
       'severity' => $severity,
     );
   }
-  // All phases
-  $title = $t('Apache Solr PHP Client Library');
-  if ($file_exists) {
-    $expected_revision = 'Revision: 22';
-    require_once 'SolrPhpClient/Apache/Solr/Service.php';
-    $revision = defined('Apache_Solr_Service::SVN_REVISION') ? trim(Apache_Solr_Service::SVN_REVISION, ' $') : '';
-    if ($revision == $expected_revision) {
-      $severity = REQUIREMENT_OK;
-      $value = $t('Correct version "@expected".', array('@expected' => $expected_revision));
-      $description = NULL;
-    }
-    else {
-      $value = $t('Incorrect version "@version". See the instructions in README.txt.', array('@version' => $revision));
-      $description = $t('The version of the library in the SolrPhpClient directory is "@version" compared to the expected "@expected"', array('@version' => $revision, '@expected' => $expected_revision));
-      $severity = REQUIREMENT_ERROR;
-    }
-    $requirements['SolrPhpClient'] = array(
-      'title' => $title,
-      'value' => $value,
-      'description' => $description,
-      'severity' => $severity,
-    );
-  }
-  else {
-    $requirements['SolrPhpClient'] = array(
-        'title' => $title,
-        'value' => $t('<em>Missing</em>.  See the instructions in README.txt'),
-        'description' => $t('The Solr PHP library must be present in a sub-directory named SolrPhpClient.'),
-        'severity' => REQUIREMENT_ERROR,
-    );
-  }
+
   return $requirements;
 }
 
@@ -98,7 +63,7 @@ function apachesolr_install() {
   // Create one MLT block.
   require_once(drupal_get_path('module', 'apachesolr') . '/apachesolr.admin.inc');
   apachesolr_mlt_save_block(array('name' => st('More like this')));
-  db_insert('apachesolr_server')->fields(array('server_id' => 'solr', 'name' => 'Apache Solr server', 'host' => 'localhost', 'port' => '8983', 'path' => '/solr'))->execute();
+  db_insert('apachesolr_server')->fields(array('server_id' => 'solr', 'name' => 'Apache Solr server', 'url' => 'http://localhost:8983/solr'))->execute();
   variable_set('apachesolr_default_server', 'solr');
   drupal_set_message(st('Apache Solr is enabled. Visit the <a href="!settings_link">settings page</a>.', array('!settings_link' => url('admin/config/search/apachesolr'))));
 }
@@ -161,31 +126,11 @@ function apachesolr_schema() {
         'not null' => TRUE,
         'default' => ''
       ),
-      'scheme' => array(
-        'description' => 'Preferred scheme for the registered server',
+      'url' => array(
+        'description' => 'Full url for the server',
         'type' => 'varchar',
-        'length' => 10,
+        'length' => 1000,
         'not null' => TRUE,
-        'default' => 'http'
-      ),
-      'host' => array(
-        'description' => 'Host name for the registered server',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => ''
-      ),
-      'port' => array(
-        'description' => 'Port number for the registered server',
-        'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'path' => array(
-        'description' => 'Path to the registered server',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => ''
       ),
       'service_class' => array(
         'description' => 'Optional class name to use for connection',
@@ -407,3 +352,49 @@ function apachesolr_update_7003() {
   variable_del('apachesolr_exclude_comments_types');
 }
 
+/**
+ * Update apachesolr_failure variable.
+ */
+function apachesolr_update_7004() {
+  $failure = variable_get('apachesolr_failure', NULL);
+  switch ($failure) {
+    case 'show_error':
+      variable_set('apachesolr_failure', 'apachesolr:show_error');
+      break;
+    case 'show_drupal_results':
+      variable_set('apachesolr_failure', 'node');
+      break;
+    case 'show_no_results':
+      variable_set('apachesolr_failure', 'apachesolr:show_no_results');
+      break;
+  }
+}
+
+/**
+ * Re-jigger the schema to use just a url column.
+ */
+function apachesolr_update_7005() {
+  if (db_field_exists('apachesolr_server', 'port')) {
+    // You installed the beta3 and need to be fixed up.
+    $servers = db_query('SELECT * FROM {apachesolr_server}')->fetchAllAssoc('server_id', PDO::FETCH_ASSOC);
+    db_drop_field('apachesolr_server', 'scheme');
+    db_drop_field('apachesolr_server', 'port');
+    db_drop_field('apachesolr_server', 'path');
+    db_change_field('apachesolr_server', 'host', 'url',
+      array(
+        'description' => 'Full url for the server',
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+      )
+    );
+    foreach ($servers as $id => $server) {
+      $port = $server['port'] ? ':' . $server['port'] : '';
+      $url = $server['scheme'] . '://' . $server['host'] . $port . $server['path'];
+    db_update('apachesolr_server')
+      ->fields(array('url' => $url))
+      ->condition('server_id', $id)
+      ->execute();
+    }
+  }
+}

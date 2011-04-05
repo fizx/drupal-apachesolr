@@ -48,20 +48,26 @@ function hook_apachesolr_prepare_query($query, $caller) {
       'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
       'index_type' => 'string',
+      'facets' => TRUE,
     ),
 
     In your _alter hook implementation you can add additional field types such as:
 
-      $mappings['number_integer']['number'] = array('indexing_callback' => '', 'index_type' => 'integer');
+      $mappings['number_integer']['number'] = array('indexing_callback' => '', 'index_type' => 'integer', 'facets' => TRUE);
 
     You can allso add a mapping for a specific field.  This will take precedence over any
     mapping for a general field type. A field-specific mapping would look like:
 
-      $mappings['per-field']['field_model_name'] = array('indexing_callback' => '', 'index_type' => 'string');
+      $mappings['per-field']['field_model_name'] = array('indexing_callback' => '', 'index_type' => 'string', 'facets' => TRUE);
 
     or
 
-      $mappings['per-field']['field_model_price'] = array('indexing_callback' => '', 'index_type' => 'float');
+      $mappings['per-field']['field_model_price'] = array('indexing_callback' => '', 'index_type' => 'float', 'facets' => TRUE);
+
+    If a custom field needs to be searchable but does not need to be faceted you can change the 'facets'
+    parameter to FALSE, like:
+
+      $mappings['number_integer']['number'] = array('callback' => '', 'index_type' => 'integer', 'facets' => FALSE);
  */
 function hook_apachesolr_field_mappings_alter(&$mappings) {
 
