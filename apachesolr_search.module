@@ -1259,7 +1259,7 @@ function apachesolr_search_language_name($lang) {
  */
 function apachesolr_search_get_username($facet) {
   if (is_numeric($facet)) {
-    return theme('apachesolr_breadcrumb_uid', array('field' => array('#value' => $facet)));
+    return theme('apachesolr_breadcrumb_is_uid', array('field' => array('#value' => $facet)));
   }
   return '';
 }
