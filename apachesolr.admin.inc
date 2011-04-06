@@ -88,25 +88,42 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
     '#type' => 'value',
     '#value' => $server['service_class'],
   );
-  $form['save'] = array(
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['save'] = array(
     '#type' => 'submit',
     '#validate' => array('apachesolr_server_save_validate'),
     '#submit' => array('apachesolr_server_save_submit'),
     '#value' => t('Save'),
   );
-  $form['test'] = array(
+  $form['actions']['test'] = array(
     '#type' => 'submit',
     '#validate' => array('apachesolr_server_save_validate'),
     '#submit' => array('apachesolr_server_test_submit'),
     '#value' => t('Test connection'),
   );
   if (!empty($server['server_id']) && !$is_default) {
-    $form['delete'] = array(
+    $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#submit' => array('apachesolr_server_delete_submit'),
       '#value' => t('Delete'),
     );
   }
+
+  // Ensures destination is an internal URL, builds "cancel" link.
+  if (isset($_GET['destination']) && !url_is_external($_GET['destination'])) {
+    $destination = $_GET['destination'];
+  }
+  else {
+    $destination = 'admin/config/search/apachesolr';
+  }
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $destination,
+  );
+
   return $form;
 }
 
