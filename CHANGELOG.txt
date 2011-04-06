@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-beta-5, xxxx-xx-xx
 ------------------------------
+#1117606 by cpliakas: Resolved inconsistencies with the caller parameter.
 #1118508 by pwolanin: Make the Apache Solr config link show up next to Search module.
 #1117128 by jpmckinney: Follow-up to #1088208
 

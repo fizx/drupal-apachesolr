@@ -263,11 +263,11 @@ function apachesolr_search_browse($keys = '', $filters = '', $solrsort = '', $ba
   // This can e.g. be used to add available sorts.
   foreach (module_implements('apachesolr_prepare_query') as $module) {
     $function_name = $module . '_apachesolr_prepare_query';
-    $function_name($query, 'apachesolr');
+    $function_name($query, 'apachesolr_search');
   }
 
   apachesolr_current_query($query);
-  apachesolr_modify_query($query, 'apachesolr');
+  apachesolr_modify_query($query, 'apachesolr_search');
   $response = $query->search();
   if (empty($response)) {
     return;
