@@ -19,11 +19,12 @@ define('APACHESOLR_SHOW_CHILDREN_WITHOUT_HIERARCHY', 2);
 function apachesolr_menu() {
   $items = array();
   $items['admin/config/search/apachesolr'] = array(
-    'title'              => 'Apache Solr',
+    'title'              => 'Apache Solr search integration',
     'description'        => 'Administer Apache Solr.',
     'page callback'      => 'drupal_get_form',
     'page arguments'     => array('apachesolr_settings'),
     'access arguments'   => array('administer search'),
+    'weight'             => -9,
     'file'               => 'apachesolr.admin.inc',
   );
   $items['admin/config/search/apachesolr/server/%apachesolr_server/edit'] = array(
@@ -134,6 +135,16 @@ function apachesolr_menu() {
     'type'               => MENU_CALLBACK,
   );
   return $items;
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function apachesolr_menu_alter(&$menu) {
+  // Give path module a more sensible weight so we can group with Search.
+  if (isset($menu['admin/config/search/path'])) {
+    $menu['admin/config/search/path']['weight'] = -5;
+  }
 }
 
 /**

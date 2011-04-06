@@ -1,9 +1,11 @@
 
-Apache Solr integration x.x-x.x, xxxx-xx-xx
-------------------------------
-
 Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 ------------------------------
+
+Apache Solr integration 7.x-1.0-beta-5, xxxx-xx-xx
+------------------------------
+#1118508 by pwolanin: Make the Apache Solr config link show up next to Search module.
+#1117128 by jpmckinney: Follow-up to #1088208
 
 Apache Solr integration 7.x-1.0-beta4, 2011-04-04
 ------------------------------
