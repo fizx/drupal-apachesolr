@@ -437,14 +437,32 @@ function apachesolr_index_report($server_id = NULL) {
   $fields = (array)$data->fields;
   if ($fields) {
     $output .= '<p>' . t('Number of fields in index: @num', array('@num' => count($fields))) . "</p>\n";
+
+    // Initializes table header.
+    $header = array(
+      'name' => t('Field name'),
+      'type' => t('Index type'),
+      'terms' => t('Distinct terms'),
+    );
+
+    // Builds table rows.
     $rows = array();
     foreach ($fields as $name => $field) {
       // TODO: try to map the name to something more meaningful.
-      $rows[$name] = array($name, $field->type, isset($field->distinct) ? $field->distinct : $not_found);
+      $rows[$name] = array(
+        'name' => $name,
+        'type' => $field->type,
+        'terms' => isset($field->distinct) ? $field->distinct : $not_found
+      );
     }
     ksort($rows);
-    // Display the table of Field names, Index Types, and term counts.
-    $output .= theme('table', array(t('Field name'), t('Index type'), t('Distinct terms')), $rows);
+
+    // Display the table of field names, index types, and term counts.
+    $variables = array(
+      'header' => $header,
+      'rows' => $rows,
+    );
+    $output .= theme('table', $variables);
   }
   else {
     $output .= '<p>' . t('No data on indexed fields.') . "</p>\n";
