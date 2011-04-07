@@ -27,48 +27,8 @@ Prerequisite: Java 5 or higher (a.k.a. 1.5.x).  PHP 5.2.4 or higher.
 
 Install the Apache Solr Drupal module as you would any Drupal module.
 
-Before enabling it, you must also do the following:
-
-Get the PHP library from the external project. The project is
-found at:  http://code.google.com/p/solr-php-client/
-From the apachesolr module directory, run this command:
-
-svn checkout -r22 http://solr-php-client.googlecode.com/svn/trunk/ SolrPhpClient
-
-Alternately you may download and extract the library from
-http://code.google.com/p/solr-php-client/downloads/list
-
-Make sure to select a r22 archive, either of these two:
-http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.zip
-http://solr-php-client.googlecode.com/files/SolrPhpClient.r22.2009-11-09.tgz
-
-Note that revision 22 is the currently tested and required revision. 
-Make sure that the final directory is named SolrPhpClient under the apachesolr
-module directory.  
-
-If you are maintaing your code base in subversion, you may choose instead to 
-use svn export or svn externals. For an export (writing a copy to your local
-directory without .svn files to track changes) use:
-
-svn export -r22 http://solr-php-client.googlecode.com/svn/trunk/ SolrPhpClient
-
-Instead of checking out, externals can be used too. Externals can be seen as 
-(remote) symlinks in svn. This requires your own project in your own svn ]
-repository, off course. In the apachesolr module directory, issue the command:
-
-svn propedit svn:externals .
-
-Your editor will open. Add a line
-
-SolrPhpClient -r22 http://solr-php-client.googlecode.com/svn/trunk/
-
-On exports and checkouts, svn will grab the externals, but it will keep the 
-references on the remote server.
-
-Those without svn, etc may also choose to try the bundled Acquia Search
-download, which includes all the items which are not in Drupal.org CVS due to 
-CVS use policy. See the download link here: 
-http://acquia.com/documentation/acquia-search/activation
+Before enabling it, you must have a working Solr server, or be subscribed
+to a service like Acquia Search.
 
 Download the latest Solr 1.4.x release (e.g. 1.4.1) from:
 http://www.apache.org/dyn/closer.cgi/lucene/solr/
