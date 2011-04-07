@@ -1,4 +1,4 @@
-
+<?php
 /**
  *
  * Exposed Hooks in 7.x:
@@ -76,7 +76,7 @@ function hook_apachesolr_field_mappings_alter(&$mappings) {
 
 /**
  *  Invoked by apachesolr.module when generating a list of nodes to index for a given
- * namespace.  Return an array of node types to be excldued from indexing for that namespace
+ * namespace.  Return an array of node types to be excluded from indexing for that namespace
  * (e.g. 'apachesolr_search'). This is used by apachesolr_search module to exclude
  * certain node types from the index.
  */
@@ -84,10 +84,18 @@ function hook_apachesolr_types_exclude($namespace) {
 }
 
 /**
- *  This is invoked by apachesolr.module for each node to be added to the index - if any module
- * returns TRUE, the node is skipped for indexing.
+ * This is invoked by apachesolr.module for each node to be added to the index.
+ * If any module returns TRUE, the node is skipped for indexing. Note that nodes
+ * which are already present in the index and subsequently qualify to be
+ * excluded will not be removed from the index automatically. This hook can be
+ * used to remove them prior to returning TRUE.
  */
 function hook_apachesolr_node_exclude($node, $namespace) {
+  // Exclude nodes from uid 1.
+  if ($node->uid == 1) {
+    apachesolr_delete_node_from_index($node);
+    return TRUE;
+  }
 }
 
 /**
