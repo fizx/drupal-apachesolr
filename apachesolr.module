@@ -19,7 +19,7 @@ define('APACHESOLR_SHOW_CHILDREN_WITHOUT_HIERARCHY', 2);
 function apachesolr_menu() {
   $items = array();
   $items['admin/config/search/apachesolr'] = array(
-    'title'              => 'Apache Solr search integration',
+    'title'              => 'Apache Solr search',
     'description'        => 'Administer Apache Solr.',
     'page callback'      => 'drupal_get_form',
     'page arguments'     => array('apachesolr_settings'),
