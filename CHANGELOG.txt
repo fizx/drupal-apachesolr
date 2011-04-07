@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-beta-5, 2011-04-07
 ------------------------------
+#799970  by pwolanin: update README for config changes.
 #1118646 by cpliakas, pwolanin: Fields now displayed on search index report page.
 #1117152 by cpliakas: Added a cancel link to the server edit page.
 #1117606 by cpliakas: Resolved inconsistencies with the caller parameter.
