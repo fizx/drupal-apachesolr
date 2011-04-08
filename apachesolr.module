@@ -57,16 +57,6 @@ function apachesolr_menu() {
     'file'               => 'apachesolr.admin.inc',
     'type'               => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['admin/config/search/apachesolr/enabled-filters'] = array(
-    'title'              => 'Enabled filters',
-    'page callback'      => 'drupal_get_form',
-    'page arguments'     => array('apachesolr_enabled_facets_form'),
-    'weight'             => -7,
-    'access arguments'   => array('administer search'),
-    'file'               => 'apachesolr.admin.inc',
-    'type'               => MENU_LOCAL_TASK,
-    'context'            => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-  );
   $items['admin/config/search/apachesolr/index'] = array(
     'title'              => 'Search index',
     'page callback'      => 'apachesolr_index_page',
@@ -933,60 +923,6 @@ function apachesolr_block_save($delta = '', $edit = array()) {
   }
 }
 
-/**
- * This code makes a decision whether to show a block or not.
- * @param $query
- *   The current query object.
- * @param string $module
- *   The module's name to whom this block belongs.
- * @param string $delta
- *   The delta string the identifies the block within $module.
- * @return boolean
- *   Whether the block should be visible. Other factors, like
- *   the block system's visibility settings, apply as well.
- */
-function apachesolr_block_visibility(DrupalSolrQueryInterface $query, $module, $delta) {
-  // TYPE HIERARCHY.
-  // If the block is configured to heed type hierarchy then it looks to see if a
-  // suitable type filter has been chosen. If not, the function returns.
-  // This variable is not static cached because variable_get() already does that.
-  $type_filters = variable_get('apachesolr_type_filter', array());
-  if (isset($type_filters[$module][$delta]) && $type_filters[$module][$delta] == TRUE) {
-    $facet_info = apachesolr_get_facet_definitions();
-    if (isset($facet_info[$module][$delta]['content_types'])) {
-      $has_filter = $query->get_filters($facet_info[$module][$delta]['facet_field']);
-      $show = count($has_filter);
-      foreach ($facet_info[$module][$delta]['content_types'] as $content_type) {
-        if ($query->has_filter('bundle', $content_type)) {
-          $show = TRUE;
-        }
-      }
-      if (!$show) {
-        return FALSE;
-      }
-    }
-  }
-  return TRUE;
-}
-
-function apachesolr_get_facet_definitions() {
-  static $definitions;
-  if (!isset($definitions)) {
-    $operator_settings = variable_get('apachesolr_operator', array());
-    foreach (module_implements('apachesolr_facets') as $module) {
-      $facets = module_invoke($module, 'apachesolr_facets');
-      if (!empty($facets)) {
-        foreach ($facets as $delta => $info) {
-          $definitions[$module][$delta] = $info;
-          if (isset($definitions[$module][$delta])) {
-            $definitions[$module][$delta]['operator'] = isset($operator_settings[$module][$delta]) ? $operator_settings[$module][$delta] : 'AND';
-          }
-        }
-      }
-    }
-  }
-  return $definitions;
-}
 
 /**
  * Returns a member of the facet definitions based on the Solr
@@ -1029,99 +965,6 @@ function apachesolr_form_field_ui_field_overview_form_alter(&$form, $form_state)
  */
 function apachesolr_form_field_ui_field_edit_form_alter(&$form, $form_state) {
   $form['#submit'][] = 'apachesolr_clear_cache';
-}
-
-/**
- * Implements hook_form_[form_id]_alter().
- *
- * Hide the core 'title' field in favor of our 'name' field.
- *
- * Add a checkbox to enable type-specific visibility.
- */
-function apachesolr_form_block_admin_configure_alter(&$form, $form_state) {
-  // Hide the core title field on MLT blocks.
-  if ($form['module']['#value'] == 'apachesolr' && $form['delta']['#value'] != 'sort') {
-    $form['settings']['title']['#access'] = FALSE;
-  }
-
-  // Add a type-specific visibility checkbox.
-  $module = $form['module']['#value'];
-  $delta = $form['delta']['#value'];
-  $enabled_facets = apachesolr_get_enabled_facets(apachesolr_default_server());
-
-  // If this block isn't enabled as a facet, get out of here.
-  if (!isset($enabled_facets[$module][$delta])) {
-    return;
-  }
-
-  $facet_info = apachesolr_get_facet_definitions();
-
-  // If this facet is hierarchical, add option to disregard hierarchy, and clarify other options.
-  if (isset($facet_info[$module][$delta]['hierarchical']) && $facet_info[$module][$delta]['hierarchical'] == TRUE) {
-    $form['settings']['apachesolr_facet_show_children']['#title'] = t('Child facet display mode');
-    $form['settings']['apachesolr_facet_show_children']['#description'] = t('Select how to display parent/child facets. Note that they will always act in a hierarchical manner, so searching for a parent term will always include child terms in the search. The hierarchy may not show in full when using the AND operator for this facet.');
-    $form['settings']['apachesolr_facet_show_children']['#options'] = array(
-      APACHESOLR_SHOW_CHILDREN_WITHOUT_HIERARCHY => t('Show children without using a hierarchy'),
-      APACHESOLR_SHOW_CHILDREN_WHEN_SELECTED => t('Only show in hierarchy if parent facet is selected (default)'),
-      APACHESOLR_SHOW_CHILDREN_ALWAYS => t('Always show in hierarchy'),
-    );
-    $form['settings']['apachesolr_facet_sort_active']['#description'] .= t(' This may produce unwanted effects when displaying child terms in a hierarchy.');
-  }
-  if (isset($facet_info[$module][$delta]['field']['type']) && $facet_info[$module][$delta]['field']['type'] == 'taxonomy_term_reference') {
-    $form['settings']['apachesolr_facet_query_sort']['#options']['weight asc'] = t('Weight, ascending');
-    $form['settings']['apachesolr_facet_query_sort']['#options']['weight desc'] = t('Weight, descending');
-    $form['settings']['apachesolr_facet_query_sort']['#description'] = t('The sort order of facet links in this block. %Count, which is the default, will show facets with the most results first. %Alphabetical will sort alphabetically, and %Numeric numerically, either ascending or descending. %Weight sorting is only supported on fields with weights (currently only taxonomy) and may produce unspecified results on other fields.', array(
-        '%Count' => t('Count'),
-        '%Alphabetical' => t('Alphanumeric'),
-        '%Numeric' => t('Numeric'),
-        '%Weight' => t('Weight'),
-    ));
-  }
-  if (isset($facet_info[$module][$delta]['content_types'])) {
-    $type_filter_settings = variable_get('apachesolr_type_filter', array());
-    // Set up some variables for the verbiage of the form element.
-    $count = count($facet_info[$module][$delta]['content_types']);
-    $types = format_plural($count, t('type'), t('types'));
-    $are = format_plural($count, t('is'), t('are'));
-    $content_types = implode(', ', $facet_info[$module][$delta]['content_types']) . '.';
-    $form['block_settings']['apachesolr_type_filter'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Show this block only when the type filter is selected for: %content_types',  array('%content_types' => $content_types)),
-      '#default_value' => isset($type_filter_settings[$module][$delta]) ? $type_filter_settings[$module][$delta] : FALSE,
-      '#description' => t('This filter is relevant only for specific content types. Check this to display the block only when the type filter has been selected for one of the relevant content types.'),
-      '#weight' => 11,
-    );
-  }
-  $operator_settings = variable_get('apachesolr_operator', array());
-  $form['block_settings']['apachesolr_operator'] = array(
-    '#type' => 'radios',
-    '#title' => t('Operator to use for facets'),
-    '#options' => drupal_map_assoc(array('AND', 'OR')),
-    '#default_value' => isset($operator_settings[$module][$delta]) ? $operator_settings[$module][$delta] : 'AND',
-    '#description' => t('AND filters are exclusive. OR filters are inclusive. Selecting more AND filters narrows the result set. Selecting more OR filters widens the result set.'),
-    '#weight' => 12,
-  );
-  // Add a submit handler to save the value.
-  $form['#validate'][] = 'apachesolr_block_admin_configure_submit';
-}
-
-function apachesolr_block_admin_configure_submit($form, &$form_state) {
-  if (isset($form_state['values']['apachesolr_type_filter'])) {
-    $type_filter_settings = variable_get('apachesolr_type_filter', array());
-    $module = $form_state['values']['module'];
-    $delta = $form_state['values']['delta'];
-    unset($type_filter_settings[$module][$delta]);
-    $type_filter_settings[$module][$delta] = $form_state['values']['apachesolr_type_filter'];
-    variable_set('apachesolr_type_filter', $type_filter_settings);
-  }
-  if (isset($form_state['values']['apachesolr_operator'])) {
-    $operator_settings = variable_get('apachesolr_operator', array());
-    $module = $form_state['values']['module'];
-    $delta = $form_state['values']['delta'];
-    unset($operator_settings[$module][$delta]);
-    $operator_settings[$module][$delta] = $form_state['values']['apachesolr_operator'];
-    variable_set('apachesolr_operator', $operator_settings);
-  }
 }
 
 /**
@@ -1489,110 +1332,6 @@ function apachesolr_date_gap_drilldown($gap) {
     'HOUR' => 'MINUTE',
   );
   return isset($drill[$gap]) ? $drill[$gap] : NULL;
-}
-
-/**
- * Used by the 'configure' $op of hook_block so that modules can generically set
- * facet limits on their blocks.
- */
-function apachesolr_facetcount_form($module, $delta) {
-  $initial = variable_get('apachesolr_facet_query_initial_limits', array());
-  $limits = variable_get('apachesolr_facet_query_limits', array());
-  $sorts = variable_get('apachesolr_facet_query_sorts', array());
-  $children = variable_get('apachesolr_facet_show_children', array());
-  $facet_missing = variable_get('apachesolr_facet_missing', array());
-  $facet_sort_active = variable_get('apachesolr_facet_sort_active', array());
-
-  $limit = drupal_map_assoc(array(50, 40, 30, 20, 15, 10, 5, 3));
-
-  $form['apachesolr_facet_query_initial_limit'] = array(
-    '#type' => 'select',
-    '#title' => t('Initial filter links'),
-    '#options' => $limit,
-    '#description' => t('The initial number of filter links to show in this block.'),
-    '#default_value' => isset($initial[$module][$delta]) ? $initial[$module][$delta] : variable_get('apachesolr_facet_query_initial_limit_default', 10),
-  );
-  $limit = drupal_map_assoc(array(100, 75, 50, 40, 30, 20, 15, 10, 5, 3));
-  $form['apachesolr_facet_query_limit'] = array(
-    '#type' => 'select',
-    '#title' => t('Maximum filter links'),
-    '#options' => $limit,
-    '#description' => t('The maximum number of filter links to show in this block.'),
-    '#default_value' => isset($limits[$module][$delta]) ? $limits[$module][$delta] : variable_get('apachesolr_facet_query_limit_default', 20),
-  );
-
-  // TODO: Generalize how we know what type a facet block is by putting field
-  // type into the facet definition. 'created' and 'changed' are date blocks.
-  if ($delta != 'ds_created' && $delta != 'ds_changed') {
-    $form['apachesolr_facet_query_sort'] = array(
-      '#type' => 'radios',
-      '#title' => t('Sort order of facet links'),
-      '#options' => array(
-        'count' => t('Count'),
-        'index asc' => t('Alphabetical, ascending'),
-        'index desc' => t('Alphabetical, descending'),
-        'index numeric asc' => t('Numeric, ascending'),
-        'index numeric desc' => t('Numeric, descending'),
-        'index key asc' => t('Key sort, ascending'),
-        'index key desc' => t('Key sort, descending'),
-      ),
-      '#description' => t('The sort order of facet links in this block. %Count, which is the default, will show facets with the most results first. %Alphabetical will sort alphabetically, and %Numeric numerically, either ascending or descending.', array(
-        '%Count' => t('Count'),
-        '%Alphabetical' => t('Alphanumeric'),
-        '%Numeric' => t('Numeric'),
-      )),
-      '#default_value' => isset($sorts[$module][$delta]) ? $sorts[$module][$delta] : 'count',
-    );
-  }
-  $form['apachesolr_facet_sort_active'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Sort active facet links above inactive facets'),
-    '#description' => t('A selected facet would by default be sorted before other facets.'),
-    '#default_value' => isset($facet_sort_active[$module][$delta]) ? $facet_sort_active[$module][$delta] : 1,
-  );
-  $form['apachesolr_facet_show_children'] = array(
-    '#type' => 'radios',
-    '#title' => t('Always show child facets'),
-    '#options' => array(APACHESOLR_SHOW_CHILDREN_WHEN_SELECTED => t('No'), APACHESOLR_SHOW_CHILDREN_ALWAYS => t('Yes')),
-    '#description' => t('Show the child facets even if the parent facet is not selected.'),
-    '#default_value' => isset($children[$module][$delta]) ? $children[$module][$delta] : APACHESOLR_SHOW_CHILDREN_WHEN_SELECTED,
-  );
-  $form['apachesolr_facet_missing'] = array(
-    '#type' => 'radios',
-    '#title' => t('Include a facet for missing'),
-    '#options' => array(0 => t('No'), 1 => t('Yes')),
-    '#description' => t('A facet can be generated corresponding to all documents entirely missing this field.'),
-    '#default_value' => isset($facet_missing[$module][$delta]) ? $facet_missing[$module][$delta] : 0,
-  );
-  return $form;
-}
-
-/**
- * Used by the 'save' $op of hook_block so that modules can generically set
- * facet limits on their blocks.
- */
-function apachesolr_facetcount_save($edit) {
-  // Save query limits
-  $module = $edit['module'];
-  $delta = $edit['delta'];
-  $limits = variable_get('apachesolr_facet_query_limits', array());
-  $limits[$module][$delta] = (int)$edit['apachesolr_facet_query_limit'];
-  variable_set('apachesolr_facet_query_limits', $limits);
-  $sorts = variable_get('apachesolr_facet_query_sorts', array());
-  $sorts[$module][$delta] = $edit['apachesolr_facet_query_sort'];
-  variable_set('apachesolr_facet_query_sorts', $sorts);
-  $initial = variable_get('apachesolr_facet_query_initial_limits', array());
-  $initial[$module][$delta] = (int)$edit['apachesolr_facet_query_initial_limit'];
-  variable_set('apachesolr_facet_query_initial_limits', $initial);
-  $children = variable_get('apachesolr_facet_show_children', array());
-  $children[$module][$delta] = (int)$edit['apachesolr_facet_show_children'];
-  variable_set('apachesolr_facet_show_children', $children);
-  $facet_missing = variable_get('apachesolr_facet_missing', array());
-  $facet_missing[$module][$delta] = (int)$edit['apachesolr_facet_missing'];
-  variable_set('apachesolr_facet_missing', $facet_missing);
-  $facet_sort_active = variable_get('apachesolr_facet_sort_active', array());
-  $facet_sort_active[$module][$delta] = (int)$edit['apachesolr_facet_sort_active'];
-  variable_set('apachesolr_facet_sort_active', $facet_sort_active);
 }
 
 /**
@@ -2661,35 +2400,7 @@ function apachesolr_l($text, $path, $options = array()) {
   return '<a href="' . check_url(url($path, $options)) . '"' . drupal_attributes($options['attributes']) . '>' . ($options['html'] ? $text : check_plain(html_entity_decode($text))) . '</a>';
 }
 
-function apachesolr_js() {
-  static $settings;
-  // Only add the js stuff once.
-  if (is_null($settings)) {
-    $settings['apachesolr_facetstyle'] = variable_get('apachesolr_facetstyle', 'checkboxes');
-    // This code looks for enabled facet blocks and injects the block #ids into
-    // Drupal.settings as jQuery selectors to add the Show more links.
-    $show_more_blocks = array();
-    $facet_map = array();
-    $show_more_selector = array();
-    foreach (apachesolr_get_facet_definitions() as $module => $definitions) {
-      foreach ($definitions as $facet => $facet_definition) {
-        $facet_map[$facet_definition['facet_field']] = $facet;
-      }
-    }
-    $server_id = apachesolr_default_server();
-    foreach (apachesolr_get_enabled_facets($server_id) as $module => $blocks) {
-      foreach ($blocks as $block) {
-        $show_more_selector[] = "#block-{$module}-{$facet_map[$block]}:has(.apachesolr-hidden-facet)";
-      }
-    }
-    $settings['apachesolr_show_more_blocks'] = implode(', ', $show_more_selector);
-    drupal_add_js($settings, 'setting');
-    drupal_add_js(drupal_get_path('module', 'apachesolr') . '/apachesolr.js');
-  }
-}
-
 function theme_apachesolr_unclick_link($vars) {
-  apachesolr_js();
   if (empty($vars['options']['html'])) {
     $vars['facet_text'] = check_plain(html_entity_decode($vars['facet_text']));
   }
@@ -2700,6 +2411,8 @@ function theme_apachesolr_unclick_link($vars) {
   $vars['options']['attributes']['class'] = 'apachesolr-unclick';
   return apachesolr_l("(-)", $vars['path'], $vars['options']) . ' ' . $vars['facet_text'];
 }
+
+
 
 function theme_apachesolr_sort_link($vars) {
   $icon = '';
@@ -2715,25 +2428,6 @@ function theme_apachesolr_sort_link($vars) {
     }
   }
   return $icon . apachesolr_l($vars['text'], $vars['path'], $vars['options']);
-}
-
-function theme_apachesolr_facet_list($vars) {
-  apachesolr_js();
-  // theme('item_list') expects a numerically indexed array.
-  $items = array_values($vars['items']);
-  // If there is a limit and the facet count is over the limit, hide the rest.
-  if ( ($vars['display_limit'] > 0) && (count($items) > $vars['display_limit'])) {
-    // Split items array into displayed and hidden.
-    $hidden_items = array_splice($items, $vars['display_limit']);
-    foreach ($hidden_items as $hidden_item) {
-      if (!is_array($hidden_item)) {
-        $hidden_item = array('data' => $hidden_item);
-      }
-      $hidden_item['class'][] = 'apachesolr-hidden-facet';
-      $items[] = $hidden_item;
-    }
-  }
-  return theme('item_list', array('items' => $items));
 }
 
 function theme_apachesolr_sort_list($vars) {
