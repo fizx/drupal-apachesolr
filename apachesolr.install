@@ -398,3 +398,7 @@ function apachesolr_update_7005() {
     }
   }
 }
+
+function apachesolr_update_7006() {
+  variable_del('apachesolr_facetstyle');
+}
