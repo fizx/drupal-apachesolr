@@ -1,19 +1,23 @@
 <?php
 /**
- *
  * Exposed Hooks in 7.x:
  */
 
 /**
-  * Any module performing a search should call apachesolr_modify_query($query, 'modulename').
-  * That function then invokes this hook. It allows modules to modify the query object and params array.
-  * $caller indicates which module is invoking the hook. A return value of TRUE from
-  * apachesolr_modify_query() indicates the search should be aborted. A module implementing
-  * hook_apachesolr_modify_query() may return TRUE to flag the query to be aborted.
-  */
+ * Any module performing a search should call
+ * apachesolr_modify_query($query, 'modulename'). That function then invokes
+ * this hook. It allows modules to modify the query object and params array.
+ * $caller indicates which module is invoking the hook. A return value of TRUE
+ * from apachesolr_modify_query() indicates the search should be aborted.
+ * A module implementing hook_apachesolr_modify_query() may return TRUE to flag
+ * the query to be aborted.
+ */
 function hook_apachesolr_modify_query($query, $caller) {
   // I only want to see articles by the admin!
   $query->add_filter("is_uid", 1);
+
+  // Only search titles.
+  $query->params['qf'] = array('label');
 }
 
 /**
