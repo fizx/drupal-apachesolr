@@ -1952,8 +1952,6 @@ function theme_apachesolr_unclick_link($vars) {
   return apachesolr_l("(-)", $vars['path'], $vars['options']) . ' ' . $vars['facet_text'];
 }
 
-
-
 function theme_apachesolr_sort_link($vars) {
   $icon = '';
   if ($vars['direction']) {

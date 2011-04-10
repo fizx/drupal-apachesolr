@@ -1106,32 +1106,6 @@ function apachesolr_search_build_spellcheck($form, &$form_state) {
  */
 function apachesolr_search_theme() {
   return array(
-    'apachesolr_breadcrumb_is_book_bid' => array(
-      'variables' => array('field' => NULL, 'exclude' => FALSE),
-    ),
-    'apachesolr_breadcrumb_is_uid' => array(
-      'variables' => array('field' => NULL, 'exclude' => FALSE),
-    ),
-    'apachesolr_breadcrumb_tid' => array(
-      'variables' => array('field' => NULL, 'exclude' => FALSE),
-    ),
-    'apachesolr_breadcrumb_bundle' => array(
-      'variables' => array('field' => NULL, 'exclude' => FALSE),
-    ),
-    'apachesolr_breadcrumb_language' => array(
-      'variables' => array('field' => NULL, 'exclude' => FALSE),
-    ),
-    'apachesolr_breadcrumb_field' => array(
-      'variables' => array('field' => NULL),
-    ),
-    'apachesolr_breadcrumb_ds_changed' => array(
-      'variables' => array('field' => NULL),
-      'function' => 'theme_apachesolr_breadcrumb_date_range',
-    ),
-    'apachesolr_breadcrumb_ds_created' => array(
-      'variables' => array('field' => NULL),
-      'function' => 'theme_apachesolr_breadcrumb_date_range',
-    ),
     'apachesolr_browse_blocks' => array(
       'variables' => array('blocks' => NULL),
     ),
@@ -1151,66 +1125,6 @@ function apachesolr_search_theme() {
 }
 
 /**
- * Alters the function used to theme breadcrumbs
- * @param string $fieldname
- *
- */
-function apachesolr_search_apachesolr_theme_breadcrumb_alter(&$fieldname) {
-  $matches = preg_split('/_field_/', $fieldname);
-  if (isset($matches[1])) {
-    $fieldname = 'apachesolr_breadcrumb_field';
-  }
-}
-
-/**
- * Theme function for fields in breadcrumbs.
- * TODO: The logic for getting here is too convoluted, and
- * there are too many bizarre naming conventions in play (_field_, _end).
- * The checks for _field_ and _end MUST get refactored.
- */
-function theme_apachesolr_breadcrumb_field($vars) {
-  $function = FALSE;
-  $field = $vars['field'];
-  $matches = preg_split('/_field_/', $field['#name']);
-  $mappings = apachesolr_entity_fields('node');
-  if (isset($matches[1])) {
-    $match = 'field_' . $matches[1];
-
-    // TODO: If the apachesolr_date module is present we might
-    // have fields with the suffix '_end'. These are the end-dates
-    // and need the suffix removed.
-    if (module_exists('apachesolr_date')) {
-      $match = preg_replace('/_end{1}$/', '', $match);
-    }
-
-    //$mappings = apachesolr_cck_fields();
-    if (isset($mappings[$match]['display_callback'])) {
-      $function = $mappings[$match]['display_callback'];
-    }
-  }
-  if (isset($mappings[$field['#name']]['display_callback'])) {
-    $function = $mappings[$field['#name']]['display_callback'];
-    $match = $field['#name'];
-  }
-  // If we determined the correct function to theme the breadcrumb, call it if
-  // it exists.
-  if ($function) {
-    if (function_exists($function)) {
-      $facet = $field['#value'];
-      $options = array_merge($mappings[$match], array('delta' => $matches[1]));
-      return $function($facet, $options);
-    }
-  }
-  // Fall through to default behavior.
-  return $field['#value'];
-}
-
-function theme_apachesolr_breadcrumb_ss_language($vars) {
-  $field = $vars['field'];
-  return apachesolr_search_language_name($field['#value']);
-}
-
-/**
  * Proxy theme function for 'created' and 'changed' date fields.
  */
 function theme_apachesolr_breadcrumb_date_range($vars) {
@@ -1219,54 +1133,6 @@ function theme_apachesolr_breadcrumb_date_range($vars) {
     return apachesolr_date_format_range($match[1], $match[2]);
   }
   return $field['#value'];
-}
-
-/**
- * Return the username from $uid
- */
-function theme_apachesolr_breadcrumb_is_uid($vars) {
-  $field = $vars['field'];
-  if ($field['#value'] == 0) {
-    return variable_get('anonymous', t('Anonymous'));
-  }
-  else {
-    return db_query("SELECT name FROM {users} WHERE uid = :uid", array(':uid' => $field['#value']))->fetchField();
-  }
-}
-
-/**
- * Return the term name from $tid, or $tid as a fallback.
- * TODO: This now seems to never be called; check.
- */
-function theme_apachesolr_breadcrumb_tid($vars) {
-  $field = $vars['field'];
-  if (function_exists('taxonomy_term_load')) {
-    if ($term = taxonomy_term_load($field['#value'])) {
-      return $term->name;
-    }
-  }
-  return $field['#value'];
-}
-
-/**
- * Return the human readable text for a content type.
- */
-function theme_apachesolr_breadcrumb_bundle($vars) {
-  $field = $vars['field'];
-  return node_type_get_name($field['#value']);
-}
-
-/**
- * Return the title of a book.
- */
-function theme_apachesolr_breadcrumb_is_book_bid($vars) {
-  $field = $vars['field'];
-  if (is_numeric($field['#value'])) {
-    return db_query('SELECT title FROM {node} WHERE nid = :nid', array(':nid' => $field['#value']))->fetchField();
-  }
-  else {
-    return t('Not in any book');
-  }
 }
 
 /**
@@ -1319,29 +1185,6 @@ function theme_apachesolr_search_noresults() {
 </ul>');
 }
 
-function apachesolr_search_get_parent_terms($tids) {
-  // Find the starting tid terms and then all their parents.
-  $parent_terms = array();
-  $new_tids = $tids;
-  do {
-    $query = db_select('taxonomy_term_hierarchy', 't')
-      ->fields('t', array('tid', 'parent'))
-      ->innerJoin('taxonomy_term_data', 'td', 't.tid = td.tid')
-      ->fields('td', array('vid', 'name', 'weight'))
-      ->condition('t.tid', $new_tids, 'IN');
-    $query->addTag('node_access');
-    $result = $query->execute();
-    $new_tids = array();
-    foreach ($result as $term) {
-      $parent_terms[$term->tid] = $term;
-      if ($term->parent > 0) {
-        $new_tids[] = $term->parent;
-      }
-    }
-  } while ($new_tids);
-  return $parent_terms;
-}
-
 /**
  * Return the contents of the "Current search" block.
  *
@@ -1382,27 +1225,3 @@ function apachesolr_search_currentsearch_block($response, DrupalSolrQueryInterfa
   }
 }
 
-/**
- * Return an array of taxonomy facets that should be displayed hierarchically.
- */
-function apachesolr_search_get_hierarchical_vocabularies() {
-  static $result;
-
-  if (!isset($result)) {
-    $result = array();
-    if (function_exists('taxonomy_get_vocabularies')) {
-      $vocabularies = taxonomy_get_vocabularies();
-      $force_flat = variable_get('apachesolr_search_force_flat_vocabularies', array());
-      foreach ($vocabularies as $voc) {
-        // See if the vocabulary is hierarchical and not not designated to be
-        // forced to display flat. Note that even free-tagging vocabs may
-        // have admin-defined hierarchy.
-        if ($voc->hierarchy == 1 && empty($force_flat[$voc->vid])) {
-          $result[$voc->vid] = 1;
-        }
-      }
-    }
-  }
-
-  return $result;
-}
