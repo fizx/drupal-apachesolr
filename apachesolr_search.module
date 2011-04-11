@@ -495,7 +495,7 @@ function apachesolr_search_entity_info_alter(&$entity_info) {
 function apachesolr_search_node_result($doc, &$result, &$extra) {
   $doc->uid = $doc->is_uid;
   $result += array(
-    'type' => apachesolr_search_get_type($doc->bundle),
+    'type' => node_type_get_name($doc->bundle),
     'user' => theme('username', array('account' => $doc)),
     'date' => isset($doc->changed) ? $doc->changed : 0,
     'node' => $doc,
