@@ -48,9 +48,9 @@ class SolrFilterSubQuery {
     return $matches;
   }
 
-  public function hasFilter($name, $value) {
+  public function hasFilter($name, $value, $exclude = FALSE) {
     foreach ($this->fields as $pos => $values) {
-      if (isset($values['#name']) && isset($values['#value']) && $values['#name'] == $name && $values['#value'] == $value) {
+      if ($values['#name'] == $name && $values['#value'] == $value && $values['#exclude'] == $exclude) {
         return TRUE;
       }
     }

@@ -1989,7 +1989,20 @@ interface DrupalSolrQueryInterface {
 
   function getFilters($name = NULL);
 
-  function hasFilter($name, $value);
+  /**
+   * Test whether a filter is already present in the query.
+   *
+   * @param string $name
+   *   The facet field name to check.
+   * @param string $value
+   *   The facet value to check.
+   * @param boolean $exclude
+   *   Optional, defaults to FALSE, must match the filter.
+   *
+   * @return
+   *   TRUE or FALSE.
+   */
+  function hasFilter($name, $value, $exclude = FALSE);
 
   /**
    * All individual filters apply as AND to the final result.
