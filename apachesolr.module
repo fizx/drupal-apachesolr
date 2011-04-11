@@ -796,13 +796,13 @@ function apachesolr_block_view($delta = '') {
     }
 
     $query = apachesolr_current_query();
-    $sorts = $query->get_available_sorts();
+    $sorts = $query->getAvailableSorts();
 
     // Get the current sort as an array.
-    $solrsort = $query->get_solrsort();
+    $solrsort = $query->getSolrsort();
 
     $sort_links = array();
-    $path = $query->get_path();
+    $path = $query->getPath();
     $new_query = clone $query;
     $toggle = array('asc' => 'desc', 'desc' => 'asc');
     foreach ($sorts as $name => $sort) {
@@ -819,11 +819,11 @@ function apachesolr_block_view($delta = '') {
         $direction = '';
         $new_direction = $sort['default'];
       }
-    $new_query->set_solrsort($name, $new_direction);
+    $new_query->setSolrsort($name, $new_direction);
       $sort_links[$name] = array(
         'title' => $sort['title'],
         'path' => $path,
-        'options' => array('query' => $new_query->get_url_queryvalues()),
+        'options' => array('query' => $new_query->getUrlQueryvalues()),
         'active' => $active,
         'direction' => $direction,
       );
@@ -919,26 +919,6 @@ function apachesolr_modify_query(DrupalSolrQueryInterface $query, $caller) {
     if ($function_name($query, $caller)) {
       // Someone pulled the ejection handle.
       return TRUE;
-    }
-  }
-
-  // TODO: make this process internal to the query object.
-  if ($fq = $query->get_fq()) {
-    foreach ($fq as $delta => $values) {
-      if (is_array($values) || is_object($values)) {
-        foreach ($values as $value) {
-          $query->params['fq'][$delta][] = $value;
-        }
-      }
-    }
-  }
-  // Add sort if present.
-  // TODO: make this process internal to the query object.
-  if ($sort = $query->get_solrsort()) {
-    $sortstring = $sort['#name'] . ' ' . $sort['#direction'];
-    // We don't bother telling Solr to do its default sort.
-    if ($sortstring != 'score desc') {
-      $query->params['sort'] = $sortstring;
     }
   }
   // Do not abort the query.
@@ -1194,7 +1174,7 @@ function apachesolr_do_query($caller, DrupalSolrQueryInterface $current_query, $
   if ($eject) {
     return array(NULL, array());
   }
-  $query->params['start'] = $page * $query->params['rows'];
+  $query->addParam('start', $page * $query->getParam('rows'));
   // Final chance for the caller to modify the query. The signature
   // is: CALLER_finalize_query($query);
   $function = $caller . '_finalize_query';
@@ -1202,19 +1182,22 @@ function apachesolr_do_query($caller, DrupalSolrQueryInterface $current_query, $
     $function($query);
   }
 
-  $keys = $query->get_query_basic();
-  if ($keys == '' && isset($query->params['fq'])) {
-    // Move the fq params to q.alt for better performance.
+  $keys = $query->getParam('q');
+
+  if (strlen($keys) == 0 && ($filters = $query->getFilters())) {
+    // Move the fq params to q.alt for better performance. Only suitable
+    // when using dismax or edismax, so we keep this out of the query class itself
+    // for now.
     $qalt = array();
-    foreach ($query->params['fq'] as $delta => $value) {
+    foreach ($filters as $delta => $filter) {
       // Move the fq param if it has no local params and is not negative.
-      if (!preg_match('/^(?:\{!|-)/', $value)) {
-        $qalt[] = '(' . $value . ')';
-        unset($query->params['fq'][$delta]);
+      if (!$filter['#exclude'] && !$filter['#local']) {
+        $qalt[] = '(' . $query->makeFilterQuery($filter) . ')';
+        $query->removeFilter($filter['#name'], $filter['#value'], $filter['#exclude']);
       }
     }
     if ($qalt) {
-      $query->params['q.alt'] = implode(' ', $qalt);
+      $query->addParam('q.alt', implode(' ', $qalt));
     }
   }
   // We must run htmlspecialchars() here since converted entities are in the index.
@@ -1269,13 +1252,13 @@ function apachesolr_static_response_cache($response = NULL, $namespace = 'apache
  *
  * @throws Exception
  */
-function apachesolr_drupal_query($keys = '', $filters = '', $solrsort = '', $base_path = '', $solr = NULL) {
+function apachesolr_drupal_query($keys = '', $fq = array(), $solrsort = '', $base_path = '', $solr = NULL) {
   $class = variable_get('apachesolr_query_class', 'SolrBaseQuery');
 
   if (empty($solr)) {
     $solr = apachesolr_get_solr();
   }
-  return new $class($solr, $keys, $filters, $solrsort, $base_path);
+  return new $class($solr, $keys, $fq, $solrsort, $base_path);
 }
 
 /**
@@ -1934,7 +1917,7 @@ function apachesolr_l($text, $path, $options = array()) {
 
   // Retain GET parameters that ApacheSolr knows nothing about.
   $query = apachesolr_current_query();
-  $get = array_diff_key($_GET, array('q' => 1, 'page' => 1), $options['query'], $query->get_url_queryvalues());
+  $get = array_diff_key($_GET, array('q' => 1, 'page' => 1), $options['query'], $query->getUrlQueryvalues());
   $options['query'] += $get;
 
   return '<a href="' . check_url(url($path, $options)) . '"' . drupal_attributes($options['attributes']) . '>' . ($options['html'] ? $text : check_plain(html_entity_decode($text))) . '</a>';
@@ -2003,138 +1986,37 @@ function theme_apachesolr_settings_title($vars) {
  * The interface for all 'query' objects.
  */
 interface DrupalSolrQueryInterface {
-  /**
-   * Get all filters, or the subset of filters for one field.
-   *
-   * @param $name
-   *   Optional name of a Solr field.
-   *
-   * @return an array of filters.
-   */
-  function get_filters($name = NULL);
+
+  function getFilters($name = NULL);
+
+  function hasFilter($name, $value);
 
   /**
-   * Checks to see if a specific filter is already present.
-   *
-   * @param string $field
-   * the facet field to check
-   * @param string $value
-   * The facet value to check against
-   *
-   * @return TRUE or FALSE
+   * All individual filters apply as AND to the final result.
    */
-  function has_filter($field, $value);
-
-  /**
-   * Add a filter to a query.
-   *
-   * @param string $field
-   *   the facet field to apply to this query
-   * @param string value
-   *   the value of the facet to apply
-   * @param boolean $exclude
-   *   Optional paramter.  If TRUE, the filter will be negative,
-   *   meaning that matching values will be excluded from the
-   *   result set.
-   *
-   * @return DrupalSolrQueryInterface
-   *   The called object.
-   */
-  function add_filter($field, $value, $exclude = FALSE);
+  function addFilter($name, $value, $exclude = FALSE, $tag = NULL);
 
   /**
    * Remove a filter from the query.
    *
-   * @param string $field
-   * the facet field to remove
+   * @param string $name
+   * the facet field name to remove
    * @param string $value
-   * The facet value to remove
-   * This value can be NULL
+   * The facet value to remove. This value can be NULL in which case all filters
+   * matching $name are removed.
+   * @param boolean $exclude
+   * If name is not NULL, the name and $excldue must both match to remove the
+   * filter.
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
    */
-  function remove_filter($field, $value = NULL);
-
-  /**
-   * Get the query's keywords.
-   */
-  function get_keys();
-
-  /**
-   * Set the query's keywords.
-   *
-   * @param string $keys
-   *   The new keywords.
-   *
-   * @return DrupalSolrQueryInterface
-   *   The called object.
-   */
-  function set_keys($keys);
-
-  /**
-   * Removes the query's keywords.
-   *
-   * @return DrupalSolrQueryInterface
-   *   The called object.
-   */
-  function remove_keys();
-
-  /**
-   * Return the search path (including the search keywords).
-   */
-  function get_path();
-
-  /**
-   * Return filters and sort in a form suitable for a query param to url().
-   */
-  function get_url_queryvalues();
-
-  /**
-   * Return the basic string query.
-   */
-  function get_query_basic();
-
-  /**
-   * Return the sorts that are provided by the query object.
-   *
-   * @return array all the sorts provided
-   */
-  function get_available_sorts();
-
-  /**
-   * Make a sort available.
-   *
-   * @return DrupalSolrQueryInterface
-   *   The called object.
-   */
-  function set_available_sort($field, $sort);
-
-  /**
-   * Get the solrsort.
-   *
-   * Returns the non-urlencode, non-aliased sort field and direction.
-   * as an array keyed with '#name' and '#direction'.
-   */
-  function get_solrsort();
-
-  /**
-   * Set the solrsort.
-   *
-   * @param $field
-   *  The name of a field in the solr index that's an allowed sort.
-   * @param $direction
-   *  'asc' or 'desc'
-   *
-   * @return DrupalSolrQueryInterface
-   *   The called object.
-   */
-  function set_solrsort($field, $direction);
+  function removeFilter($name, $value = NULL, $exclude = FALSE);
 
   /**
    * Add a subquery to the query.
    *
-   * @param DrupalSolrQueryInterface $query
+   * @param SolrFilterSubQuery $query
    *   The query to add to the orginal query - may have keywords or filters.
    * @param string $fq_operator
    *   The operator to use within the filter part of the subquery
@@ -2147,7 +2029,7 @@ interface DrupalSolrQueryInterface {
    * @return DrupalSolrQueryInterface
    *   The called object.
    */
-  function add_subquery(DrupalSolrQueryInterface $query, $fq_operator = 'OR', $q_operator = 'AND');
+  function addFilterSubQuery(SolrFilterSubQuery $query);
 
   /**
    * Remove a specific subquery.
@@ -2158,7 +2040,7 @@ interface DrupalSolrQueryInterface {
    * @return DrupalSolrQueryInterface
    *   The called object.
    */
-  function remove_subquery(DrupalSolrQueryInterface $query);
+  function removeFilterSubQuery(SolrFilterSubQuery $query);
 
   /**
    * Remove all subqueries.
@@ -2166,7 +2048,128 @@ interface DrupalSolrQueryInterface {
    * @return DrupalSolrQueryInterface
    *   The called object.
    */
-  function remove_subqueries();
+  function removeFilterSubQueries();
+
+  /**
+   * Takes an array $filter as returned by getFilters() and combines the values
+   * in a way suitable for use in a Solr query.
+   */
+  public function makeFilterQuery(array $filter);
+
+  /**
+   * Get one param in normalized form.
+   */
+  public function getParam($name);
+
+  /**
+   * Get all params in normalized form.
+   */
+  function getParams();
+
+  /**
+   * Get params in a form suitable to pass to Solr.
+   */
+  function getSolrParams();
+
+  /**
+   * Add a param to be sent when running the Solr search.
+   *
+   * If the param is single-valued, this will replace rather than add the value.
+   *
+   * @param $name
+   *   A Solr param name, e.g. 'q' or 'fl'.
+   * @param $value
+   *   A Solr param value, a string for a single one, or an array of values.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
+  function addParam($name, $value);
+
+  /**
+   * Add multipls params to be sent when running the Solr search.
+   *
+   * If the param is single-valued, this will replace rather than add the value.
+   *
+   * @param $params
+   *   An array where the keys are param names, and the values may be string or arrays of strings.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
+  function addParams(array $params);
+
+  /**
+   * Remove all values for one Solr param.
+   *
+   * @param $name
+   *   A Solr param name, e.g. 'q' or 'fl'.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
+  function removeParam($name);
+
+  /**
+   * Replace a param to be sent when running the Solr search.
+   *
+   * Basically a short-cut for removeParam() plus addParam()
+   *
+   * @param $name
+   *   A Solr param name, e.g. 'q' or 'fl'.
+   * @param $value
+   *   A Solr param value, a string for a single one, or an array of values.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
+  function replaceParam($name, $value);
+
+  /**
+   * Handle aliases for field to make nicer URLs
+   *
+   * @param $field_map
+   *   An array keyed with aliases with the real Solr index field name as value.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
+  function addFieldAliases($field_map);
+
+  function getFieldAliases();
+
+  function clearFieldAliases();
+
+  function getAvailableSorts();
+
+  /**
+   * Set the solrsort.
+   *
+   * @param $field
+   *  The name of a field in the solr index that's an allowed sort.
+   * @param $direction
+   *  'asc' or 'desc'
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
+  function setAvailableSort($name, $sort);
+
+  function removeAvailableSort($name);
+
+  function getSolrsort();
+
+  function setSolrsort($name, $direction);
+
+  /**
+   * Return the search path (including the search keywords).
+   *
+   * @param string $new_keywords
+   *   Optional. When set, this string overrides the query's current keywords.
+   */
+  public function getPath($new_keywords = NULL);
+
+  public function getUrlQueryvalues();
 
   /**
    * Send a search query using the Solr object passed into the constructor.

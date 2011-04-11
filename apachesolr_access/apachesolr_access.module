@@ -38,21 +38,21 @@ function apachesolr_access_build_subquery($account) {
   if (!user_access('access content', $account)) {
     throw new Exception('No access');
   }
-  $node_access_query = apachesolr_drupal_query();
+  $node_access_query = new SolrFilterSubQuery();
   if (user_access('bypass node access', $account)) {
     // Access all content from the current site, or public content.
-    $node_access_query->add_filter('access__all', 0);
-    $node_access_query->add_filter('hash', apachesolr_site_hash());
+    $node_access_query->addFilter('access__all', 0);
+    $node_access_query->addFilter('hash', apachesolr_site_hash());
   }
   else {
     // Get node access grants.
     $grants = node_access_grants('view', $account);
     foreach ($grants as $realm => $gids) {
       foreach ($gids as $gid) {
-        $node_access_query->add_filter('access_node_' . apachesolr_site_hash() . '_' . $realm, $gid);
+        $node_access_query->addFilter('access_node_' . apachesolr_site_hash() . '_' . $realm, $gid);
       }
     }
-    $node_access_query->add_filter('access__all', 0);
+    $node_access_query->addFilter('access__all', 0);
   }
   return $node_access_query;
 }
@@ -64,7 +64,7 @@ function apachesolr_access_apachesolr_modify_query(DrupalSolrQueryInterface $que
   global $user;
   try {
     $subquery = apachesolr_access_build_subquery($user);
-    $query->add_subquery($subquery, 'OR');
+    $query->addFilterSubQuery($subquery);
   }
   catch (Exception $e) {
     watchdog("apachesolr_access", 'User %name (UID:!uid) cannot search: @message', array('%name' => $user->name, '!uid' => $user->uid, '@message' => $e->getMessage()));

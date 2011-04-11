@@ -102,7 +102,7 @@ function apachesolr_search_search_status() {
  * Implementation of hook_search_execute().
  */
 function apachesolr_search_search_execute($keys = NULL, $conditions = NULL) {
-  $filters = isset($conditions['filters']) ? $conditions['filters'] : '';
+  $filters = isset($conditions['fq']) ? $conditions['fq'] : array();
   $solrsort = isset($_GET['solrsort']) ? $_GET['solrsort'] : '';
   $empty_search_behavior = isset($conditions['apachesolr_search_browse']) ? $conditions['apachesolr_search_browse'] : '';
 
@@ -134,8 +134,8 @@ function apachesolr_search_search_execute($keys = NULL, $conditions = NULL) {
 function apachesolr_search_conditions() {
   $conditions = array();
 
-  if (isset($_GET['filters']) && trim($_GET['filters'])) {
-    $conditions['filters'] = trim($_GET['filters']);
+  if (isset($_GET['fq']) && !empty($_GET['fq'])) {
+    $conditions['fq'] = $_GET['fq'];
   }
   if (variable_get('apachesolr_search_browse', 'browse') != 'none') {
     // Set a condition so the search is triggered.
@@ -224,18 +224,24 @@ function apachesolr_search_page_browse($empty_search_behavior) {
  *
  * @throws Exception
  */
-function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '', $page = 0, $caller = 'apachesolr_search') {
+function apachesolr_search_run($keys, $fq = array(), $solrsort = '', $base_path = '', $page = 0, $caller = 'apachesolr_search') {
   // This is the object that knows about the query coming from the user.
-  $query = apachesolr_drupal_query($keys, $filterstring, $solrsort, $base_path);
+  $query = apachesolr_drupal_query($keys, $fq, $solrsort, $base_path);
 
   apachesolr_search_basic_params($query);
   apachesolr_search_add_boost_params($query);
   if ($keys) {
     apachesolr_search_highlighting_params($query);
-    if (!isset($query->params['hl.fl'])) {
+    if (!$query->getParam('hl.fl')) {
+      $qf = array();
+      foreach ($query->getParam('qf') as $field) {
+        // Truncate off any boost so we get the simple field name.
+        $parts = explode('^', $field, 2);
+        $qf[$parts[0]] = TRUE;
+      }
       foreach (array('content', 'ts_comments') as $field) {
-        if (isset($query->params['qf'][$field])) {
-          $query->params['hl.fl'][] = $field;
+        if (isset($qf[$field])) {
+          $query->addParam('hl.fl', $field);
         }
       }
     }
@@ -243,25 +249,22 @@ function apachesolr_search_run($keys, $filterstring, $solrsort, $base_path = '',
   }
   else {
     // No highlighting, use the teaser as a snippet.
-    $query->params['fl'] .= ',teaser';
+    $query->addParam('fl', 'teaser');
   }
   list($final_query, $response) = apachesolr_do_query($caller, $query, $page);
   apachesolr_has_searched(TRUE);
-  // Add search terms and filters onto the breadcrumb.
-  // We use the original $query to avoid exposing, for example, nodeaccess
-  // filters in the breadcrumb.
-  drupal_set_breadcrumb(array_merge(drupal_get_breadcrumb(), $query->get_breadcrumb()));
+
   return apachesolr_search_process_response($response, $final_query);
 }
 
 
 function apachesolr_search_basic_params(DrupalSolrQueryInterface $query = NULL) {
   $params = array(
-    'fl' => 'id,entity_id,entity_type,bundle,bundle_name,label,is_comment_count,ds_created,ds_changed,score,path,url,is_uid,tos_name',
+    'fl' => array('id', 'entity_id', 'entity_type', 'bundle', 'bundle_name', 'label', 'is_comment_count', 'ds_created', 'ds_changed', 'score', 'path', 'url', 'is_uid', 'tos_name'),
     'rows' => variable_get('apachesolr_rows', 10),
   );
   if ($query) {
-    $query->params += $params;
+    $query->addParams($params);
   }
   return $params;
 }
@@ -283,23 +286,24 @@ function apachesolr_search_highlighting_params(DrupalSolrQueryInterface $query =
   $params['hl.fl'] = variable_get('apachesolr_hl_fieldtohightlight', NULL);
   $params = array_filter($params);
   if ($query) {
-    $query->params += $params;
+    $query->addParams($params);
   }
   return $params;
 }
 
 function apachesolr_search_add_spellcheck_params(DrupalSolrQueryInterface $query) {
-  $params = &$query->params;
+  $params = array();
   if (variable_get('apachesolr_search_spellcheck', TRUE)) {
     //Add new parameter to the search request
-    $params['spellcheck.q'] = $query->get_query_basic();
+    $params['spellcheck.q'] = $query->getParam('q');
     $params['spellcheck'] = 'true';
   }
+  $query->addParams($params);
 }
 
 function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
   $server_id = $query->solr('getServerId');
-  $params = &$query->params;
+  $params = array();
 
   $defaults = array(
     'content' => '1.0',
@@ -375,14 +379,18 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
       }
     }
   }
+  $query->addParams($params);
 }
 
 function apachesolr_search_process_response($response, DrupalSolrQueryInterface $query) {
   $results = array();
   // We default to getting snippets from the body content and comments.
-  $hl_fl = isset($query->params['hl.fl']) ? $query->params['hl.fl'] : array('content', 'ts_comments');
+  $hl_fl = $query->getParam('hl.fl');
+  if (!$hl_fl) {
+    $hl_fl = array('content', 'ts_comments');
+  }
   $total = $response->response->numFound;
-  pager_default_initialize($total, $query->params['rows']);
+  pager_default_initialize($total, $query->getParam('rows'));
   if ($total > 0) {
     foreach ($response->response->docs as $doc) {
       $extra = array();
@@ -531,7 +539,7 @@ function apachesolr_search_preprocess_search_results(&$variables) {
     }
     $variables['query'] = apachesolr_current_query();
     $total = $variables['response']->response->numFound;
-    $params = $variables['query']->params;
+    $params = $variables['query']->getParams();
 
     $variables['description'] = t('Showing items @start through @end of @total.', array(
       '@start' => $params['start'] + 1,
@@ -646,7 +654,7 @@ function apachesolr_search_form_search_form_alter(&$form, $form_state) {
     $queryvalues = array();
     if ($apachesolr_has_searched) {
       $query = apachesolr_current_query();
-      $queryvalues = $query->get_url_queryvalues();
+      $queryvalues = $query->getUrlQueryvalues();
     }
 
     $form['basic']['apachesolr_search']['#tree'] = TRUE;
@@ -861,16 +869,16 @@ function theme_apachesolr_search_noresults() {
  *   The Solr query object.
  */
 function apachesolr_search_currentsearch_block($response, DrupalSolrQueryInterface $query) {
-  $fields = $query->get_filters();
+  $fields = $query->getFilters();
   $links = array();
   $facets = array();
 
   // If current search has keys, offer current search without them
-  if ($keys = $query->get_query_basic()) {
+  if ($keys = $query->getParam('q')) {
     $links[] = theme('apachesolr_unclick_link', array(
       'facet_text' => $keys,
-      'path' => $query->get_path(''),
-      'options' => array('query' => $query->get_url_queryvalues())));
+      'path' => $query->getPath(''),
+      'options' => array('query' => $query->getUrlQueryvalues())));
   }
 }
 

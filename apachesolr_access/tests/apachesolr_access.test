@@ -86,7 +86,7 @@ class DrupalApacheSolrNodeAccess extends DrupalWebTestCase {
  //     'access_node_' . apachesolr_site_hash() . '_nodeaccess_author' => $basic_user->uid,
     );
 
-    $fields = $subquery->get_filters();
+    $fields = $subquery->getFilters();
 
     foreach ($fields as $field) {
       if (is_array($expected_criterion[$field['#name']])) {
