@@ -28,7 +28,7 @@ class ApacheSolrFacetapiDate extends FacetapiQueryTypeDate implements FacetapiQu
    */
   public function execute($query) {
     $searcher = $this->adapter->getSearcher();
-
+    $query->addParam('facet', 'true');
     // Gets the data range in formats that Solr understands.
     list($start, $end, $gap) = $this->getDateRange($query);
 
@@ -138,7 +138,7 @@ class ApacheSolrFacetapiDate extends FacetapiQueryTypeDate implements FacetapiQu
     }
 
     // Gets raw facet data from the Solr server.
-    if (isset($response->facet_counts->facet_dates)) {
+    if (isset($response->facet_counts->facet_dates) && isset($response->facet_counts->facet_dates->{$this->facet['field']})) {
       $raw_data = (array) $response->facet_counts->facet_dates->{$this->facet['field']};
     }
     else {

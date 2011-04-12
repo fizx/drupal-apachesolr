@@ -28,7 +28,7 @@ class ApacheSolrFacetapiTerm extends FacetapiQueryType implements FacetapiQueryT
    */
   public function execute($query) {
     $searcher = $this->adapter->getSearcher();
-
+    $query->addParam('facet', 'true');
     // Adds the operator parameter.
     //$operator = facetapi_get_setting('operator', $searcher, '', $this->facet['name']);
     $operator = 'and';
@@ -50,9 +50,11 @@ class ApacheSolrFacetapiTerm extends FacetapiQueryType implements FacetapiQueryT
   public function build() {
     $build = array();
     if ($response = apachesolr_static_response_cache()) {
-      $values = (array) $response->facet_counts->facet_fields->{$this->facet['field']};
-      foreach ($values as $value => $count) {
-        $build[$value] = array('#count' => $count);
+      if (isset($response->facet_counts->facet_fields->{$this->facet['field']})) {
+        $values = (array) $response->facet_counts->facet_fields->{$this->facet['field']};
+        foreach ($values as $value => $count) {
+          $build[$value] = array('#count' => $count);
+        }
       }
     }
     return $build;

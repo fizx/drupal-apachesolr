@@ -148,7 +148,7 @@ function apachesolr_init() {
 function apachesolr_facetapi_searcher_info() {
   $info = array();
   foreach (apachesolr_load_all_servers() as $id => $server) {
-    $info['apachesolr:' . $id] = array(
+    $info['apachesolr@' . $id] = array(
       'label' => t('Apache Solr server: @server', array('@server' => $server['name'])),
       'adapter' => 'apachesolr',
       'instance' => $id,
@@ -1240,9 +1240,9 @@ function apachesolr_do_query($caller, DrupalSolrQueryInterface $current_query, $
 
   if (module_exists('facetapi')) {
     // Gets enabled facets, adds filter queries to $params.
-    $adapter = facetapi_adapter_load('apachesolr:' . $current_query->solr('getServerId'));
+    $adapter = facetapi_adapter_load('apachesolr@' . $current_query->solr('getServerId'));
     if ($adapter) {
-      $adapter->addFacetsFilters($query);
+      $adapter->addFacetsFilters($current_query);
     }
   }
 

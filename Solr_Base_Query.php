@@ -219,6 +219,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
     'debugQuery' => TRUE,
     'start' => TRUE,
     'rows' => TRUE,
+    'facet' => TRUE,
     'facet.prefix' => TRUE,
     'facet.limit' => TRUE,
     'facet.offset' => TRUE,

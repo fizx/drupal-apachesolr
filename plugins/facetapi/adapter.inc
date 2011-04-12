@@ -56,7 +56,7 @@ class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
   public function getSearchKeys() {
     if (NULL === $this->keys) {
       if ($query = apachesolr_current_query()) {
-        return $query->get_query_basic();
+        return $query->getParam('q');
       }
     }
     else {
@@ -64,17 +64,4 @@ class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
     }
   }
 
-  /**
-   *
-   */
-  public function addFacet(array $facet, $query) {
-    parent::addFacet($facet, $query);
-    $queries = array();
-    foreach ($this->getActiveItems($facet) as $value => $item) {
-      $queries[] = $facet['field alias'] . ':' . $value;
-    }
-    if (!empty($queries)) {
-      $query->params['fq'][$facet['field alias']] = $queries;
-    }
-  }
 }
