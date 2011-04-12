@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1124844 by pwolanin: Port over facet API adapter and hooks.
 #1121170 by pwolanin: remove facet-related code to prep for Facet API integration.
 
 Apache Solr integration 7.x-1.0-beta-5, 2011-04-07

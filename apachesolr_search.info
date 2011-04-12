@@ -2,7 +2,7 @@ name = Apache Solr search
 description = Search with Solr
 dependencies[] = search
 dependencies[] = apachesolr
-package = Apache Solr
+package = Search Toolkit
 core = 7.x
 
 files[] = apachesolr_search.install

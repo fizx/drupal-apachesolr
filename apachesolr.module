@@ -143,6 +143,85 @@ function apachesolr_init() {
 }
 
 /**
+ * Implements hook_facetapi_searcher_info().
+ */
+function apachesolr_facetapi_searcher_info() {
+  $info = array();
+  foreach (apachesolr_load_all_servers() as $id => $server) {
+    $info['apachesolr:' . $id] = array(
+      'label' => t('Apache Solr server: @server', array('@server' => $server['name'])),
+      'adapter' => 'apachesolr',
+      'instance' => $id,
+      'path' => 'admin/config/search/apachesolr',
+    );
+  }
+  return $info;
+}
+
+/**
+ * Implements hook_facetapi_adapters().
+ */
+function apachesolr_facetapi_adapters() {
+  return array(
+    'apachesolr' => array(
+      'handler' => array(
+        'class' => 'ApacheSolrFacetapiAdapter',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_facetapi_query_types().
+ */
+function apachesolr_facetapi_query_types() {
+  return array(
+    'apachesolr_term' => array(
+      'handler' => array(
+        'class' => 'ApacheSolrFacetapiTerm',
+        'adapter' => 'apachesolr',
+      ),
+    ),
+    'apachesolr_date' => array(
+      'handler' => array(
+        'class' => 'ApacheSolrFacetapiDate',
+        'adapter' => 'apachesolr',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_facetapi_facet_info().
+ */
+function apachesolr_facetapi_facet_info($searcher_info) {
+  $facets = array();
+  if ('apachesolr' == $searcher_info['adapter']) {
+    foreach (apachesolr_entity_fields('node') as $field_nm => $field_info) {
+      $field = apachesolr_index_key($field_info);
+      $facets[$field] = array(
+        'label' => check_plain($field_info['display_name']),
+        'description' => t('Filter by field of type @type.', array('@type' => $field_info['field']['type'])),
+        'map callback' => $field_info['display_callback'],
+      );
+    }
+  }
+  return $facets;
+}
+
+/**
+ * Implements hook_facetapi_facet_info_alter().
+ */
+function apachesolr_facetapi_facet_info_alter(&$facet_info, $searcher_info) {
+  if ('apachesolr' == $searcher_info['adapter']) {
+    $facet_info['author']['field'] = 'is_uid';
+    $facet_info['language']['field'] = 'ss_language';
+    $facet_info['created']['field'] = 'ds_created';
+    $facet_info['changed']['field'] = 'ds_changed';
+  }
+}
+
+/**
  * Determines Apache Solr's behavior when searching causes an exception (e.g. Solr isn't available.)
  * Depending on the admin settings, possibly redirect to Drupal's core search.
  *
@@ -1158,6 +1237,15 @@ function apachesolr_server_status($url, $class = NULL) {
 function apachesolr_do_query($caller, DrupalSolrQueryInterface $current_query, $page = 0) {
   // Allow modules to alter the query prior to statically caching it.
   // This can e.g. be used to add available sorts.
+
+  if (module_exists('facetapi')) {
+    // Gets enabled facets, adds filter queries to $params.
+    $adapter = facetapi_adapter_load('apachesolr:' . $current_query->solr('getServerId'));
+    if ($adapter) {
+      $adapter->addFacetsFilters($query);
+    }
+  }
+
   foreach (module_implements('apachesolr_prepare_query') as $module) {
     $function_name = $module . '_apachesolr_prepare_query';
     $function_name($current_query, $caller);
@@ -1401,7 +1489,6 @@ function apachesolr_entity_fields($entity_type = 'node') {
         'display_callback' => '',
         'indexing_callback' => '',
         'index_type' => 'string',
-        'facet_block_callback' => '',
         'name_callback' => '',
         // Field API allows any field to be multi-valued.
         'multiple' => TRUE,
