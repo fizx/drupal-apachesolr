@@ -335,7 +335,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
     }
 
     if (is_array($value)) {
-      $this->params[$name] = array_merge($this->params[$name], $value);
+      $this->params[$name] = array_merge($this->params[$name], array_values($value));
     }
     else {
       $this->params[$name][] = $value;

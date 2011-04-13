@@ -686,10 +686,10 @@ function apachesolr_search_form_search_form_alter(&$form, $form_state) {
           foreach ($suggestions as $word => $value) {
             $replacements[$word] = $value->suggestion[0];
           }
-          $new_keywords = strtr($query->get_query_basic(), $replacements);
+          $new_keywords = strtr($query->getParam('q'), $replacements);
 
           // Show only if suggestion is different than current query.
-          if ($query->get_query_basic() != $new_keywords) {
+          if ($query->getParam('q') != $new_keywords) {
             $form['apachesolr_search']['suggestion'] = array(
               '#theme' => 'apachesolr_search_suggestions',
               '#links' => array(l($new_keywords, $query->get_path($new_keywords))),
