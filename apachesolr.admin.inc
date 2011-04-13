@@ -216,13 +216,13 @@ function apachesolr_settings($form, &$form_state) {
     }
     else {
       $type = 'none';
-      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr/server/' . $data['server_id'] . '/delete'));
+      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr-server/' . $data['server_id'] . '/delete'));
     }
     $rows[] = array('data' =>
       array(
         // Cells
         array('class' => 'icon'),
-        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr/server/' . $data['server_id'] . '/edit')),
+        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr-server/' . $data['server_id'], array('query' => array('destination' => $_GET['q'])))),
         $delete_link,
         check_plain($data['name']),
         check_plain($data['url']),
@@ -233,7 +233,7 @@ function apachesolr_settings($form, &$form_state) {
   }
   $actions[] = array(
     '#theme' => 'menu_local_action',
-    '#link' => array('title' => t('Add new server'), 'href' => 'admin/config/search/apachesolr/server/add', 'options' => array()),
+    '#link' => array('title' => t('Add new server'), 'href' => 'admin/config/search/apachesolr-server/add', 'options' => array()),
   );
 
   $form['apachesolr_host_settings']['actions'] = array(

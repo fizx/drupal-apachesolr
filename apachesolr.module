@@ -22,28 +22,36 @@ function apachesolr_menu() {
     'weight'             => -9,
     'file'               => 'apachesolr.admin.inc',
   );
-  $items['admin/config/search/apachesolr/server/%apachesolr_server/edit'] = array(
+  $items['admin/config/search/apachesolr-server/%apachesolr_server'] = array(
     'title'              => 'Apache Solr search server edit',
     'description'        => 'Edit Apache Solr server.',
     'page callback'      => 'drupal_get_form',
-    'page arguments'     => array('apachesolr_server_edit_form', 5),
+    'page arguments'     => array('apachesolr_server_edit_form', 4),
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
+    'type'               => MENU_CALLBACK,
   );
-  $items['admin/config/search/apachesolr/server/%apachesolr_server/delete'] = array(
+  $items['admin/config/search/apachesolr-server/%apachesolr_server/edit'] = array(
+    'title'              => 'Edit',
+    'weight'             => -20,
+    'type'               => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/search/apachesolr-server/%apachesolr_server/delete'] = array(
     'title'              => 'Apache Solr search server delete',
     'page callback'      => 'apachesolr_server_delete_page',
-    'page arguments'     => array(5),
+    'page arguments'     => array(4),
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
+    'type'               => MENU_CALLBACK,
   );
-  $items['admin/config/search/apachesolr/server/add'] = array(
+  $items['admin/config/search/apachesolr-server/add'] = array(
     'title'              => 'Apache Solr search server add',
     'description'        => 'Add Apache Solr server.',
     'page callback'      => 'drupal_get_form',
     'page arguments'     => array('apachesolr_server_edit_form', NULL),
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
+    'type'               => MENU_CALLBACK,
   );
   $items['admin/config/search/apachesolr/settings'] = array(
     'title'              => 'Settings',
@@ -131,7 +139,7 @@ function apachesolr_menu() {
         $items[$base_path . '/facets'] = array(
           'title'            => 'Enabled filters',
           'page callback'    => 'apachesolr_enabled_facets_page',
-          'page arguments'   =>  array($realm_name),
+          'page arguments'   =>  array($realm_name, NULL),
           'weight'           => -7,
           'access arguments' => array('administer search'),
           'file path'        => $file_path,
@@ -144,18 +152,23 @@ function apachesolr_menu() {
           'type'             => MENU_DEFAULT_LOCAL_TASK,
           'weight'           => $realm['weight'],
         );
+        $items[$base_path . '-server/%apachesolr_server/facets'] = $items[$base_path . '/facets'];
+        $items[$base_path . '-server/%apachesolr_server/facets']['page arguments'] = array($realm_name, 4);
       }
       else {
         $items[$base_path . '/facets/' . $realm_name] = array(
-          'title' => $realm['label'],
+          'title'            => $realm['label'],
           'page callback'    => 'apachesolr_enabled_facets_page',
-          'page arguments'   => array($realm_name),
+          'page arguments'   => array($realm_name, NULL),
           'access arguments' => array('administer search'),
           'type'             => MENU_LOCAL_TASK,
+          'context'          => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
           'file path'        => $file_path,
           'file'             => 'facetapi.admin.inc',
         );
       }
+      $items[$base_path . '-server/%apachesolr_server/facets/' . $realm_name] = $items[$base_path . '/facets/' . $realm_name];
+      $items[$base_path . '-server/%apachesolr_server/facets/' . $realm_name]['page arguments'] = array($realm_name, 4);
     }
   }
   return $items;
@@ -164,13 +177,11 @@ function apachesolr_menu() {
 /**
  * Wrapper for facetapi settings forms.
  */
-function apachesolr_enabled_facets_page($realm_name, $server_id = NULL) {
+function apachesolr_enabled_facets_page($realm_name, $server = NULL) {
   $page = array();
 
-  if (isset($server_id)) {
-    if (!apachesolr_server_load($server_id)) {
-      return MENU_NOT_FOUND;
-    }
+  if (isset($server['server_id'])) {
+    $server_id = $server['server_id'];
   }
   else {
     $server_id = apachesolr_default_server();
@@ -2126,7 +2137,7 @@ function theme_apachesolr_settings_title($vars) {
   // edit page. Skips building title if server info could not be retrieved.
   if ($server = apachesolr_server_load($vars['server_id'])) {
     $url = url(
-      'admin/config/search/apachesolr/server/' . $vars['server_id'] . '/edit',
+      'admin/config/search/apachesolr-server/' . $vars['server_id'],
       array('query' => array('destination' => $_GET['q']))
     );
 
