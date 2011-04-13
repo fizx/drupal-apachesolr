@@ -692,7 +692,7 @@ function apachesolr_search_form_search_form_alter(&$form, $form_state) {
           if ($query->getParam('q') != $new_keywords) {
             $form['apachesolr_search']['suggestion'] = array(
               '#theme' => 'apachesolr_search_suggestions',
-              '#links' => array(l($new_keywords, $query->get_path($new_keywords))),
+              '#links' => array(l($new_keywords, $query->getPath($new_keywords))),
             );
           }
         }
