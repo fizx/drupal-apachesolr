@@ -258,7 +258,7 @@ function apachesolr_facetapi_facet_info($searcher_info) {
         $facets[$field] = array(
           'label' => check_plain($field_info['display_name']),
           'description' => t('Filter by field of type @type.', array('@type' => $field_info['field']['type'])),
-          'map callback' => $field_info['display_callback'],
+          'map callback' => $field_info['map callback'],
         );
       }
     }
@@ -1544,6 +1544,7 @@ function apachesolr_entity_fields($entity_type = 'node') {
       // Set all values with defaults.
       $mappings[$key] += array(
         'display_callback' => '',
+        'map callback' => FALSE,
         'indexing_callback' => '',
         'index_type' => 'string',
         'name_callback' => '',
@@ -1970,6 +1971,7 @@ function field_apachesolr_field_mappings() {
     ),
     'taxonomy_term_reference' => array(
       'display_callback' => 'apachesolr_taxonomy_get_term',
+      'map callback' => 'apachesolr_taxonomy_map_tids',
       'indexing_callback' => 'apachesolr_term_reference_indexing_callback',
       'index_type' => 'integer',
       'facet_block_callback' => 'apachesolr_search_taxonomy_facet_block',
@@ -2000,10 +2002,23 @@ function content_apachesolr_field_mappings() {
   return $mappings;
 }
 
+/**
+ * A facetapi map callback.
+ */
+function apachesolr_taxonomy_map_tids($tids) {
+  $map = array();
+  $terms = taxonomy_term_load_multiple($tids);
+  foreach ($terms as $term) {
+    $map[$term->tid] = $term->name;
+  }
+  return $map;
+}
+
 function apachesolr_taxonomy_get_term($tid) {
   if (function_exists('taxonomy_term_load')) {
-    $term = taxonomy_term_load($tid);
-    return $term->name;
+    if ($term = taxonomy_term_load($tid)) {
+      return $term->name;
+    }
   }
 }
 
