@@ -6,10 +6,10 @@ Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
 #1124844 by pwolanin: Port over facet API adapter and hooks.
 #1121170 by pwolanin: remove facet-related code to prep for Facet API integration.
+#1122348 by pwolanin: Rework query class to provide uniform methods of getting and setting params.
 
 Apache Solr integration 7.x-1.0-beta-5, 2011-04-07
 ------------------------------
-#1122348 by pwolanin: Rework query class to provide uniform methods of getting and setting params.
 #799970  by pwolanin: update README for config changes.
 #1118646 by cpliakas, pwolanin: Fields now displayed on search index report page.
 #1117152 by cpliakas: Added a cancel link to the server edit page.
