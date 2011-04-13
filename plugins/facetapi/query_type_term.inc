@@ -28,7 +28,6 @@ class ApacheSolrFacetapiTerm extends FacetapiQueryType implements FacetapiQueryT
    */
   public function execute($query) {
     $searcher = $this->adapter->getSearcher();
-    $query->addParam('facet', 'true');
     // Adds the operator parameter.
     //$operator = facetapi_get_setting('operator', $searcher, '', $this->facet['name']);
     $operator = 'and';

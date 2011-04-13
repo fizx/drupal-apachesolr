@@ -9,6 +9,38 @@
  * Facet API adapter for the Apache Solr Search Integration module.
  */
 class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
+  /**
+   * Returns the path to the admin settings for a given realm.
+   *
+   * @param $realm_name
+   *   The name of the realm.
+   *
+   * @return
+   *   The path to the admin settings.
+   */
+  public function getPath($realm_name) {
+    $base_path = 'admin/config/search/apachesolr';
+    return $base_path . '/facets/' . $realm_name;
+  }
+
+  /**
+   * Requests facets and applies facet filters to the query.
+   *
+   * @param stdClass $query
+   *   The query in the backend's native API.
+   */
+  function addFacetsFilters($query) {
+    $enabled_facets = facetapi_get_enabled_facets($this->info['name']);
+    if ($enabled_facets) {
+      $query->addParam('facet', 'true');
+      $query->addParam('facet.sort', 'count');
+      $query->addParam('facet.mincount', '1');
+      foreach ($enabled_facets as $facet) {
+        $this->addFacetQuery($facet, $query);
+        $this->addActiveFilters($facet, $query);
+      }
+    }
+  }
 
   /**
    * Back-end specific function for adding filters.
