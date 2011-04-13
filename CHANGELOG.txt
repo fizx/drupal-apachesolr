@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1126488 by cpliakas: Implemented hierarchical taxonomy facets.
 #1126284 by pwolanin: add enabled filters tab on every server edit page.
 #1126282 by pwolanin: fix facet mincount param.
 #1124844 by pwolanin: Port over facet API adapter and hooks.
