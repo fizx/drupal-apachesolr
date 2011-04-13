@@ -167,13 +167,15 @@ function apachesolr_menu() {
 function apachesolr_enabled_facets_page($realm_name, $server_id = NULL) {
   $page = array();
 
-  if (isset($server_id) && !apachesolr_server_load($server_id)) {
-    return MENU_NOT_FOUND;
+  if (isset($server_id)) {
+    if (!apachesolr_server_load($server_id)) {
+      return MENU_NOT_FOUND;
+    }
   }
   else {
     $server_id = apachesolr_default_server();
   }
-  $searcher = "apachesolr@$server_id";
+  $searcher = 'apachesolr@' . $server_id;
 
   // Initializes output with information about which server's setting we are
   // editing, as it is otherwise not transparent to the end user.
