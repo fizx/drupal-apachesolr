@@ -58,8 +58,9 @@ class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
    public function addActiveFilters(array $facet, $query) {
 
      $active = $this->getActiveItems($facet);
-     //$operator = facetapi_get_setting('operator', $searcher, '', $facet['name']);
-     $operator = 'and';
+     $settings = $this->getFacet($facet)->getSettings();
+     $operator = $settings->settings['operator'];
+
      if (FACETAPI_OPERATOR_OR != $operator) {
        foreach ($active as $value => $item) {
          $query->addFilter($facet['field'], $value);

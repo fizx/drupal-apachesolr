@@ -27,7 +27,6 @@ class ApacheSolrFacetapiDate extends FacetapiQueryTypeDate implements FacetapiQu
    *   An object containing the query in the backend's native API.
    */
   public function execute($query) {
-    $searcher = $this->adapter->getSearcher();
     // Gets the data range in formats that Solr understands.
     list($start, $end, $gap) = $this->getDateRange($query);
 
@@ -37,9 +36,9 @@ class ApacheSolrFacetapiDate extends FacetapiQueryTypeDate implements FacetapiQu
     $query->addParam('f.' . $this->facet['field'] . '.facet.date.gap', $gap);
 
     // Adds "hard limit" parameter to prevent too many return values.
-    //$limit = facetapi_setting_get('hard_limit', $searcher, '', $this->facet['name']);
-    $limit = 20;
-    $query->addParam('f.' . $this->facet['field'] . '.facet.limit', ($limit !== NULL) ? (int) $limit : 20);
+    $settings = $this->adapter->getFacet($this->facet)->getSettings();
+    $limit = empty($settings->settings['hard_limit']) ? 20 : (int) $settings->settings['hard_limit'];
+    $query->addParam('f.' . $this->facet['field'] . '.facet.limit', $limit);
   }
 
   /**

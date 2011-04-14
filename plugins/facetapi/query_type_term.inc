@@ -27,17 +27,15 @@ class ApacheSolrFacetapiTerm extends FacetapiQueryType implements FacetapiQueryT
    *   An object containing the query in the backend's native API.
    */
   public function execute($query) {
-    $searcher = $this->adapter->getSearcher();
+    $settings = $this->adapter->getFacet($this->facet)->getSettings();
     // Adds the operator parameter.
-    //$operator = facetapi_get_setting('operator', $searcher, '', $this->facet['name']);
-    $operator = 'and';
+    $operator = $settings->settings['operator'];
     $ex = (FACETAPI_OPERATOR_OR != $operator) ? '' : "{!ex={$this->facet['field']}}";
     $query->addParam('facet.field', $ex . $this->facet['field']);
 
     // Adds "hard limit" parameter to prevent too many return values.
-    //$limit = facetapi_get_setting('hard_limit', $searcher, '', $this->facet['name']);
-    $limit = 50;
-    $query->addParam('f.' . $this->facet['field'] . '.facet.limit', ($limit !== NULL) ? (int) $limit : 20);
+    $limit = empty($settings->settings['hard_limit']) ? 20 : (int) $settings->settings['hard_limit'];
+    $query->addParam('f.' . $this->facet['field'] . '.facet.limit', $limit);
   }
 
   /**
