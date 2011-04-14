@@ -1984,7 +1984,7 @@ function field_apachesolr_field_mappings() {
     ),
     'taxonomy_term_reference' => array(
       'display_callback' => 'apachesolr_taxonomy_get_term',
-      'map callback' => 'apachesolr_taxonomy_map_tids',
+      'map callback' => 'facetapi_map_taxonomy_terms',
       'hierarchy callback' => 'facetapi_get_taxonomy_hierarchy',
       'indexing_callback' => 'apachesolr_term_reference_indexing_callback',
       'index_type' => 'integer',
@@ -2014,18 +2014,6 @@ function content_apachesolr_field_mappings() {
   );
 
   return $mappings;
-}
-
-/**
- * A facetapi map callback.
- */
-function apachesolr_taxonomy_map_tids($tids) {
-  $map = array();
-  $terms = taxonomy_term_load_multiple($tids);
-  foreach ($terms as $term) {
-    $map[$term->tid] = $term->name;
-  }
-  return $map;
 }
 
 function apachesolr_taxonomy_get_term($tid) {
