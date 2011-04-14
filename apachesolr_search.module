@@ -105,20 +105,20 @@ function apachesolr_search_search_execute($keys = NULL, $conditions = NULL) {
   $filters = isset($conditions['fq']) ? $conditions['fq'] : array();
   $solrsort = isset($_GET['solrsort']) ? $_GET['solrsort'] : '';
   $empty_search_behavior = isset($conditions['apachesolr_search_browse']) ? $conditions['apachesolr_search_browse'] : '';
-
-  // For perfomance reasons, do not run a search if search is empty and
-  // $empty_search_behavior condition is 'browse'
-  if (!$keys && !$filters && $empty_search_behavior == 'browse') {
-    // Pass empty search behavior as string on to apachesolr_search_search_page()
-    return array('apachesolr_search_browse' => $empty_search_behavior);
-  }
+  unset($conditions['apachesolr_search_browse']);
 
   try {
-    $results = apachesolr_search_run($keys, $filters, $solrsort, 'search/' . arg(1), pager_find_page());
-    if (!$keys && !$filters && $empty_search_behavior == 'blocks') {
-      // If search was empty and empty search behavior is 'blocks', discard
-      // the result items and pass behavior on to apachesolr_search_search_page()
+    if (!$keys && !$conditions && ($empty_search_behavior == 'browse' || $empty_search_behavior == 'blocks')) {
+      // Pass empty search behavior as string on to apachesolr_search_search_page()
+      apachesolr_search_run_empty('search/' . arg(1));
       $results['apachesolr_search_browse'] = $empty_search_behavior;
+      if ($empty_search_behavior == 'browse') {
+        // Hide sidebar blocks for content-area browsing instead.
+        apachesolr_suppress_blocks(TRUE);
+      }
+    }
+    else {
+      $results = apachesolr_search_run($keys, $filters, $solrsort, 'search/' . arg(1), pager_find_page());
     }
     return $results;
   }
@@ -134,8 +134,16 @@ function apachesolr_search_search_execute($keys = NULL, $conditions = NULL) {
 function apachesolr_search_conditions() {
   $conditions = array();
 
-  if (isset($_GET['fq']) && !empty($_GET['fq'])) {
+  if (!empty($_GET['fq']) && is_array($_GET['fq'])) {
     $conditions['fq'] = $_GET['fq'];
+  }
+  // We may also have filters added by facet API module. The 'f'
+  // is determined by constant FacetapiAdapter::FILTER_KEY. Hard
+  // coded here to avoid extra class loading.
+  if (!empty($_GET['f']) && is_array($_GET['f'])) {
+    if (module_exists('facetapi')) {
+      $conditions['f'] = $_GET['f'];
+    }
   }
   if (variable_get('apachesolr_search_browse', 'browse') != 'none') {
     // Set a condition so the search is triggered.
@@ -202,9 +210,25 @@ function apachesolr_search_page_browse($empty_search_behavior) {
   // Switch in case we come up with new flags.
   switch ($empty_search_behavior) {
     case 'browse':
+      if (module_exists('facetapi') && $query = apachesolr_current_query()) {
+        module_load_include('inc', 'facetapi', 'facetapi.block');
+        $server_id = $query->solr('getServerId');
+        $searcher = 'apachesolr@' . $server_id;
+        $output = facetapi_build_realm($searcher, 'block');
+      }
       break;
   }
   return $output;
+}
+
+/**
+ * Execute a search with zero results rows so as to populate facets.
+ */
+function apachesolr_search_run_empty($base_path = '', $caller = 'apachesolr_search') {
+  $query = apachesolr_drupal_query('', array(), '', $base_path);
+  $query->addParam('rows', '0');
+  list($final_query, $response) = apachesolr_do_query($caller, $query, 0);
+  apachesolr_has_searched(TRUE);
 }
 
 /**
@@ -623,7 +647,7 @@ function apachesolr_search_block_info() {
  * Implements hook_block_view().
  */
 function apachesolr_search_block_view($delta = '') {
-  if (apachesolr_has_searched()) {
+  if (apachesolr_has_searched() && !apachesolr_suppress_blocks()) {
     // Get the query and response. Without these no blocks make sense.
     $response = apachesolr_static_response_cache();
     if (empty($response)) {
@@ -737,6 +761,28 @@ function apachesolr_search_form_search_submit($form, &$form_state) {
  * This adds options to the apachesolr admin form.
  */
 function apachesolr_search_form_apachesolr_settings_alter(&$form, $form_state) {
+  $description = t('This is what is shown when the user enters an empty search, or removes all filters from an active search.');
+  if (!module_exists('facetapi')) {
+    $description .= ' ' . t('<strong>Filters will not be shown until you enable FacetAPI module.</strong>');
+  }
+  else {
+    $description .= t('Remember to enable filters on the !filterslink and assign blocks to regions on the !blocklink', array(
+      '!filterslink' => l('enabled filters page', 'admin/config/search/apachesolr/enabled-filters'),
+      '!blocklink' => l('block settings page', 'admin/structure/block'),
+    ));
+  }
+  $form['apachesolr_search_browse'] = array(
+    '#type' => 'radios',
+    '#title' => t('Behavior on empty search'),
+    '#options' => array(
+      'none'    => t("Show search box"),
+      'browse'  => t("Show search box and enabled filters' blocks under the search box"),
+      'blocks'  => t("Show search box and enabled filters' blocks in their configured regions"),
+      'results' => t("Show search box, enabled filters' blocks in their configured regions and first page of all available results"),
+    ),
+    '#default_value' => variable_get('apachesolr_search_browse', 'browse'),
+    '#description' => $description,
+  );
 
   $form['apachesolr_search_spellcheck'] = array(
     '#type' => 'checkbox',

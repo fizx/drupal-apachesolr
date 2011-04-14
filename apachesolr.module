@@ -936,7 +936,7 @@ function apachesolr_block_view($delta = '') {
     }
     return $suggestions;
   }
-  elseif (apachesolr_has_searched() && $delta == 'sort') {
+  elseif (apachesolr_has_searched() && !apachesolr_suppress_blocks() && $delta == 'sort') {
     // Get the query and response. Without these no blocks make sense.
     $response = apachesolr_static_response_cache();
     if (empty($response) || ($response->response->numFound < 2)) {
@@ -1092,6 +1092,24 @@ function apachesolr_has_searched($searched = NULL) {
   return $_searched;
 }
 
+/**
+ * Semaphore that indicates whether Blocks should be suppressed regardless
+ * of whether a search has run.
+ *
+ * @param $flag
+ *   A boolean indicating whether to suppress.
+ *
+ * @return
+ *   TRUE if a search has been executed.
+ *   FALSE otherwise.
+ */
+function apachesolr_suppress_blocks($flag = NULL) {
+  static $_flag = FALSE;
+  if (is_bool($flag)) {
+    $_flag = $flag;
+  }
+  return $_flag;
+}
 
 /**
  * Get or set the default server ID for the current page.

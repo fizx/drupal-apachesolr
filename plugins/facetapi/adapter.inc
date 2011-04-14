@@ -83,6 +83,14 @@ class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
     return apachesolr_has_searched();
   }
 
+  public function suppressOutput($realm_name) {
+    $flag = FALSE;
+    if ($realm_name == 'block') {
+      $flag = apachesolr_suppress_blocks();
+    }
+    return $flag || !apachesolr_has_searched();
+  }
+
   /**
    * Returns the search keys.
    */
