@@ -34,6 +34,37 @@ function apachesolr_search_help($section) {
  * Implements hook_menu().
  */
 function apachesolr_search_menu() {
+  $items['admin/config/search/apachesolr/search-pages'] = array(
+    'title'            => 'Search Pages',
+    'description'      => t('Configure search pages.'),
+    'page callback'    => 'apachesolr_search_page_list_page',
+    'access arguments' => array('administer search'),
+    'type'             => MENU_LOCAL_TASK,
+    'file'             => 'apachesolr_search.admin.inc',
+  );
+  $items['admin/config/search/apachesolr/search-pages/add'] = array(
+    'title'            => 'Add search page configuration',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('apachesolr_search_page_settings_form'),
+    'access arguments' => array('administer search'),
+    'type'             => MENU_LOCAL_ACTION,
+    'file'             => 'apachesolr_search.admin.inc',
+  );
+  $items['admin/config/search/apachesolr/search-pages/%apachesolr_search_page/edit'] = array(
+    'title' => 'Edit search page configuration',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('apachesolr_search_page_settings_form', 5),
+    'access arguments' => array('administer search'),
+    'file'             => 'apachesolr_search.admin.inc',
+  );
+  $items['admin/config/search/apachesolr/search-pages/%apachesolr_search_page/delete'] = array(
+    'title'            => 'Delete search page configuration',
+    'load arguments'   => array('apachesolr_search_page'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('apachesolr_search_delete_search_page_confirm', 5),
+    'access arguments' => array('administer search'),
+    'file'             => 'apachesolr_search.admin.inc',
+  );
   $items['admin/config/search/apachesolr/query-fields'] = array(
     'title'            => 'Search fields',
     'page callback'    => 'apachesolr_search_settings_page',
@@ -51,7 +82,75 @@ function apachesolr_search_menu() {
     'file'             => 'apachesolr_search.admin.inc',
   );
 
+  try {
+    // Gets search pages directly from the index.
+    // @todo Honor "enabled" settings?
+    $result = db_select('apachesolr_search_page', 's')
+      ->fields('s', array('name', 'search_path', 'page_title'))
+      ->execute();
+  }
+  catch (Exception $e) {
+    watchdog_exception('apachesolr_search', $e);
+    $result = array();
+  }
+
+  // Gets default search information.
+  // @todo Check if the static reset is required.
+  drupal_static_reset('search_get_info');
+  $default_info = search_get_default_module_info();
+
+  // Iterates over search pages, builds menu items.
+  foreach ($result as $record) {
+    // Parses search path into it's various parts, builds menu items dependent
+    // on whether %keys is in the path.
+    $path_info = apachesolr_search_parse_search_path($record->search_path);
+    if (FALSE !== $path_info['keys position']) {
+      // Tests whether we are simulating a core search tab.
+      $core_search = (0 === strpos($path_info['parent'], 'search/'));
+
+      $items[$path_info['parent']] = array(
+        'title' => $record->page_title,
+        'page callback' => 'apachesolr_search_user_defined_search_page',
+        'page arguments' => array($record->name, ''),
+        'access arguments' => array('search content'),
+        'type' => ($core_search) ? MENU_LOCAL_TASK : MENU_SUGGESTED_ITEM,
+        'file' => 'apachesolr_search.pages.inc',
+      );
+
+      $items[$path_info['path']] = array(
+        'title' => $record->page_title,
+        'load arguments' => array('%map', '%index'),
+        'page callback' => 'apachesolr_search_user_defined_search_page',
+        'page arguments' => array($record->name, $path_info['keys position']),
+        'access arguments' => array('search content'),
+        'type' => MENU_LOCAL_TASK,
+        'file' => 'apachesolr_search.pages.inc',
+      );
+
+      if ($core_search) {
+        $items[$path_info['path']]['tab_root'] = 'search/' . $default_info['path'] . '/%';
+        $items[$path_info['path']]['tab_parent'] = 'search/' . $default_info['path'];
+      }
+    }
+    else {
+      $items[$path_info['path']] = array(
+        'title' => $record->page_title,
+        'page callback' => 'apachesolr_search_user_defined_search_page',
+        'page arguments' => array($record->name, ''),
+        'access arguments' => array('search content'),
+        'type' => MENU_SUGGESTED_ITEM,
+        'file' => 'apachesolr_search.pages.inc',
+      );
+    }
+  }
+
   return $items;
+}
+
+function apachesolr_search_page_load($name) {
+  $result = db_query('SELECT * FROM {apachesolr_search_page} s WHERE s.name = :name', array(':name' => $name));
+
+  return $result->fetchObject(); 
 }
 
 /**
@@ -248,9 +347,9 @@ function apachesolr_search_run_empty($base_path = '', $caller = 'apachesolr_sear
  *
  * @throws Exception
  */
-function apachesolr_search_run($keys, $fq = array(), $solrsort = '', $base_path = '', $page = 0, $caller = 'apachesolr_search') {
+function apachesolr_search_run($keys, $fq = array(), $solrsort = '', $base_path = '', $page = 0, $caller = 'apachesolr_search', $solr = NULL) {
   // This is the object that knows about the query coming from the user.
-  $query = apachesolr_drupal_query($keys, $fq, $solrsort, $base_path);
+  $query = apachesolr_drupal_query($keys, $fq, $solrsort, $base_path, $solr);
 
   apachesolr_search_basic_params($query);
   apachesolr_search_add_boost_params($query);
@@ -540,6 +639,13 @@ function apachesolr_search_node_result($doc, &$result, &$extra) {
 }
 
 /**
+ * Returns whether a search page exists. 
+ */
+function apachesolr_search_page_exists($search_page_name) {
+  return db_query('SELECT 1 FROM {apachesolr_search_page} WHERE name = :name', array(':name' => $search_page_name))->fetchField();
+}
+
+/**
  * Template preprocess for apachesolr search results.
  *
  * We need to add additional entity/bundle-based templates
@@ -823,6 +929,63 @@ function apachesolr_search_build_spellcheck($form, &$form_state) {
 }
 
 /**
+ * Parses search path, populates with variables.
+ *
+ * @param $path
+ *   A string containing the raw path set in the database.
+ *
+ * @return
+ *   An array containing the search path information.
+ */
+function apachesolr_search_parse_search_path($path) {
+  $return = array(
+    'raw path' => $path,
+    'path' => '',
+    'parent' => '',
+    'keys position' => FALSE,
+    'variables' => array(),
+    'values' => array(),
+  );
+
+  // Pulls out query string and parses into vars.
+  if ($qstring = parse_url($path, PHP_URL_QUERY)) {
+    parse_str($qstring, $vars);
+  }
+  else {
+    $vars = array();
+  }
+
+  // Pulls out additional information based on the query string.
+  if (FALSE !== ($pos = strpos($path, '/%keys'))) {
+    $return['parent'] = substr($path, 0, $pos);
+    $return['path'] = $return['parent'] . '/%menu_tail';
+    $return['keys position'] = count(explode('/', $return['path'])) - 1;
+  }
+  else {
+    $return['path'] = rtrim(parse_url($path, PHP_URL_PATH), '/');
+    $return['variables']['keys'] = array_search('%keys', $vars);
+    if (isset($_GET[$return['variables']['keys']])) {
+      $return['values']['keys'] = (string) $_GET[$return['variables']['keys']];
+    }
+    else {
+      $return['values']['keys'] = FALSE;
+    }
+  }
+
+  // Builds keys, allows modules to add additional keys.
+  // @todo Create and invoke hook.
+  $keys = array('sort', 'limit');
+  foreach ($keys as $key) {
+    $var = array_search('%' . $key, $vars);
+    $var = (FALSE === $var) ? $key : $var;
+    $return['variables'][$key] = $var;
+    $return['values'][$key] = (isset($_GET[$var])) ? $_GET[$var] : FALSE;
+  }
+
+  return $return;
+}
+
+/**
  * Implements hook_theme().
  */
 function apachesolr_search_theme() {
@@ -927,4 +1090,5 @@ function apachesolr_search_currentsearch_block($response, DrupalSolrQueryInterfa
       'options' => array('query' => $query->getUrlQueryvalues())));
   }
 }
+
 

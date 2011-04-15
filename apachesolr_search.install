@@ -15,6 +15,87 @@ function apachesolr_search_enable() {
 }
 
 /**
+ * Implements hook_schema().
+ */
+function apachesolr_search_schema() {
+  $schema = array();
+
+  $schema['apachesolr_search_page'] = array(
+    'description' => 'Apache Solr Search search page settings.',
+    'export' => array(
+      'key' => 'name',
+      'identifier' => 'searcher',
+      'default hook' => 'apachesolr_search_default_searchers',
+      'status' => 'apachesolr_search_page_status',
+      'api' => array(
+        'owner' => 'apachesolr_search',
+        'api' => 'apachesolr_search_defaults',
+        'minimum_version' => 3,
+        'current_version' => 3,
+      ),
+      'export callback' => 'apachesolr_search_page_settings_export',
+    ),
+    'fields' => array(
+      'name' => array(
+        'description' => 'The machine readable name of the search page.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'label' => array(
+        'description' => 'The human readable name of the search page.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'The description of the search page.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'search_path' => array(
+        'description' => 'The path to the search page.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'page_title' => array(
+        'description' => 'The title of the search page.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'server_id' => array(
+        'description' => 'The machine name of the server.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'settings' => array(
+        'description' => 'Serialized storage of general settings.',
+        'type' => 'text',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('name'),
+    'indexes' => array(
+      'server_id' => array('server_id'),
+    ),
+  );
+
+  return $schema;
+}
+
+
+
+/**
  * Implements hook_uninstall().
  */
 function apachesolr_search_uninstall() {
@@ -49,5 +130,12 @@ function apachesolr_search_update_7000() {
     variable_set('search_default_module', 'apachesolr_search');
   }
   variable_del('apachesolr_search_make_default');
+}
+
+/**
+ * Add apachesolr_search_page table.
+ */
+function apachesolr_search_update_7001() {
+  drupal_install_schema('apachesolr_search');
 }
 

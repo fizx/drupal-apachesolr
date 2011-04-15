@@ -6,6 +6,302 @@
  */
 
 /**
+ *
+ */
+function apachesolr_search_page_list_page() {
+  $build = array();
+
+  // Build the sortable table header.
+  $header = array(
+    'label' => array('data' => t('Name'), 'field' => 's.label'),
+    'path' => array('data' => t('Path'), 'field' => 's.search_path'),
+    'server' => array('data' => t('Server'), 'field' => 'ser.server_name'),
+    'operations' => array('data' => t('Operations'), 'colspan' => '2'),
+  );
+
+  // Initializes the search page query.
+  $query = db_select('apachesolr_search_page', 's')
+    ->fields('s', array('label', 'name', 'description', 'search_path'))
+    ->extend('PagerDefault')
+    ->extend('TableSort')
+    ->limit(20)
+    ->orderByHeader($header);
+
+  $query->addField('ser', 'name', 'server_name');
+
+  // Joins on the server table.
+  $query->leftJoin('apachesolr_server', 'ser', 's.server_id = ser.server_id');
+
+  $rows = array();
+  foreach ($query->execute() as $record) {
+    $row = array();
+
+    $row[] = check_plain($record->label);
+
+    // Parses path information, calculates the link's href.
+    $path_info = apachesolr_search_parse_search_path($record->search_path);
+    $href = (!empty($path_info['parent'])) ? $path_info['parent'] : $path_info['path'];
+    $row[] = array(
+      'data' => array(
+        '#type' => 'link',
+        '#title' => $record->search_path,
+        '#href' => $href,
+      ),
+    );
+
+    $row[] = check_plain($record->server_name);
+
+    // Operations
+    $row[] = array('data' => l(t('Edit'), 'admin/config/search/apachesolr/search-pages/' . $record->name . '/edit'));
+    $row[] = array('data' => l(t('Delete'), 'admin/config/search/apachesolr/search-pages/' . $record->name . '/delete'));
+      
+    $rows[] = $row;
+  }
+
+  $build['list'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No available search pages.'),
+  );
+
+  return $build;
+}
+
+/**
+ *
+ */
+function apachesolr_search_page_settings_form($form, &$form_state, $search_page = NULL) {
+
+  // Initializes form with common settings.
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#description' => '',
+    '#required' => TRUE,
+    '#size' => 30,
+    '#maxlength' => 32,
+    '#weight' => -50,
+    '#default_value' => !empty($search_page) ? $search_page->label : '',
+  );
+
+  $form['name'] = array(
+    '#type' => 'machine_name',
+    '#maxlength' => 32,
+    '#required' => TRUE,
+    '#machine_name' => array(
+      'exists' => 'apachesolr_search_page_exists',
+      'source' => array('label'),
+    ),
+    '#description' => '',
+    '#weight' => -40,
+    '#default_value' => !empty($search_page) ? $search_page->name : '',
+    '#disabled' => !empty($search_page),
+  );
+
+  $form['info']['description'] = array(
+    '#title' => t('Description'),
+    '#type' => 'textfield',
+    '#required' => FALSE,
+    '#maxlength' => 255,
+    '#description' => '',
+    '#default_value' => !empty($search_page) ? $search_page->description : '',
+  );
+
+  $form['info']['search_path'] = array(
+    '#title' => t('Path'),
+    '#type' => 'textfield',
+    '#required' => FALSE,
+    '#maxlength' => 255,
+    '#description' => t('Must include "%keys" token, for example: search/my-search-page/%keys.'),
+    '#default_value' => !empty($search_page) ? $search_page->search_path : '',
+  );
+
+  $form['info']['page_title'] = array(
+    '#title' => t('Title'),
+    '#type' => 'textfield',
+    '#required' => FALSE,
+    '#maxlength' => 255,
+    '#description' => '',
+    '#default_value' => !empty($search_page) ? $search_page->page_title : '',
+  );
+
+  // Sets the descriptions and button text.
+  $form['label']['#description'] = t('The human-readable name of the search page configuration.');
+  $form['name']['#description'] = t('A unique machine-readable name for the search page configuration. It must only contain lowercase letters, numbers, and underscores.');
+  $form['info']['description']['#description'] = t('The description of the search page configuration.');
+
+  $id = variable_get('apachesolr_default_server', 'solr');
+  $servers = apachesolr_load_all_servers();
+
+  $options = array();
+  foreach ($servers as $id => $server) {
+    $options[$id] = $server['name'];
+  }
+
+  $form['info']['server_id'] = array(
+    '#title' => t('Server'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => $id,
+    '#description' => t('The server that is searched by this search page.'),
+    '#required' => TRUE,
+    '#weight' => -30,
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    '#weight' => 20,
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  $form['actions']['submit_list'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save and go back to list'),
+  );
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/config/search/apachesolr/search-pages',
+  );
+
+  $form['#submit'][] = 'apachesolr_search_page_settings_form_submit';
+
+  return $form;
+}
+
+function apachesolr_search_page_settings_form_validate($form, &$form_state) {
+  try {
+    // Performs basic validation of the menu path.
+    if (FALSE === ($url = parse_url($form_state['values']['search_path']))) {
+      throw new Exception(t('Path not valid.'));
+    }
+    if (!empty($url['host'])) {
+      throw new Exception(t('Path must be local.'));
+    }
+    if (empty($url['path'])) {
+      throw new Exception(t('Path required.'));
+    }
+    if (0 === strpos($url['path'], '/')) {
+      throw new Exception(t('Path cannot start with a forward slash.'));
+    }
+
+    // Parses query string into array of variables.
+    $qstring = isset($url['query']) ? $url['query'] : '';
+    parse_str($qstring, $vars);
+
+    // Parses path, checks if %keys token is in the menu path or query string.
+    $parts = explode('/', $url['path']);
+    if (FALSE !== ($pos = array_search('%keys', $parts))) {
+      // Validates position of %keys token.
+      if (count($parts) != $pos + 1) {
+        throw new Exception(t('The <em>keys</em> token must be the last item in the path.'));
+      }
+      elseif (!$pos) {
+        throw new Exception(t('The <em>keys</em> token cannot be the only item in the path.'));
+      }
+    }
+    else {
+      // Attempts to extract %keys token from query string.
+      if (FALSE === ($keys = array_search('%keys', $vars))) {
+        throw new Exception(t('The <em>keys</em> token is required.'));
+      }
+    }
+
+  }
+  catch (Exception $e) {
+    form_set_error('search_path', $e->getMessage());
+  }
+}
+
+/**
+ * Processes apachesolr_search_page_settings_form form submissions.
+ */
+function apachesolr_search_page_settings_form_submit($form, &$form_state) {
+  db_merge('apachesolr_search_page')
+    ->key(array('name' => $form_state['values']['name']))
+    ->fields(array(
+      'label' => $form_state['values']['label'],
+      'name' => $form_state['values']['name'],
+      'description' => $form_state['values']['description'],
+      'server_id' => $form_state['values']['server_id'],
+      'search_path' => $form_state['values']['search_path'],
+      'page_title' => $form_state['values']['page_title'],
+    ))
+    ->execute();
+
+  // Saves our values in the database, sets redirect path on success.
+  drupal_set_message(t('The configuration options have been saved.'));
+
+  if (t('Save and go back to list') == $form_state['clicked_button']['#value']) {
+      $form_state['redirect'] = 'admin/config/search/apachesolr/search-pages';
+  }
+
+  // Menu rebuild needed to pick up search path.
+  menu_rebuild();
+}
+
+/**
+ * Deletes a single search page configuration.
+ */
+function apachesolr_search_delete_search_page_confirm($form, &$form_state, $search_page) {
+
+  // Sets values required for deletion.
+  $form['name'] = array('#type' => 'value', '#value' => $search_page->name);
+  $form['label'] = array('#type' => 'value', '#value' => $search_page->label);
+
+  // Sets the message, or the title of the page.
+  $message = t(
+    'Are you sure you want to delete the %label search page configuration?',
+    array('%label' => $form['label']['#value'])
+  );
+
+  // Builds caption.
+  $caption = '<p>';
+  $caption .= t(
+    'The %label search page configuration will be deleted.',
+    array('%label' => $form['label']['#value'])
+  );
+  $caption .= '</p>';
+  $caption .= '<p><strong>' . t('This action cannot be undone.') . '</strong></p>';
+
+  // Finalizes and returns the confirmation form.
+  $return_path = 'admin/config/search/apachesolr/search-pages';
+  $button_text = t('Delete configuration');
+  return confirm_form($form, $message, $return_path, $caption, $button_text);
+}
+
+/**
+ * Process content type delete confirm submissions.
+ */
+function apachesolr_search_delete_search_page_confirm_submit($form, &$form_state) {
+  // Deletes the index configuration settings.
+  // @todo Invoke a hook that allows backends and indexers to delete their stuff.
+  db_delete('apachesolr_search_page')
+    ->condition('name', $form_state['values']['name'])
+    ->execute();
+
+  // Sets message, logs action.
+  drupal_set_message(t(
+    'The %label search page configuration has been deleted.',
+    array('%label' => $form_state['values']['label'])
+  ));
+  watchdog('apachesolr_search', 'Deleted search page configuration "@name".', array('@name' => $form_state['values']['name']), WATCHDOG_NOTICE);
+
+  // Rebuilds the menu cache.
+  menu_rebuild();
+
+  // Returns back to search page list page.
+  $form_state['redirect'] = 'admin/config/search/apachesolr/search-pages';
+}
+
+
+/**
  * Menu callback - the settings form.
  */
 function apachesolr_search_settings_page($server_id = NULL) {
