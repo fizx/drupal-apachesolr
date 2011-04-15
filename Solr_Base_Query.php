@@ -164,21 +164,24 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
   protected $solr;
   // The array keys must always be real Solr index fields.
   protected $available_sorts;
+  /**
+   * The query name is used to construct a searcher string. Typically something like 'apachesolr'
+   */
+  protected $name;
 
   // Makes sure we always have a valid sort.
   protected $solrsort = array('#name' => 'score', '#direction' => 'desc');
 
   /**
+   * @param $name
+   *   A name (namespce) for this query.  Typically 'apachesolr'.
+   *
    * @param $solr
    *   An instantiated DrupalApacheSolrService Object.
    *   Can be instantiated from apachesolr_get_solr().
    *
-   * @param $keys
-   *   The string that a user would type into the search box. Suitable input
-   *   may come from search_get_keys().
-   *
-   * @param $fq
-   *   Array of filter queries.
+   * @param $params
+   *   Array of params to initialize the object (typically 'q' and 'fq').
    *
    * @param $sortstring
    *   Visible string telling solr how to sort - added to GET query params.
@@ -186,11 +189,11 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
    * @param $base_path
    *   The search base path (without the keywords) for this query, without trailing slash.
    */
-  function __construct($solr, $keys = '', $fq = array(), $sortstring = '', $base_path = '') {
+  function __construct($name, $solr, array $params = array(), $sortstring = '', $base_path = '') {
     parent::__construct();
+    $this->name = $name;
     $this->solr = $solr;
-    $this->addParam('q', trim($keys));
-    $this->addParam('fq', $fq);
+    $this->addParams($params);
     $this->available_sorts = $this->defaultSorts();
     $this->sortstring = trim($sortstring);
     $this->parseSortstring();
@@ -205,6 +208,20 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
       'sort_name' => array('title' => t('Author'), 'default' => 'asc'),
       'ds_created' => array('title' => t('Date'), 'default' => 'desc'),
     );
+  }
+
+  /**
+   * Get query name.
+   */
+  public function getName() {
+    return $this->name;
+  }
+
+  /**
+   * Get query searcher name (for facetapi, views, pages, etc).
+   */
+  public function getSearcher() {
+    return $this->name . '@' . $this->solr->getServerId();
   }
 
   protected $single_value_params = array(
@@ -261,7 +278,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
     if ($name == 'fq') {
       return $this->rebuildFq();
     }
-    $empty = isset($single_value_params[$name]) ? NULL : array();
+    $empty = isset($this->single_value_params[$name]) ? NULL : array();
     return isset($this->params[$name]) ? $this->params[$name] : $empty;
   }
 
@@ -315,7 +332,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
       if (is_array($value)) {
         $value = end($value);
       }
-      $this->params[$name] = $value;
+      $this->params[$name] = trim($value);
       return $this;
     }
     // We never actually populate $this->params['fq'].  Instead

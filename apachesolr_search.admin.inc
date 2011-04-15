@@ -21,7 +21,7 @@ function apachesolr_search_page_list_page() {
 
   // Initializes the search page query.
   $query = db_select('apachesolr_search_page', 's')
-    ->fields('s', array('label', 'name', 'description', 'search_path'))
+    ->fields('s', array('label', 'name', 'page_title', 'description', 'search_path'))
     ->extend('PagerDefault')
     ->extend('TableSort')
     ->limit(20)
@@ -38,14 +38,11 @@ function apachesolr_search_page_list_page() {
 
     $row[] = check_plain($record->label);
 
-    // Parses path information, calculates the link's href.
-    $path_info = apachesolr_search_parse_search_path($record->search_path);
-    $href = (!empty($path_info['parent'])) ? $path_info['parent'] : $path_info['path'];
     $row[] = array(
       'data' => array(
         '#type' => 'link',
         '#title' => $record->search_path,
-        '#href' => $href,
+        '#href' => $record->search_path,
       ),
     );
 
@@ -82,7 +79,7 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
     '#size' => 30,
     '#maxlength' => 32,
     '#weight' => -50,
-    '#default_value' => !empty($search_page) ? $search_page->label : '',
+    '#default_value' => !empty($search_page->label) ? $search_page->label : '',
   );
 
   $form['name'] = array(
@@ -95,7 +92,7 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
     ),
     '#description' => '',
     '#weight' => -40,
-    '#default_value' => !empty($search_page) ? $search_page->name : '',
+    '#default_value' => !empty($search_page->name) ? $search_page->name : '',
     '#disabled' => !empty($search_page),
   );
 
@@ -105,25 +102,34 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
     '#required' => FALSE,
     '#maxlength' => 255,
     '#description' => '',
-    '#default_value' => !empty($search_page) ? $search_page->description : '',
+    '#default_value' => !empty($search_page->description) ? $search_page->description : '',
   );
 
   $form['info']['search_path'] = array(
     '#title' => t('Path'),
     '#type' => 'textfield',
+    '#required' => TRUE,
+    '#maxlength' => 255,
+    '#description' => t('For example: search/my-search-page. Search keywords will appear at the end of the path.'),
+    '#default_value' => !empty($search_page->search_path) ? $search_page->search_path : '',
+  );
+
+  $form['info']['filters'] = array(
+    '#title' => t('Default filters'),
+    '#type' => 'textfield',
     '#required' => FALSE,
     '#maxlength' => 255,
-    '#description' => t('Must include "%keys" token, for example: search/my-search-page/%keys.'),
-    '#default_value' => !empty($search_page) ? $search_page->search_path : '',
+    '#description' => t('A comma-separated list of lucene filter queries to apply by default. E.g. "bundle:blog, is_uid:(1 OR 2 OR 3)"'),
+    '#default_value' => !empty($search_page->settings['fq'])  ? implode(', ', $search_page->settings['fq']) : '',
   );
 
   $form['info']['page_title'] = array(
     '#title' => t('Title'),
     '#type' => 'textfield',
-    '#required' => FALSE,
+    '#required' => TRUE,
     '#maxlength' => 255,
     '#description' => '',
-    '#default_value' => !empty($search_page) ? $search_page->page_title : '',
+    '#default_value' => !empty($search_page->page_title) ? $search_page->page_title : '',
   );
 
   // Sets the descriptions and button text.
@@ -143,7 +149,7 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
     '#title' => t('Server'),
     '#type' => 'select',
     '#options' => $options,
-    '#default_value' => $id,
+    '#default_value' => !empty($search_page->server_id) ? $search_page->server_id : NULL,
     '#description' => t('The server that is searched by this search page.'),
     '#required' => TRUE,
     '#weight' => -30,
@@ -176,46 +182,13 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
 }
 
 function apachesolr_search_page_settings_form_validate($form, &$form_state) {
-  try {
-    // Performs basic validation of the menu path.
-    if (FALSE === ($url = parse_url($form_state['values']['search_path']))) {
-      throw new Exception(t('Path not valid.'));
-    }
-    if (!empty($url['host'])) {
-      throw new Exception(t('Path must be local.'));
-    }
-    if (empty($url['path'])) {
-      throw new Exception(t('Path required.'));
-    }
-    if (0 === strpos($url['path'], '/')) {
-      throw new Exception(t('Path cannot start with a forward slash.'));
-    }
-
-    // Parses query string into array of variables.
-    $qstring = isset($url['query']) ? $url['query'] : '';
-    parse_str($qstring, $vars);
-
-    // Parses path, checks if %keys token is in the menu path or query string.
-    $parts = explode('/', $url['path']);
-    if (FALSE !== ($pos = array_search('%keys', $parts))) {
-      // Validates position of %keys token.
-      if (count($parts) != $pos + 1) {
-        throw new Exception(t('The <em>keys</em> token must be the last item in the path.'));
-      }
-      elseif (!$pos) {
-        throw new Exception(t('The <em>keys</em> token cannot be the only item in the path.'));
-      }
-    }
-    else {
-      // Attempts to extract %keys token from query string.
-      if (FALSE === ($keys = array_search('%keys', $vars))) {
-        throw new Exception(t('The <em>keys</em> token is required.'));
-      }
-    }
-
+  // Performs basic validation of the menu path.
+  if (url_is_external($form_state['values']['search_path'])) {
+    form_set_error('search_path', t('Path must be local.'));
   }
-  catch (Exception $e) {
-    form_set_error('search_path', $e->getMessage());
+  $form_state['values']['search_path'] = trim($form_state['values']['search_path'], '/');
+  if (empty($form_state['values']['search_path'])) {
+    form_set_error('search_path', t('Path required.'));
   }
 }
 
@@ -223,6 +196,16 @@ function apachesolr_search_page_settings_form_validate($form, &$form_state) {
  * Processes apachesolr_search_page_settings_form form submissions.
  */
 function apachesolr_search_page_settings_form_submit($form, &$form_state) {
+  $settings = array();
+  if ($form_state['values']['filters']) {
+    foreach(explode(',', $form_state['values']['filters']) as $string) {
+      $string = trim($string);
+      // Minimal validation.  ':' must exist and can't be the 1st char..
+      if (strpos($string, ':')) {
+        $settings['fq'][] = $string;
+      }
+    }
+  }
   db_merge('apachesolr_search_page')
     ->key(array('name' => $form_state['values']['name']))
     ->fields(array(
@@ -232,6 +215,7 @@ function apachesolr_search_page_settings_form_submit($form, &$form_state) {
       'server_id' => $form_state['values']['server_id'],
       'search_path' => $form_state['values']['search_path'],
       'page_title' => $form_state['values']['page_title'],
+      'settings' => serialize($settings),
     ))
     ->execute();
 

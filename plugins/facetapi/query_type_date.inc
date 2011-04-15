@@ -107,7 +107,7 @@ class ApacheSolrFacetapiDate extends FacetapiQueryTypeDate implements FacetapiQu
   public function build() {
 
     // Initializes build and gets static response.
-    if (!$response = apachesolr_static_response_cache()) {
+    if (!$response = apachesolr_static_response_cache($this->adapter->getSearcher())) {
       return array();
     }
     $build = array();

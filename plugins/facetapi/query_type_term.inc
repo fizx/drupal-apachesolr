@@ -46,7 +46,7 @@ class ApacheSolrFacetapiTerm extends FacetapiQueryType implements FacetapiQueryT
    */
   public function build() {
     $build = array();
-    if ($response = apachesolr_static_response_cache()) {
+    if ($response = apachesolr_static_response_cache($this->adapter->getSearcher())) {
       if (isset($response->facet_counts->facet_fields->{$this->facet['field']})) {
         $values = (array) $response->facet_counts->facet_fields->{$this->facet['field']};
         foreach ($values as $value => $count) {

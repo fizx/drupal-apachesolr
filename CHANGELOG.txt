@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1122186 by slip, pwolanin: Allow custom user-specified search pages, supporting API changes.
 #1127520 by cpliakas, pwolanin: make the breadcrumb look reasonable on facet form.
 #1127302 by Janusman: some variables were not removed on uninstall.
 #1126806 by pwolanin, Janusman: restore facet browsing functionality.

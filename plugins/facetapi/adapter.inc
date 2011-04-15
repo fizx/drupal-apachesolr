@@ -80,7 +80,11 @@ class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
    * Returns a boolean flagging whether $this->_searcher executed a search.
    */
   public function searchExecuted() {
-    return apachesolr_has_searched();
+    // Initial check - has ANY solr query run.
+    $this_has_searched = apachesolr_has_searched();
+    // Secondary check - do we have results for this searcher?
+    $this_has_searched = $this_has_searched && apachesolr_static_response_cache($this->getSearcher());
+    return $this_has_searched;
   }
 
   public function suppressOutput($realm_name) {
@@ -88,7 +92,7 @@ class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
     if ($realm_name == 'block') {
       $flag = apachesolr_suppress_blocks();
     }
-    return $flag || !apachesolr_has_searched();
+    return $flag || !$this->searchExecuted();
   }
 
   /**
