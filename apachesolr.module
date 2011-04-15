@@ -1041,6 +1041,28 @@ function apachesolr_form_field_ui_field_edit_form_alter(&$form, $form_state) {
 }
 
 /**
+ * Implements hook_form_[form_id]_alter(). (D7)
+ *
+ * Ensures breadcrumbs are reasonable for the facet settings form.
+ */
+function apachesolr_form_facetapi_facet_settings_form_alter(&$form, $form_state) {
+  if ('apachesolr' == $form['#facetapi']['adapter']->getId()) {
+    // Hack here that depnds on our construction of the searcher name in this way.
+    list(, $server_id) = explode('@', $form['#facetapi']['adapter']->getSearcher());
+    $realm = $form['#facetapi']['realm'];
+    $breadcrumb = array(
+      l(t('Home'), '<front>'),
+      l(t('Administration'), 'admin'),
+      l(t('Configuration'), 'admin/config'),
+      l(t('Search and metadata'), 'admin/config/search'),
+      l(t('Apache Solr search server edit'), 'admin/config/search/apachesolr-server/' . $server_id),
+      l($realm['label'], 'admin/config/search/apachesolr-server/' . $server_id . '/facets/' . $realm['name']),
+    );
+    drupal_set_breadcrumb($breadcrumb);
+  }
+}
+
+/**
  * This hook allows modules to modify the query object.
  *
  * Example:
