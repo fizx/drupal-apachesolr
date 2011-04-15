@@ -175,6 +175,7 @@ function apachesolr_schema() {
  * Implements hook_uninstall().
  */
 function apachesolr_uninstall() {
+  // Remove variables.
   variable_del('apachesolr_default_server');
   variable_del('apachesolr_rows');
   variable_del('apachesolr_facet_show_children');
@@ -185,6 +186,10 @@ function apachesolr_uninstall() {
   variable_del('apachesolr_mlt_blocks');
   variable_del('apachesolr_cron_limit');
   variable_del('apachesolr_exclude_nodeapi_types');
+  variable_del('apachesolr_failure');
+  variable_del('apachesolr_index_updated');
+  variable_del('apachesolr_read_only');
+  variable_del('apachesolr_set_nodeapi_messages');
   // Remove blocks.
   db_delete('block')->condition('module', 'apachesolr')->execute();
 }

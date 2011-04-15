@@ -29,6 +29,9 @@ function apachesolr_search_uninstall() {
     unset($active[$idx]);
     variable_set('search_active_modules', $active);
   }
+  // Remove variables.
+  variable_del('apachesolr_search_browse');
+  variable_del('apachesolr_search_spellcheck');
 }
 
 /**
