@@ -471,8 +471,9 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
     return $this->base_path . '/' . $this->getParam('q');
   }
 
-  public function getUrlQueryvalues() {
-    $queryvalues = array();
+  public function getUrlQueryvalues($queryvalues = array()) {
+    // For sanity's sake, unset the special 'q' param used by Drupal core.
+    unset($queryvalues['q']);
     $filters = $this->getParam('fq');
     if ($filters) {
       $queryvalues['fq'] = $filters;

@@ -972,11 +972,11 @@ function apachesolr_block_view($delta = '') {
         $direction = '';
         $new_direction = $sort['default'];
       }
-    $new_query->setSolrsort($name, $new_direction);
+      $new_query->setSolrsort($name, $new_direction);
       $sort_links[$name] = array(
         'title' => $sort['title'],
         'path' => $path,
-        'options' => array('query' => $new_query->getUrlQueryvalues()),
+        'options' => array('query' => $new_query->getUrlQueryvalues($_GET)),
         'active' => $active,
         'direction' => $direction,
       );
@@ -1451,7 +1451,7 @@ function apachesolr_drupal_query($name, $params = array(), $solrsort = '', $base
   if (empty($solr)) {
     $solr = apachesolr_get_solr();
   }
-  return new $class($name, $solr, $params, $base_path);
+  return new $class($name, $solr, $params, $solrsort, $base_path);
 }
 
 /**
@@ -2376,7 +2376,7 @@ interface DrupalSolrQueryInterface {
    */
   public function getPath($new_keywords = NULL);
 
-  public function getUrlQueryvalues();
+  public function getUrlQueryvalues($queryvalues = array());
 
   /**
    * Send a search query using the Solr object passed into the constructor.
