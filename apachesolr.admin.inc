@@ -48,10 +48,6 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
   }
   $server += array('server_id' => '', 'name' => '', 'url' => '', 'service_class' => '');
 
-  $form['original_server_id'] = array(
-    '#type' => 'value',
-    '#value' => $server['server_id'],
-  );
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr server URL'),
@@ -81,6 +77,7 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
       'exists' => 'apachesolr_server_load',
     ),
     '#default_value' => $server['server_id'],
+    '#disabled' => !empty($server['server_id']), // Cannot change it once set.
     '#description' => t('Unique, machine-readable identifier Solr server.'),
     '#required' => TRUE,
   );
@@ -162,7 +159,7 @@ function apachesolr_server_save_validate($form, &$form_state) {
 }
 
 function apachesolr_server_save_submit($form, &$form_state) {
-  apachesolr_server_save($form_state['values'], $form_state['values']['original_server_id']);
+  apachesolr_server_save($form_state['values']);
   if (!empty($form_state['values']['make_default'])) {
     variable_set('apachesolr_default_server', $form_state['values']['server_id']);
   }  

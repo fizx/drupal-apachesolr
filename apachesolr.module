@@ -1213,48 +1213,45 @@ function apachesolr_server_load($server_id) {
 }
 
 function apachesolr_server_delete($server_id) {
-  $result = db_delete('apachesolr_server')
-    ->condition('server_id', $server_id)
-    ->execute();
-  $result = db_delete('apachesolr_server')
-    ->condition('server_id', $server_id)
-    ->execute();
-  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
-  drupal_static_reset('apachesolr_load_all_servers');
-  drupal_static_reset('apachesolr_get_solr');
-  return $result;
+  $server = apachesolr_server_load($server_id);
+  if ($server) {
+    db_delete('apachesolr_server')
+      ->condition('server_id', $server_id)
+      ->execute();
+    db_delete('apachesolr_server_variable')
+      ->condition('server_id', $server_id)
+      ->execute();
+
+    module_invoke_all('apachesolr_server_delete', $server);
+
+    cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+    drupal_static_reset('apachesolr_load_all_servers');
+    drupal_static_reset('apachesolr_get_solr');
+  }
 }
 
-function apachesolr_server_save($server, $original_id = NULL) {
+function apachesolr_server_save($server) {
   $default = array('server_id' => NULL, 'name' => '', 'url' => '', 'service_class' => '');
+  $is_new = !apachesolr_server_load($server['server_id']);
   $conf = isset($server['conf']) ? $server['conf'] : array();
   // Remove any unexpected fields.
-  // @todo - getthis from the schema, or maybe use drupal_write_record().
+  // @todo - getthis from the schema?.
   $server = array_intersect_key($server, $default);
-  $server_id = $server['server_id'];
-  if (empty($original_id) || $server['server_id'] == $original_id) {
-    unset($server['server_id']);
-    db_merge('apachesolr_server')
+  if ($is_new) {
+    db_insert('apachesolr_server')
       ->fields($server)
-      ->key(array('server_id' => $server_id))
       ->execute();
   }
   else {
     db_update('apachesolr_server')
       ->fields($server)
-      ->condition('server_id', $original_id)
-      ->execute();
-    // Update the server_id column for the per-server variables.
-    db_update('apachesolr_server_variable')
-      ->fields(array('server_id' => $server_id))
-      ->condition('server_id', $original_id)
+      ->condition('server_id', $server['server_id'])
       ->execute();
   }
-  // Update the server variables (if any).  Note that a change in server_id
-  // will already have happened above.
+  // Update the server variables (if any).
   foreach ($conf as $name => $value) {
     db_merge('apachesolr_server_variable')
-      ->key(array('server_id' => $server_id, 'name' => $name))
+      ->key(array('server_id' => $server['server_id'], 'name' => $name))
       ->fields(array('value' => serialize($value)))
       ->execute();
   }

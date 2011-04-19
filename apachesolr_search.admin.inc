@@ -140,7 +140,7 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
   $id = variable_get('apachesolr_default_server', 'solr');
   $servers = apachesolr_load_all_servers();
 
-  $options = array();
+  $options = array('' => t('<Disabled>'));
   foreach ($servers as $id => $server) {
     $options[$id] = $server['name'];
   }
@@ -150,8 +150,7 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
     '#type' => 'select',
     '#options' => $options,
     '#default_value' => !empty($search_page->server_id) ? $search_page->server_id : NULL,
-    '#description' => t('The server that is searched by this search page.'),
-    '#required' => TRUE,
+    '#description' => t('The server that is searched by this search page. If no server is selected, this page will be disabled.'),
     '#weight' => -30,
   );
 

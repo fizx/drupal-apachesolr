@@ -122,3 +122,16 @@ function hook_apachesolr_search_result_alter($doc) {
  */
 function hook_apachesolr_sort_links_alter(&$sort_links) {
 }
+
+/**
+ * Respond to server deletion.
+ *
+ * This hook is invoked from apachesolr_server_delete() after the server is removed
+ * from the database.
+ *
+ * @param $server
+ *   The server object that is being deleted.
+ */
+function hook_apachesolr_server_delete($server) {
+}
+
