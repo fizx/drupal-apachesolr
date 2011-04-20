@@ -87,6 +87,7 @@ function apachesolr_search_menu() {
     // @todo Honor "enabled" settings?
     $result = db_select('apachesolr_search_page', 's')
       ->fields('s', array('name', 'search_path', 'page_title'))
+      ->condition('server_id', '', '!=')
       ->execute();
   }
   catch (Exception $e) {
@@ -727,6 +728,21 @@ function apachesolr_search_vocabulary_content_types($vid) {
   }
   return array_unique($types);
 }
+
+/**
+ * Implements hook_apachesolr_server_delete().
+ */
+function apachesolr_search_apachesolr_server_delete($server) {
+  db_update('apachesolr_search_page')
+    ->fields(array(
+      'server_id' => '',
+    ))
+    ->condition('server_id', $server['server_id'])
+    ->execute();
+
+  menu_rebuild();
+}
+
 
 /**
  * Implements hook_block_info().
