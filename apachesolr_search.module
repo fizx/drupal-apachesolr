@@ -87,7 +87,6 @@ function apachesolr_search_menu() {
     // @todo Honor "enabled" settings?
     $result = db_select('apachesolr_search_page', 's')
       ->fields('s', array('name', 'search_path', 'page_title'))
-      ->condition('server_id', '', '!=')
       ->execute();
   }
   catch (Exception $e) {
@@ -300,43 +299,13 @@ function apachesolr_search_page_browse($empty_search_behavior) {
     case 'browse':
       if (module_exists('facetapi') && $query = apachesolr_current_query()) {
         module_load_include('inc', 'facetapi', 'facetapi.block');
-        // Get facet render elements.
-        $searcher = $query->getSearcher();
-        $elements = facetapi_build_realm($searcher, 'block');
-        $build = array();
-
-        foreach (element_children($elements) as $key) {
-          $delta = "facetapi_{$key}";
-          // @todo: order/filter these pseudo-blocks according to block.module weight, visibility (see 7.x-1beta4)
-          $block = new stdClass();
-          $block->visibility = TRUE;
-          $block->enabled = TRUE;
-          $block->module = 'facetapi';
-          $block->subject = check_plain($elements[$key]['#title']);
-          $build[$delta] = $elements[$key];
-          $block->region = NULL;
-          $block->delta = 'apachesolr-' . $key;
-          // @todo: the final themed block's div id attribute does not coincide with "real" block's id (see facetapi_get_delta_map())
-          $build[$delta]['#block'] = $block;
-          $build[$delta]['#theme_wrappers'][] = 'block';
-          $build['#sorted'] = TRUE;
-        }
-        $build['#theme_wrappers'][] = 'apachesolr_search_browse_blocks';
+        $server_id = $query->solr('getServerId');
+        $searcher = 'apachesolr@' . $server_id;
+        $output = facetapi_build_realm($searcher, 'block');
       }
       break;
   }
-  return $build;
-}
-
-/**
- * Shows a groups of blocks for starting a search from a filter.
- */
-function theme_apachesolr_search_browse_blocks($vars) {
-  $result = "<div class='apachesolr-browse-blocks'>\n<h2>" . t('Browse available categories') . "</h2>\n";
-  $result .= '<p>' . t('Pick a category to launch a search.') . "</p>\n";
-  $result .= $vars['content']['#children'] . "\n</div>\n";
-
-  return $result;
+  return $output;
 }
 
 /**
@@ -760,21 +729,6 @@ function apachesolr_search_vocabulary_content_types($vid) {
 }
 
 /**
- * Implements apachesolr_server_delete().
- */
-function apachesolr_search_apachesolr_server_delete($server) {
-  db_update('apachesolr_search_page')
-    ->fields(array(
-      'server_id' => '',
-    ))
-    ->condition('server_id', $server['server_id'])
-    ->execute();
-
-  menu_rebuild();
-}
-
-
-/**
  * Implements hook_block_info().
  */
 function apachesolr_search_block_info() {
@@ -973,8 +927,8 @@ function apachesolr_search_build_spellcheck($form, &$form_state) {
  */
 function apachesolr_search_theme() {
   return array(
-    'apachesolr_search_browse_blocks' => array(
-      'render element' => 'content',
+    'apachesolr_browse_blocks' => array(
+      'variables' => array('blocks' => NULL),
     ),
     'apachesolr_currentsearch' => array(
       'variables' => array('total_found' => NULL, 'links' => NULL),

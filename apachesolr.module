@@ -284,7 +284,7 @@ function apachesolr_facetapi_facet_info($searcher_info) {
 function apachesolr_facetapi_facet_info_alter(&$facet_info, $searcher_info) {
   // Provide information about the real Solr field names for these default facets.
   if ('apachesolr' == $searcher_info['adapter']) {
-    $facet_info['uid']['field'] = 'is_uid';
+    $facet_info['author']['field'] = 'is_uid';
     $facet_info['language']['field'] = 'ss_language';
     $facet_info['created']['field'] = 'ds_created';
     $facet_info['changed']['field'] = 'ds_changed';
