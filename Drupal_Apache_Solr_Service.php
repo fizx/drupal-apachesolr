@@ -574,7 +574,9 @@ class DrupalApacheSolrService {
 
     $rawPost = "<add{$attr}>";
     foreach ($documents as $document) {
-      $rawPost .= ApacheSolrDocument::documentToXml($document);
+      if (is_object($document) && ($document instanceof ApacheSolrDocument)) {
+        $rawPost .= ApacheSolrDocument::documentToXml($document);
+      }
     }
     $rawPost .= '</add>';
 
