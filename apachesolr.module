@@ -22,33 +22,33 @@ function apachesolr_menu() {
     'weight'             => -9,
     'file'               => 'apachesolr.admin.inc',
   );
-  $items['admin/config/search/apachesolr-server/%apachesolr_server'] = array(
-    'title'              => 'Apache Solr search server edit',
-    'description'        => 'Edit Apache Solr server.',
+  $items['admin/config/search/apachesolr-env/%apachesolr_environment'] = array(
+    'title'              => 'Apache Solr search environment edit',
+    'description'        => 'Edit Apache Solr search environment.',
     'page callback'      => 'drupal_get_form',
-    'page arguments'     => array('apachesolr_server_edit_form', 4),
+    'page arguments'     => array('apachesolr_environment_edit_form', 4),
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
     'type'               => MENU_CALLBACK,
   );
-  $items['admin/config/search/apachesolr-server/%apachesolr_server/edit'] = array(
+  $items['admin/config/search/apachesolr-env/%apachesolr_environment/edit'] = array(
     'title'              => 'Edit',
     'weight'             => -20,
     'type'               => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['admin/config/search/apachesolr-server/%apachesolr_server/delete'] = array(
-    'title'              => 'Apache Solr search server delete',
-    'page callback'      => 'apachesolr_server_delete_page',
+  $items['admin/config/search/apachesolr-env/%apachesolr_environment/delete'] = array(
+    'title'              => 'Apache Solr search environment delete',
+    'page callback'      => 'apachesolr_environment_delete_page',
     'page arguments'     => array(4),
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
     'type'               => MENU_CALLBACK,
   );
-  $items['admin/config/search/apachesolr-server/add'] = array(
-    'title'              => 'Apache Solr search server add',
-    'description'        => 'Add Apache Solr server.',
+  $items['admin/config/search/apachesolr-env/add'] = array(
+    'title'              => 'Apache Solr search environment add',
+    'description'        => 'Add Apache Solr environment.',
     'page callback'      => 'drupal_get_form',
-    'page arguments'     => array('apachesolr_server_edit_form', NULL),
+    'page arguments'     => array('apachesolr_environment_edit_form', NULL),
     'access arguments'   => array('administer search'),
     'file'               => 'apachesolr.admin.inc',
     'type'               => MENU_CALLBACK,
@@ -152,8 +152,8 @@ function apachesolr_menu() {
           'type'             => MENU_DEFAULT_LOCAL_TASK,
           'weight'           => $realm['weight'],
         );
-        $items[$base_path . '-server/%apachesolr_server/facets'] = $items[$base_path . '/facets'];
-        $items[$base_path . '-server/%apachesolr_server/facets']['page arguments'] = array($realm_name, 4);
+        $items[$base_path . '-env/%apachesolr_environment/facets'] = $items[$base_path . '/facets'];
+        $items[$base_path . '-env/%apachesolr_environment/facets']['page arguments'] = array($realm_name, 4);
       }
       else {
         $items[$base_path . '/facets/' . $realm_name] = array(
@@ -167,8 +167,8 @@ function apachesolr_menu() {
           'file'             => 'facetapi.admin.inc',
         );
       }
-      $items[$base_path . '-server/%apachesolr_server/facets/' . $realm_name] = $items[$base_path . '/facets/' . $realm_name];
-      $items[$base_path . '-server/%apachesolr_server/facets/' . $realm_name]['page arguments'] = array($realm_name, 4);
+      $items[$base_path . '-env/%apachesolr_environment/facets/' . $realm_name] = $items[$base_path . '/facets/' . $realm_name];
+      $items[$base_path . '-env/%apachesolr_environment/facets/' . $realm_name]['page arguments'] = array($realm_name, 4);
     }
   }
   return $items;
@@ -177,22 +177,22 @@ function apachesolr_menu() {
 /**
  * Wrapper for facetapi settings forms.
  */
-function apachesolr_enabled_facets_page($realm_name, $server = NULL) {
+function apachesolr_enabled_facets_page($realm_name, $environment = NULL) {
   $page = array();
 
-  if (isset($server['server_id'])) {
-    $server_id = $server['server_id'];
+  if (isset($environment['env_id'])) {
+    $env_id = $environment['env_id'];
   }
   else {
-    $server_id = apachesolr_default_server();
+    $env_id = apachesolr_default_environment();
   }
-  $searcher = 'apachesolr@' . $server_id;
+  $searcher = 'apachesolr@' . $env_id;
 
-  // Initializes output with information about which server's setting we are
+  // Initializes output with information about which environment's setting we are
   // editing, as it is otherwise not transparent to the end user.
-  $page['apachesolr_server'] = array(
+  $page['apachesolr_environment'] = array(
     '#theme' => 'apachesolr_settings_title',
-    '#server_id' => $server_id,
+    '#env_id' => $env_id,
   );
   $page['settings'] = drupal_get_form('facetapi_realm_settings_form', $searcher, $realm_name);
   return $page;
@@ -213,9 +213,9 @@ function apachesolr_init() {
  */
 function apachesolr_facetapi_searcher_info() {
   $info = array();
-  foreach (apachesolr_load_all_servers() as $id => $server) {
+  foreach (apachesolr_load_all_environments() as $id => $environment) {
     $info['apachesolr@' . $id] = array(
-      'label' => t('Apache Solr server: @server', array('@server' => $server['name'])),
+      'label' => t('Apache Solr environment: @environment', array('@environment' => $environment['name'])),
       'adapter' => 'apachesolr',
       'instance' => $id,
       'path' => '',
@@ -555,7 +555,7 @@ function apachesolr_get_last_change($namespace) {
  */
 function apachesolr_get_nodes_to_index($namespace, $limit) {
   $rows = array();
-  if (apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+  if (apachesolr_environment_variable_get(apachesolr_default_environment(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
     return $rows;
   }
 
@@ -831,13 +831,13 @@ function apachesolr_flush_caches() {
  * A wrapper for cache_clear_all to be used as a submit handler on forms that
  * require clearing Luke cache etc.
  */
-function apachesolr_clear_cache($server_id) {
-  // Reset $server_id to NULL if call originates form a form submit handler.
-  if (is_array($server_id)) {
-    $server_id = NULL;
+function apachesolr_clear_cache($env_id) {
+  // Reset $env_id to NULL if call originates form a form submit handler.
+  if (is_array($env_id)) {
+    $env_id = NULL;
   }
   try {
-    $solr = apachesolr_get_solr($server_id);
+    $solr = apachesolr_get_solr($env_id);
     $solr->clearCache();
   }
   catch (Exception $e) {
@@ -1053,15 +1053,15 @@ function apachesolr_form_field_ui_field_edit_form_alter(&$form, $form_state) {
 function apachesolr_form_facetapi_facet_settings_form_alter(&$form, $form_state) {
   if ('apachesolr' == $form['#facetapi']['adapter']->getId()) {
     // Hack here that depnds on our construction of the searcher name in this way.
-    list(, $server_id) = explode('@', $form['#facetapi']['adapter']->getSearcher());
+    list(, $env_id) = explode('@', $form['#facetapi']['adapter']->getSearcher());
     $realm = $form['#facetapi']['realm'];
     $breadcrumb = array(
       l(t('Home'), '<front>'),
       l(t('Administration'), 'admin'),
       l(t('Configuration'), 'admin/config'),
       l(t('Search and metadata'), 'admin/config/search'),
-      l(t('Apache Solr search server edit'), 'admin/config/search/apachesolr-server/' . $server_id),
-      l($realm['label'], 'admin/config/search/apachesolr-server/' . $server_id . '/facets/' . $realm['name']),
+      l(t('Apache Solr search environment edit'), 'admin/config/search/apachesolr-env/' . $env_id),
+      l($realm['label'], 'admin/config/search/apachesolr-env/' . $env_id . '/facets/' . $realm['name']),
     );
     drupal_set_breadcrumb($breadcrumb);
   }
@@ -1137,18 +1137,18 @@ function apachesolr_suppress_blocks($flag = NULL) {
 }
 
 /**
- * Get or set the default server ID for the current page.
+ * Get or set the default environment ID for the current page.
  */
-function apachesolr_default_server($server_id = NULL) {
-  static $default_server_id = NULL;
+function apachesolr_default_environment($env_id = NULL) {
+  static $default_env_id = NULL;
 
-  if (isset($server_id)) {
-    $default_server_id = $server_id;
+  if (isset($env_id)) {
+    $default_env_id = $env_id;
   }
-  if (empty($default_server_id)) {
-    $default_server_id = variable_get('apachesolr_default_server', 'solr');
+  if (empty($default_env_id)) {
+    $default_env_id = variable_get('apachesolr_default_environment', 'solr');
   }
-  return $default_server_id;
+  return $default_env_id;
 }
 
 /**
@@ -1163,13 +1163,13 @@ function apachesolr_default_server($server_id = NULL) {
 function apachesolr_get_solr($id = NULL) {
   $solr_cache = &drupal_static(__FUNCTION__);
 
-  $servers = apachesolr_load_all_servers();
+  $environments = apachesolr_load_all_environments();
 
-  if (empty($id) || empty($servers[$id])) {
-    $id = apachesolr_default_server();
+  if (empty($id) || empty($environments[$id])) {
+    $id = apachesolr_default_environment();
   }
 
-  $class = $servers[$id]['service_class'];
+  $class = $environments[$id]['service_class'];
 
   if (empty($solr_cache[$id])) {
     // Use the default class if none is specified.
@@ -1177,86 +1177,86 @@ function apachesolr_get_solr($id = NULL) {
       $class = variable_get('apachesolr_service_class', 'DrupalApacheSolrService');
     }
     // Takes advantage of auto-loading.
-    $solr = new $class($servers[$id]['url'], $id);
+    $solr = new $class($environments[$id]['url'], $id);
     $solr_cache[$id] = $solr;
   }
   return $solr_cache[$id];
 }
 
-function apachesolr_load_all_servers() {
-  $servers = &drupal_static(__FUNCTION__);
+function apachesolr_load_all_environments() {
+  $environments = &drupal_static(__FUNCTION__);
 
-  if (isset($servers)) {
-    return $servers;
+  if (isset($environments)) {
+    return $environments;
   }
   // Use cache_get to avoid DB when using memcache, etc.
-  $cache = cache_get('apachesolr:servers', 'cache_apachesolr');
+  $cache = cache_get('apachesolr:environments', 'cache_apachesolr');
   if (isset($cache->data)) {
-    $servers = $cache->data;
+    $environments = $cache->data;
   }
   else {
-    $servers = db_query('SELECT * FROM {apachesolr_server}')->fetchAllAssoc('server_id', PDO::FETCH_ASSOC);
-    foreach ($servers as $id => &$server) {
-      $conf = db_query('SELECT name, value FROM {apachesolr_server_variable} WHERE server_id = :server_id', array('server_id' => $id))->fetchAllAssoc('name', PDO::FETCH_ASSOC);
+    $environments = db_query('SELECT * FROM {apachesolr_environment}')->fetchAllAssoc('env_id', PDO::FETCH_ASSOC);
+    foreach ($environments as $id => &$environment) {
+      $conf = db_query('SELECT name, value FROM {apachesolr_environment_variable} WHERE env_id = :env_id', array('env_id' => $id))->fetchAllAssoc('name', PDO::FETCH_ASSOC);
       foreach ($conf as $name => $data) {
-        $server['conf'][$name] = unserialize($data['value']);
+        $environment['conf'][$name] = unserialize($data['value']);
       }
     }
-    cache_set('apachesolr:servers', $servers, 'cache_apachesolr');
+    cache_set('apachesolr:environments', $environments, 'cache_apachesolr');
   }
-  return $servers;
+  return $environments;
 }
 
-function apachesolr_server_load($server_id) {
-  $servers = apachesolr_load_all_servers();
-  return isset($servers[$server_id]) ? $servers[$server_id] : FALSE;
+function apachesolr_environment_load($env_id) {
+  $environments = apachesolr_load_all_environments();
+  return isset($environments[$env_id]) ? $environments[$env_id] : FALSE;
 }
 
-function apachesolr_server_delete($server_id) {
-  $server = apachesolr_server_load($server_id);
-  if ($server) {
-    db_delete('apachesolr_server')
-      ->condition('server_id', $server_id)
+function apachesolr_environment_delete($env_id) {
+  $environment = apachesolr_environment_load($env_id);
+  if ($environment) {
+    db_delete('apachesolr_environment')
+      ->condition('env_id', $env_id)
       ->execute();
-    db_delete('apachesolr_server_variable')
-      ->condition('server_id', $server_id)
+    db_delete('apachesolr_environment_variable')
+      ->condition('env_id', $env_id)
       ->execute();
 
-    module_invoke_all('apachesolr_server_delete', $server);
+    module_invoke_all('apachesolr_environment_delete', $environment);
 
-    cache_clear_all('apachesolr:servers', 'cache_apachesolr');
-    drupal_static_reset('apachesolr_load_all_servers');
+    cache_clear_all('apachesolr:environments', 'cache_apachesolr');
+    drupal_static_reset('apachesolr_load_all_environments');
     drupal_static_reset('apachesolr_get_solr');
   }
 }
 
-function apachesolr_server_save($server) {
-  $default = array('server_id' => NULL, 'name' => '', 'url' => '', 'service_class' => '');
-  $is_new = !apachesolr_server_load($server['server_id']);
-  $conf = isset($server['conf']) ? $server['conf'] : array();
+function apachesolr_environment_save($environment) {
+  $default = array('env_id' => NULL, 'name' => '', 'url' => '', 'service_class' => '');
+  $is_new = !apachesolr_environment_load($environment['env_id']);
+  $conf = isset($environment['conf']) ? $environment['conf'] : array();
   // Remove any unexpected fields.
   // @todo - getthis from the schema?.
-  $server = array_intersect_key($server, $default);
+  $environment = array_intersect_key($environment, $default);
   if ($is_new) {
-    db_insert('apachesolr_server')
-      ->fields($server)
+    db_insert('apachesolr_environment')
+      ->fields($environment)
       ->execute();
   }
   else {
-    db_update('apachesolr_server')
-      ->fields($server)
-      ->condition('server_id', $server['server_id'])
+    db_update('apachesolr_environment')
+      ->fields($environment)
+      ->condition('env_id', $environment['env_id'])
       ->execute();
   }
-  // Update the server variables (if any).
+  // Update the environment variables (if any).
   foreach ($conf as $name => $value) {
-    db_merge('apachesolr_server_variable')
-      ->key(array('server_id' => $server['server_id'], 'name' => $name))
+    db_merge('apachesolr_environment_variable')
+      ->key(array('env_id' => $environment['env_id'], 'name' => $name))
       ->fields(array('value' => serialize($value)))
       ->execute();
   }
-  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
-  drupal_static_reset('apachesolr_load_all_servers');
+  cache_clear_all('apachesolr:environments', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_load_all_environments');
   drupal_static_reset('apachesolr_get_solr');
 }
 
@@ -1265,10 +1265,10 @@ function apachesolr_server_save($server) {
  *
  * @see variable_get()
  */
-function apachesolr_server_variable_get($server_id, $name, $default = NULL) {
-  $server = apachesolr_server_load($server_id);
-  if (isset($server['conf'][$name])) {
-    return $server['conf'][$name];
+function apachesolr_environment_variable_get($env_id, $name, $default = NULL) {
+  $environment = apachesolr_environment_load($env_id);
+  if (isset($environment['conf'][$name])) {
+    return $environment['conf'][$name];
   }
   return $default;
 }
@@ -1278,13 +1278,13 @@ function apachesolr_server_variable_get($server_id, $name, $default = NULL) {
  *
  * @see variable_set()
  */
-function apachesolr_server_variable_set($server_id, $name, $value) {
-  db_merge('apachesolr_server_variable')
-    ->key(array('server_id' => $server_id, 'name' => $name))
+function apachesolr_environment_variable_set($env_id, $name, $value) {
+  db_merge('apachesolr_environment_variable')
+    ->key(array('env_id' => $env_id, 'name' => $name))
     ->fields(array('value' => serialize($value)))
     ->execute();
-  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
-  drupal_static_reset('apachesolr_load_all_servers');
+  cache_clear_all('apachesolr:environments', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_load_all_environments');
   drupal_static_reset('apachesolr_get_solr');
 }
 
@@ -1293,13 +1293,13 @@ function apachesolr_server_variable_set($server_id, $name, $value) {
  *
  * @see variable_del()
  */
-function apachesolr_server_variable_del($server_id, $name) {
-  db_delete('apachesolr_server_variable')
-    ->condition('server_id', $server_id)
+function apachesolr_environment_variable_del($env_id, $name) {
+  db_delete('apachesolr_environment_variable')
+    ->condition('env_id', $env_id)
     ->condition('name', $name)
     ->execute();
-  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
-  drupal_static_reset('apachesolr_load_all_servers');
+  cache_clear_all('apachesolr:environments', 'cache_apachesolr');
+  drupal_static_reset('apachesolr_load_all_environments');
   drupal_static_reset('apachesolr_get_solr');
 }
 
@@ -1837,16 +1837,16 @@ function apachesolr_theme() {
      * Themes the title links in admin settings pages.
      */
     'apachesolr_settings_title' => array(
-      'variables' => array('server_id' => NULL),
+      'variables' => array('env_id' => NULL),
     ),
   );
 }
 
 /**
- * A per-server version of system_settings_form().
+ * A per-environment version of system_settings_form().
  */
-function apachesolr_settings_form($form, $server_id) {
-  $form['#server_id'] = $server_id;
+function apachesolr_settings_form($form, $env_id) {
+  $form['#env_id'] = $env_id;
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -1873,7 +1873,7 @@ function apachesolr_settings_form_submit($form, &$form_state) {
 
     // There is no need to set default variable values.
     if (!isset($form[$key]['#default_value']) || is_array($value) || $form[$key]['#default_value'] != $value) {
-      apachesolr_server_variable_set($form['#server_id'], $key, $value);
+      apachesolr_environment_variable_set($form['#env_id'], $key, $value);
     }
   }
 
@@ -1885,7 +1885,7 @@ function apachesolr_settings_form_reset($form, &$form_state) {
   form_state_values_clean($form_state);
 
   foreach ($form_state['values'] as $key => $value) {
-    apachesolr_server_variable_del($form['#server_id'], $key);
+    apachesolr_environment_variable_del($form['#env_id'], $key);
   }
   drupal_set_message(t('The configuration options have been reset to their default values.'));
 }
@@ -2154,18 +2154,18 @@ function theme_apachesolr_sort_list($vars) {
 function theme_apachesolr_settings_title($vars) {
   $output = '';
 
-  // Gets server information, builds header with nested link to the server's
-  // edit page. Skips building title if server info could not be retrieved.
-  if ($server = apachesolr_server_load($vars['server_id'])) {
+  // Gets environment information, builds header with nested link to the environment's
+  // edit page. Skips building title if environment info could not be retrieved.
+  if ($environment = apachesolr_environment_load($vars['env_id'])) {
     $url = url(
-      'admin/config/search/apachesolr-server/' . $vars['server_id'],
+      'admin/config/search/apachesolr-env/' . $vars['env_id'],
       array('query' => array('destination' => $_GET['q']))
     );
 
     $output .= '<h3>';
     $output .= t(
-      'Settings for server: <a href="@url">@server</a>',
-      array('@url' => $url, '@server' => $server['name'])
+      'Settings for: <a href="@url">@environment</a>',
+      array('@url' => $url, '@environment' => $environment['name'])
     );
     $output .= '</h3>';
   }

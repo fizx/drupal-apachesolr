@@ -221,7 +221,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
    * Get query searcher name (for facetapi, views, pages, etc).
    */
   public function getSearcher() {
-    return $this->name . '@' . $this->solr->getServerId();
+    return $this->name . '@' . $this->solr->getId();
   }
 
   protected $single_value_params = array(

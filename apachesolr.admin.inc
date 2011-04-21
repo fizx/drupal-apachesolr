@@ -6,24 +6,24 @@
  */
 
 /**
- * Form builder for adding/editing a Solr server used as a menu callback.
+ * Form builder for adding/editing a Solr environment used as a menu callback.
  */
-function apachesolr_server_delete_page($server) {
-  $is_default = $server['server_id'] == variable_get('apachesolr_default_server', 'solr');
+function apachesolr_environment_delete_page($environment) {
+  $is_default = $environment['env_id'] == variable_get('apachesolr_default_environment', 'solr');
   if ($is_default) {
     return MENU_ACCESS_DENIED;
   }
-  return drupal_get_form('apachesolr_server_delete_form', $server);
+  return drupal_get_form('apachesolr_environment_delete_form', $environment);
 }
 
-function apachesolr_server_delete_form($form, &$form_state, $server) {
-  $form['server_id'] = array(
+function apachesolr_environment_delete_form($form, &$form_state, $environment) {
+  $form['env_id'] = array(
     '#type' => 'value',
-    '#value' => $server['server_id'],
+    '#value' => $environment['env_id'],
   );
   return confirm_form(
     $form,
-    t('Are you sure you want to delete server %name?', array('%name' => $server['name'])),
+    t('Are you sure you want to delete search environment %name?', array('%name' => $environment['name'])),
     'admin/config/search/apachesolr',
     t('This action cannot be undone.'),
     t('Delete'),
@@ -31,79 +31,79 @@ function apachesolr_server_delete_form($form, &$form_state, $server) {
   );
 }
 
-function apachesolr_server_delete_form_submit($form, &$form_state) {
-  if (apachesolr_server_delete($form_state['values']['server_id'])) {
-    drupal_set_message(t('The server was deleted'));
+function apachesolr_environment_delete_form_submit($form, &$form_state) {
+  if (apachesolr_environment_delete($form_state['values']['env_id'])) {
+    drupal_set_message(t('The search environment was deleted'));
   }
   $form_state['redirect'] = 'admin/config/search/apachesolr';
 }
 
 /**
- * Form builder for adding/editing a Solr server used as a menu callback.
+ * Form builder for adding/editing a Solr environment used as a menu callback.
  */
-function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
+function apachesolr_environment_edit_form($form, &$form_state, $environment = NULL) {
   
-  if (empty($server)) {
-    $server = array();
+  if (empty($environment)) {
+    $environment = array();
   }
-  $server += array('server_id' => '', 'name' => '', 'url' => '', 'service_class' => '');
+  $environment += array('env_id' => '', 'name' => '', 'url' => '', 'service_class' => '');
 
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr server URL'),
-    '#default_value' => $server['url'],
+    '#default_value' => $environment['url'],
     '#description' => t('URL that identifies the Solr server and request path to be used. E.g. http://localhost:8983/solr'),
     '#required' => TRUE,
   );
-  $is_default = $server['server_id'] == variable_get('apachesolr_default_server', 'solr');
+  $is_default = $environment['env_id'] == variable_get('apachesolr_default_environment', 'solr');
   $form['make_default'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Make this Solr server the default'),
+    '#title' => t('Make this Solr search environment the default'),
     '#default_value' => $is_default,
     '#disabled' => $is_default,
-    '#description' => $is_default ? t('Select this option for a different server to make this one non-default.') : '',
+    '#description' => $is_default ? t('Select this option for a different environment to make this one non-default.') : '',
   );
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Description'),
-    '#default_value' => $server['name'],
-    '#description' => t('Short description of your Solr server.'),
+    '#default_value' => $environment['name'],
+    '#description' => t('Short description of your Solr search environment.'),
     '#required' => TRUE,
   );
-  $form['server_id'] = array(
+  $form['env_id'] = array(
     '#type' => 'machine_name',
-    '#title' => t('Server id'),
+    '#title' => t('Environment id'),
     '#machine_name' => array(
-      'exists' => 'apachesolr_server_load',
+      'exists' => 'apachesolr_environment_load',
     ),
-    '#default_value' => $server['server_id'],
-    '#disabled' => !empty($server['server_id']), // Cannot change it once set.
-    '#description' => t('Unique, machine-readable identifier Solr server.'),
+    '#default_value' => $environment['env_id'],
+    '#disabled' => !empty($environment['env_id']), // Cannot change it once set.
+    '#description' => t('Unique, machine-readable identifier for this Solr environment.'),
     '#required' => TRUE,
   );
   $form['service_class'] = array(
     '#type' => 'value',
-    '#value' => $server['service_class'],
+    '#value' => $environment['service_class'],
   );
   $form['actions'] = array(
     '#type' => 'actions',
   );
   $form['actions']['save'] = array(
     '#type' => 'submit',
-    '#validate' => array('apachesolr_server_save_validate'),
-    '#submit' => array('apachesolr_server_save_submit'),
+    '#validate' => array('apachesolr_environment_save_validate'),
+    '#submit' => array('apachesolr_environment_save_submit'),
     '#value' => t('Save'),
   );
   $form['actions']['test'] = array(
     '#type' => 'submit',
-    '#validate' => array('apachesolr_server_save_validate'),
-    '#submit' => array('apachesolr_server_test_submit'),
+    '#validate' => array('apachesolr_environment_save_validate'),
+    '#submit' => array('apachesolr_environment_test_submit'),
     '#value' => t('Test connection'),
   );
-  if (!empty($server['server_id']) && !$is_default) {
+  if (!empty($environment['env_id']) && !$is_default) {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
-      '#submit' => array('apachesolr_server_delete_submit'),
+      '#submit' => array('apachesolr_environment_delete_submit'),
       '#value' => t('Delete'),
     );
   }
@@ -124,11 +124,11 @@ function apachesolr_server_edit_form($form, &$form_state, $server = NULL) {
   return $form;
 }
 
-function apachesolr_server_delete_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/apachesolr/server/' . $form_state['values']['original_server_id'] . '/delete';
+function apachesolr_environment_delete_submit($form, &$form_state) {
+  $form_state['redirect'] = 'admin/config/search/apachesolr/apachesolr-env/' . $form_state['values']['env_id'] . '/delete';
 }
 
-function apachesolr_server_test_submit($form, &$form_state) {
+function apachesolr_environment_test_submit($form, &$form_state) {
   $ping = apachesolr_server_status($form_state['values']['url'], $form_state['values']['service_class']);
   if ($ping) {
     drupal_set_message(t('Your site has contacted the Apache Solr server.'));
@@ -139,7 +139,7 @@ function apachesolr_server_test_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
-function apachesolr_server_save_validate($form, &$form_state) {
+function apachesolr_environment_save_validate($form, &$form_state) {
   $parts = parse_url($form_state['values']['url']);
   foreach (array('scheme', 'host', 'path') as $key) {
     if (empty($parts[$key])) {
@@ -158,12 +158,12 @@ function apachesolr_server_save_validate($form, &$form_state) {
   }
 }
 
-function apachesolr_server_save_submit($form, &$form_state) {
-  apachesolr_server_save($form_state['values']);
+function apachesolr_environment_save_submit($form, &$form_state) {
+  apachesolr_environment_save($form_state['values']);
   if (!empty($form_state['values']['make_default'])) {
-    variable_set('apachesolr_default_server', $form_state['values']['server_id']);
-  }  
-  cache_clear_all('apachesolr:servers', 'cache_apachesolr');
+    variable_set('apachesolr_default_environment', $form_state['values']['env_id']);
+  }
+  cache_clear_all('apachesolr:environments', 'cache_apachesolr');
   $form_state['redirect'] = 'admin/config/search/apachesolr';
 }
 
@@ -191,13 +191,13 @@ function apachesolr_settings($form, &$form_state) {
     '#description' => format_plural(count(apachesolr_mlt_list_blocks()), 'You currently have 1 block.', 'You currenly have @count blocks.'),
   );
   $form['apachesolr_host_settings'] = array(
-    '#title' => t('Solr host settings'),
+    '#title' => t('Solr search environments'),
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => $collapse_host,
   );
-  $id = variable_get('apachesolr_default_server', 'solr');
-  $servers = apachesolr_load_all_servers();
+  $id = variable_get('apachesolr_default_environment', 'solr');
+  $environments = apachesolr_load_all_environments();
   $rows = array();
   $headers = array(
     t('Default'),
@@ -205,21 +205,21 @@ function apachesolr_settings($form, &$form_state) {
     t('Name'),
     t('URL'),
   );
-  foreach ($servers as $server_id => $data) {
-    $is_default = $server_id == variable_get('apachesolr_default_server', 'solr');
+  foreach ($environments as $environment_id => $data) {
+    $is_default = $environment_id == variable_get('apachesolr_default_environment', 'solr');
     if ($is_default) {
       $type = 'selected';
       $delete_link = '';
     }
     else {
       $type = 'none';
-      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr-server/' . $data['server_id'] . '/delete'));
+      $delete_link = array('class' => 'operation', 'data' => l(t('delete'), 'admin/config/search/apachesolr-env/' . $data['env_id'] . '/delete'));
     }
     $rows[] = array('data' =>
       array(
         // Cells
         array('class' => 'icon'),
-        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr-server/' . $data['server_id'], array('query' => array('destination' => $_GET['q'])))),
+        array('class' => 'operation', 'data' => l(t('edit'), 'admin/config/search/apachesolr-env/' . $data['env_id'], array('query' => array('destination' => $_GET['q'])))),
         $delete_link,
         check_plain($data['name']),
         check_plain($data['url']),
@@ -230,7 +230,7 @@ function apachesolr_settings($form, &$form_state) {
   }
   $actions[] = array(
     '#theme' => 'menu_local_action',
-    '#link' => array('title' => t('Add new server'), 'href' => 'admin/config/search/apachesolr-server/add', 'options' => array()),
+    '#link' => array('title' => t('Add new search environment'), 'href' => 'admin/config/search/apachesolr-env/add', 'options' => array()),
   );
 
   $form['apachesolr_host_settings']['actions'] = array(
@@ -298,7 +298,7 @@ function apachesolr_settings($form, &$form_state) {
   $form['advanced']['apachesolr_read_only'] = array(
     '#type' => 'radios',
     '#title' => t('Index write access'),
-    '#default_value' => apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE),
+    '#default_value' => apachesolr_environment_variable_get(apachesolr_default_environment(), 'apachesolr_read_only', APACHESOLR_READ_WRITE),
     '#options' => array(APACHESOLR_READ_WRITE => t('Read and write (normal)'), APACHESOLR_READ_ONLY => t('Read only')),
     '#description' => t('<em>Read only</em> stops this site from sending updates to your search index. Useful for development sites.'),
   );
@@ -324,9 +324,9 @@ function apachesolr_settings_validate($form, &$form_state) {
 /**
  * Gets information about the fields already in solr index.
  */
-function apachesolr_index_page($server_id = NULL) {
+function apachesolr_index_page($env_id = NULL) {
   try {
-    $solr = apachesolr_get_solr($server_id);
+    $solr = apachesolr_get_solr($env_id);
     // TODO: possibly clear this every page view if we are running multi-site.
     if (apachesolr_index_get_last_updated()) {
       $solr->clearCache();
@@ -340,16 +340,16 @@ function apachesolr_index_page($server_id = NULL) {
     $data->fields = array();
   }
 
-  if (empty($server_id)) {
-    $server_id = apachesolr_default_server();
+  if (empty($env_id)) {
+    $env_id = apachesolr_default_environment();
   }
 
   // Initializes output with information about which server's setting we are
   // editing, as it is otherwise not transparent to the end user.
   $output = array(
-    'apachesolr_server' => array(
+    'apachesolr_environment' => array(
       '#theme' => 'apachesolr_settings_title',
-      '#server_id' => $server_id,
+      '#env_id' => $env_id,
     ),
   );
 
@@ -374,7 +374,7 @@ function apachesolr_index_page($server_id = NULL) {
     $status_header .= $delete_msg;
   }
   $status_header .= '<p>' . l(t('View more details on the search index contents'), 'admin/reports/apachesolr') . "</p>\n";
-  if (apachesolr_server_variable_get($server_id, 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_WRITE) {
+  if (apachesolr_environment_variable_get($env_id, 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_WRITE) {
     $output['apachesolr_index_action_status_header'] = array('#markup' => $status_header);
     // Display the Delete Index form.
     $output['apachesolr_index_action_form'] = drupal_get_form('apachesolr_index_action_form');
@@ -386,12 +386,12 @@ function apachesolr_index_page($server_id = NULL) {
   return $output;
 }
 
-function apachesolr_index_report($server_id = NULL) {
-  if (empty($server_id)) {
-    $server_id = apachesolr_default_server();
+function apachesolr_index_report($env_id = NULL) {
+  if (empty($env_id)) {
+    $env_id = apachesolr_default_environment();
   }
   try {
-    $solr = apachesolr_get_solr($server_id);
+    $solr = apachesolr_get_solr($env_id);
     // TODO: possibly clear this every page view if we are running multi-site.
     if (apachesolr_index_get_last_updated()) {
       $solr->clearCache();
@@ -414,7 +414,7 @@ function apachesolr_index_report($server_id = NULL) {
   elseif (isset($data->index->numDocs)) {
     $not_found = t('Not indexed');
     try {
-      $solr = apachesolr_get_solr($server_id);
+      $solr = apachesolr_get_solr($env_id);
       // Note: we use 2 since 1 fails on Ubuntu Hardy.
       $data = $solr->getLuke(2);
       $output .= '<p>' . t('Number of terms in index: @num', array('@num' => $data->index->numTerms)) . "</p>\n";
