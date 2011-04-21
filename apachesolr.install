@@ -178,9 +178,6 @@ function apachesolr_uninstall() {
   // Remove variables.
   variable_del('apachesolr_default_server');
   variable_del('apachesolr_rows');
-  variable_del('apachesolr_facet_show_children');
-  variable_del('apachesolr_facet_query_limits');
-  variable_del('apachesolr_facet_query_limit_default');
   variable_del('apachesolr_site_hash');
   variable_del('apachesolr_index_last');
   variable_del('apachesolr_mlt_blocks');
@@ -404,8 +401,14 @@ function apachesolr_update_7005() {
   }
 }
 
+/**
+ * Remove facet-related variable deprecated by the Facet API integration.
+ */
 function apachesolr_update_7006() {
   variable_del('apachesolr_facetstyle');
+  variable_del('apachesolr_facet_show_children');
+  variable_del('apachesolr_facet_query_limits');
+  variable_del('apachesolr_facet_query_limit_default');
 }
 
 /**
