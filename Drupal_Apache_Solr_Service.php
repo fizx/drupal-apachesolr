@@ -99,7 +99,7 @@ class DrupalApacheSolrService {
    * var float
    */
   protected $_defaultTimeout;
-  protected $server_id;
+  protected $env_id;
   protected $luke;
   protected $stats;
 
@@ -140,8 +140,8 @@ class DrupalApacheSolrService {
   protected function setLuke($num_terms = 0) {
     if (empty($this->luke[$num_terms])) {
       $url = $this->_constructUrl(self::LUKE_SERVLET, array('numTerms' => "$num_terms", 'wt' => 'json'));
-      if ($this->server_id) {
-        $cid = $this->server_id . ":luke:" . drupal_hash_base64($url);
+      if ($this->env_id) {
+        $cid = $this->env_id . ":luke:" . drupal_hash_base64($url);
         $cache = cache_get($cid, 'cache_apachesolr');
         if (isset($cache->data)) {
           $this->luke = $cache->data;
@@ -151,7 +151,7 @@ class DrupalApacheSolrService {
     // Second pass to populate the cache if necessary.
     if (empty($this->luke[$num_terms])) {
       $this->luke[$num_terms] = $this->_sendRawGet($url);
-      if ($this->server_id) {
+      if ($this->env_id) {
         cache_set($cid, $this->luke, 'cache_apachesolr');
       }
     }
@@ -182,8 +182,8 @@ class DrupalApacheSolrService {
     // Only try to get stats if we have connected to the index.
     if (empty($this->stats) && isset($data->index->numDocs)) {
       $url = $this->_constructUrl(self::STATS_SERVLET);
-      if ($this->server_id) {
-        $this->stats_cid = $this->server_id . ":stats:" . drupal_hash_base64($url);
+      if ($this->env_id) {
+        $this->stats_cid = $this->env_id . ":stats:" . drupal_hash_base64($url);
         $cache = cache_get($this->stats_cid, 'cache_apachesolr');
         if (isset($cache->data)) {
           $this->stats = simplexml_load_string($cache->data);
@@ -193,7 +193,7 @@ class DrupalApacheSolrService {
       if (empty($this->stats)) {
         $response = $this->_sendRawGet($url);
         $this->stats = simplexml_load_string($response->data);
-        if ($this->server_id) {
+        if ($this->env_id) {
           cache_set($this->stats_cid, $response->data, 'cache_apachesolr');
         }
       }
@@ -264,9 +264,9 @@ class DrupalApacheSolrService {
   }
 
   protected function _clearCache() {
-    if ($this->server_id) {
-      cache_clear_all($this->server_id . ":stats:", 'cache_apachesolr', TRUE);
-      cache_clear_all($this->server_id . ":luke:", 'cache_apachesolr', TRUE);
+    if ($this->env_id) {
+      cache_clear_all($this->env_id . ":stats:", 'cache_apachesolr', TRUE);
+      cache_clear_all($this->env_id . ":luke:", 'cache_apachesolr', TRUE);
     }
     $this->luke = array();
     $this->stats = NULL;
@@ -278,12 +278,12 @@ class DrupalApacheSolrService {
    * @param $url
    *   The URL to the Solr server, possibly including a core name.  E.g. http://localhost:8983/solr/
    *   or https://search.example.com/solr/core99/
-   * @param $server_id
+   * @param $env_id
    *   The machine name of a corresponding saved configuration used for loading
-   *    data like which facets are enabled.
+   *   data like which facets are enabled.
    */
-  public function __construct($url, $server_id = NULL) {
-    $this->server_id = $server_id;
+  public function __construct($url, $env_id = NULL) {
+    $this->env_id = $env_id;
     $this->setUrl($url);
 
     // determine our default http timeout from ini settings
@@ -295,8 +295,8 @@ class DrupalApacheSolrService {
     }
   }
 
-  function getServerId() {
-    return $this->server_id;
+  function getId() {
+    return $this->env_id;
   }
 
   /**
@@ -574,7 +574,9 @@ class DrupalApacheSolrService {
 
     $rawPost = "<add{$attr}>";
     foreach ($documents as $document) {
-      $rawPost .= ApacheSolrDocument::documentToXml($document);
+      if (is_object($document) && ($document instanceof ApacheSolrDocument)) {
+        $rawPost .= ApacheSolrDocument::documentToXml($document);
+      }
     }
     $rawPost .= '</add>';
 

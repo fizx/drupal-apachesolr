@@ -15,7 +15,7 @@ function apachesolr_search_user_defined_search_page($page_id, $keys = '') {
   $solrsort = isset($_GET['solrsort']) ? $_GET['solrsort'] : '';
 
   try {
-    $solr = apachesolr_get_solr($search_page->server_id);
+    $solr = apachesolr_get_solr($search_page->env_id);
     $results = apachesolr_search_run('apachesolr', array('q' => $keys, 'fq' => $filters), $solrsort, 'search/' . arg(1), pager_find_page(), $solr);
 
     // Adds the search form to the page.

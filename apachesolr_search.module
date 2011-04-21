@@ -12,7 +12,7 @@
 function apachesolr_search_help($section) {
   switch ($section) {
     case 'admin/config/search/apachesolr/index':
-      if (apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
+      if (apachesolr_environment_variable_get(apachesolr_default_environment(), 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_ONLY) {
         return t('Operating in read-only mode; updates are disabled.');
       }
       $remaining = 0;
@@ -86,8 +86,8 @@ function apachesolr_search_menu() {
     // Gets search pages directly from the index.
     // @todo Honor "enabled" settings?
     $result = db_select('apachesolr_search_page', 's')
-      ->fields('s', array('name', 'search_path', 'page_title'))
-      ->condition('server_id', '', '!=')
+      ->fields('s', array('page_id', 'search_path', 'page_title'))
+      ->condition('env_id', '', '!=')
       ->execute();
   }
   catch (Exception $e) {
@@ -110,7 +110,7 @@ function apachesolr_search_menu() {
     $items[$record->search_path] = array(
       'title' => $record->page_title,
       'page callback' => 'apachesolr_search_user_defined_search_page',
-      'page arguments' => array($record->name, ''),
+      'page arguments' => array($record->page_id, ''),
       'access arguments' => array('search content'),
       'type' => ($core_search) ? MENU_LOCAL_TASK : MENU_SUGGESTED_ITEM,
       'file' => 'apachesolr_search.pages.inc',
@@ -120,7 +120,7 @@ function apachesolr_search_menu() {
       'title' => $record->page_title,
       'load arguments' => array('%map', '%index'),
       'page callback' => 'apachesolr_search_user_defined_search_page',
-      'page arguments' => array($record->name, $keys_pos),
+      'page arguments' => array($record->page_id, $keys_pos),
       'access arguments' => array('search content'),
       'type' => MENU_LOCAL_TASK,
       'file' => 'apachesolr_search.pages.inc',
@@ -134,8 +134,8 @@ function apachesolr_search_menu() {
   return $items;
 }
 
-function apachesolr_search_page_load($name) {
-  $page = db_query('SELECT * FROM {apachesolr_search_page} s WHERE s.name = :name', array(':name' => $name))->fetchObject();
+function apachesolr_search_page_load($page_id) {
+  $page = db_query('SELECT * FROM {apachesolr_search_page} s WHERE s.page_id = :page_id', array(':page_id' => $page_id))->fetchObject();
   if ($page) {
     $page->settings = unserialize($page->settings);
   }
@@ -156,7 +156,7 @@ function apachesolr_search_cron() {
  */
 function apachesolr_search_apachesolr_types_exclude($namespace) {
   if ($namespace == 'apachesolr_search') {
-    $excluded_types = apachesolr_server_variable_get(apachesolr_default_server(), 'apachesolr_search_excluded_types', array());
+    $excluded_types = apachesolr_environment_variable_get(apachesolr_default_environment(), 'apachesolr_search_excluded_types', array());
     return array_filter($excluded_types);
   }
 }
@@ -300,8 +300,8 @@ function apachesolr_search_page_browse($empty_search_behavior) {
     case 'browse':
       if (module_exists('facetapi') && $query = apachesolr_current_query()) {
         module_load_include('inc', 'facetapi', 'facetapi.block');
-        $server_id = $query->solr('getServerId');
-        $searcher = 'apachesolr@' . $server_id;
+        $env_id = $query->solr('getId');
+        $searcher = 'apachesolr@' . $env_id;
         $output = facetapi_build_realm($searcher, 'block');
       }
       break;
@@ -415,7 +415,7 @@ function apachesolr_search_add_spellcheck_params(DrupalSolrQueryInterface $query
 }
 
 function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
-  $server_id = $query->solr('getServerId');
+  $env_id = $query->solr('getId');
   $params = array();
 
   $defaults = array(
@@ -431,7 +431,7 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
     'tags_inline' => '1.0',
     'tags_a' => '0',
   );
-  $qf = apachesolr_server_variable_get($server_id, 'apachesolr_search_query_fields', $defaults);
+  $qf = apachesolr_environment_variable_get($env_id, 'apachesolr_search_query_fields', $defaults);
   $fields = $query->solr('getFields');
   if ($qf && $fields) {
     foreach ($fields as $field_name => $field) {
@@ -448,11 +448,11 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
     }
   }
 
-  $date_settings = apachesolr_server_variable_get($server_id, 'apachesolr_search_date_boost', '0:0');
-  $comment_settings = apachesolr_server_variable_get($server_id, 'apachesolr_search_comment_boost', '0:0');
-  $changed_settings = apachesolr_server_variable_get($server_id, 'apachesolr_search_changed_boost', '0:0');
-  $sticky_boost = apachesolr_server_variable_get($server_id, 'apachesolr_search_sticky_boost', '0');
-  $promote_boost = apachesolr_server_variable_get($server_id, 'apachesolr_search_promote_boost', '0');
+  $date_settings = apachesolr_environment_variable_get($env_id, 'apachesolr_search_date_boost', '0:0');
+  $comment_settings = apachesolr_environment_variable_get($env_id, 'apachesolr_search_comment_boost', '0:0');
+  $changed_settings = apachesolr_environment_variable_get($env_id, 'apachesolr_search_changed_boost', '0:0');
+  $sticky_boost = apachesolr_environment_variable_get($env_id, 'apachesolr_search_sticky_boost', '0');
+  $promote_boost = apachesolr_environment_variable_get($env_id, 'apachesolr_search_promote_boost', '0');
   // For the boost functions for the created timestamp, etc we use the
   // standard date-biasing function, as suggested (but steeper) at
   // http://wiki.apache.org/solr/SolrRelevancyFAQ#How_can_I_boost_the_score_of_newer_documents
@@ -483,7 +483,7 @@ function apachesolr_search_add_boost_params(DrupalSolrQueryInterface $query) {
     $params['bq'][] = "bs_promote:true^$promote_boost";
   }
   // Modify the weight of results according to the node types.
-  $type_boosts = apachesolr_server_variable_get($server_id, 'apachesolr_search_type_boosts', array());
+  $type_boosts = apachesolr_environment_variable_get($env_id, 'apachesolr_search_type_boosts', array());
   if (!empty($type_boosts)) {
     foreach ($type_boosts as $type => $boost) {
       // Only add a param if the boost is != 0 (i.e. > "Normal").
@@ -631,8 +631,8 @@ function apachesolr_search_node_result($doc, &$result, &$extra) {
 /**
  * Returns whether a search page exists. 
  */
-function apachesolr_search_page_exists($search_page_name) {
-  return db_query('SELECT 1 FROM {apachesolr_search_page} WHERE name = :name', array(':name' => $search_page_name))->fetchField();
+function apachesolr_search_page_exists($search_page_id) {
+  return db_query('SELECT 1 FROM {apachesolr_search_page} WHERE page_id = :page_id', array(':page_id' => $search_page_id))->fetchField();
 }
 
 /**
@@ -730,14 +730,14 @@ function apachesolr_search_vocabulary_content_types($vid) {
 }
 
 /**
- * Implements hook_apachesolr_server_delete().
+ * Implements hook_apachesolr_environment_delete().
  */
-function apachesolr_search_apachesolr_server_delete($server) {
+function apachesolr_search_apachesolr_environment_delete($server) {
   db_update('apachesolr_search_page')
     ->fields(array(
-      'server_id' => '',
+      'env_id' => '',
     ))
-    ->condition('server_id', $server['server_id'])
+    ->condition('env_id', $server['env_id'])
     ->execute();
 
   menu_rebuild();
