@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#920880 by jpmckinney, mihha: facet_block_callback not propagated.
 #783366 by jpmckinney, pwolanin, elliotttf: Synchronize apachesolr_search_browse with apachesolr_search_execute.
 #614644 by jpmckinney, pwolanin: Forms attached to Apachesolr search results won't work.
 #509982 by jpmckinney: Is our use of menu_alter incompatible with fallback to core search?

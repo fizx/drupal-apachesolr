@@ -2023,12 +2023,18 @@ function apachesolr_cck_fields() {
             $instance['index_type'] = $mappings['per-field'][$field_name]['index_type'];
             $instance['indexing_callback'] = $mappings['per-field'][$field_name]['indexing_callback'];
             $instance['display_callback'] = $mappings['per-field'][$field_name]['display_callback'];
+            if (isset($mappings['per-field'][$field_name]['facet_block_callback'])) {
+              $instance['facet_block_callback'] = $mappings['per-field'][$field_name]['facet_block_callback'];
+            }
             $instance['facets'] = $mappings['per-field'][$field_name]['facets'];
           }
           else {
             $instance['index_type'] = $mappings[$field_type][$widget_type]['index_type'];
             $instance['indexing_callback'] = $mappings[$field_type][$widget_type]['indexing_callback'];
             $instance['display_callback'] = $mappings[$field_type][$widget_type]['display_callback'];
+            if (isset($mappings[$field_type][$widget_type]['facet_block_callback'])) {
+              $instance['facet_block_callback'] = $mappings[$field_type][$widget_type]['facet_block_callback'];
+            }
             $instance['facets'] = $mappings[$field_type][$widget_type]['facets'];
           }
           $instance['multiple'] = (bool) $instance['multiple'];
