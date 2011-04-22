@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#509982 by jpmckinney: Is our use of menu_alter incompatible with fallback to core search?
 #871440 by jpmckinney, elliotttf: Solr taxonomy page displays search form and blocks when the user has no access.
 #899590 by jpmckinney, elliotttf: Support indexing of CCK fields that are not facets.
 #993476 by jpmckinney, pwolanin: allow arbitrary results per page in the 0-200 range.
