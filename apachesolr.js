@@ -11,7 +11,7 @@ Drupal.behaviors.apachesolr = function(context) {
       $(this).text(Drupal.t('Show more'));
     }
     return false;
-  }).appendTo($(Drupal.settings.apachesolr_show_more_blocks, context));
+  }).insertAfter($(Drupal.settings.apachesolr_show_more_blocks, context));
 
   if (Drupal.settings.apachesolr_facetstyle == 'checkboxes') {
     // Find all facet links and give them a checkbox

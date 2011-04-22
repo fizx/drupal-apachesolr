@@ -2244,7 +2244,7 @@ function theme_apachesolr_mlt_recommendation_block($docs, $delta) {
     // Suitable for single-site mode.
     $links[] = l($result->title, $result->path, array('html' => TRUE));
   }
-  return theme('item_list', $links);
+  return theme('item_list', $links, NULL, 'ul', array('class' => 'apachesolr-mlt-block'));
 }
 
 function theme_apachesolr_facet_link($facet_text, $path, $options = array(), $count, $active = FALSE, $num_found = NULL) {
@@ -2307,7 +2307,7 @@ function apachesolr_js() {
     $show_more_selector = array();
     foreach (apachesolr_get_enabled_facets() as $module => $blocks) {
       foreach ($blocks as $block) {
-        $show_more_selector[] = "#block-{$module}-{$facet_map[$block]}:has(.apachesolr-hidden-facet)";
+        $show_more_selector[] = "#block-{$module}-{$facet_map[$block]}:has(.apachesolr-hidden-facet) .apachesolr-facet-list";
       }
     }
     $settings['apachesolr_show_more_blocks'] = implode(', ', $show_more_selector);
@@ -2365,13 +2365,13 @@ function theme_apachesolr_facet_list($items, $display_limit = 0, $delta = '') {
   if (user_access('administer search')) {
     $admin_link = l(t('Configure enabled filters'), 'admin/settings/apachesolr/enabled-filters');
   }
-  return theme('item_list', $items) . $admin_link;
+  return theme('item_list', $items, NULL, 'ul', array('class' => 'apachesolr-facet-list')) . $admin_link;
 }
 
 function theme_apachesolr_sort_list($items) {
   // theme('item_list') expects a numerically indexed array.
   $items = array_values($items);
-  return theme('item_list', $items);
+  return theme('item_list', $items, NULL, 'ul', array('class' => 'apachesolr-sort-list'));
 }
 
 /**
