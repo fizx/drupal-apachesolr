@@ -431,7 +431,7 @@ function apachesolr_process_response($response, $query, $params) {
         // again.  Decode to correct the display.
         'title' => htmlspecialchars_decode($doc->title, ENT_QUOTES),
         'user' => theme('username', $doc),
-        'date' => $doc->created,
+        'date' => $doc->changed,
         'node' => $doc,
         'extra' => $extra,
         'score' => $doc->score,

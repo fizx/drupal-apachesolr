@@ -7,6 +7,7 @@ Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.3, xxxx-xx-xx
 ------------------------------
+#920482 by jpmckinney: $info_split['date'] template variable should contain changed, not created, date.
 #871440 by jpmckinney, elliotttf: Solr taxonomy page displays search form and blocks when the user has no access.
 #899590 by jpmckinney, elliotttf: Support indexing of CCK fields that are not facets.
 #1084332 by pwolanin, elliotttf: replace drush command with drush make file to get Solr php library.
