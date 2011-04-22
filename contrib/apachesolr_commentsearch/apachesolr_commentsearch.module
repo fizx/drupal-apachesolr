@@ -67,7 +67,7 @@ function apachesolr_commentsearch_node_to_comments($node, $namespace) {
     $document->changed = $timestamp;
     $last_change = (isset($node->last_comment_timestamp) && $node->last_comment_timestamp > $node->changed) ? $node->last_comment_timestamp : $node->changed;
     $document->last_comment_or_change = apachesolr_date_iso($last_change);
-    $document->name = htmlspecialchars(html_entity_decode($comment->name, ENT_NOQUOTES, 'UTF-8'), ENT_NOQUOTES, 'UTF-8');
+    $document->name = $comment->name;
     $path = "node/{$node->nid}";
     $document->url = url($path, array('absolute' => TRUE, 'fragment' => "comment-{$comment->cid}"));
     $document->path = $path;
