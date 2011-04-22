@@ -141,80 +141,86 @@ function apachesolr_search_search($op = 'search', $keys = NULL) {
  * Re-implementation of search_view().
  */
 function apachesolr_search_view($type = NULL) {
+  if (empty($type)) {
+    // Note: search/X can not be a default tab because it would take on the
+    // path of its parent (search). It would prevent remembering keywords when
+    // switching tabs. This is why we drupal_goto to it from the parent instead.
+    drupal_goto('search/apachesolr_search');
+  }
   $keys = trim(search_get_keys());
+  // Construct the search form.  If the user submits POST data, this will
+  // redirect to a GET request before the search actually runs.
+  if (isset($_POST['form_id']) && $_POST['form_id'] == 'search_form') {
+    $form = drupal_get_form('search_form', NULL, $keys, $type);
+  }
+  // We did not redirect, so run the search if needed.
   $content = '';
-  // Search form submits with POST but redirects to GET.
-  if (!isset($_POST['keys'])) {
-    if (empty($type)) {
-      // Note: search/X can not be a default tab because it would take on the
-      // path of its parent (search). It would prevent remembering keywords when
-      // switching tabs. This is why we drupal_goto to it from the parent instead.
-      drupal_goto('search/apachesolr_search');
-    }
-    $filters = '';
-    if (isset($_GET['filters'])) {
-      $filters = trim($_GET['filters']);
-    }
-    // Only perform search if there is non-whitespace search term or filters:
-    if ($keys || $filters || variable_get('apachesolr_search_browse', 'browse') == 'results') {
-      if (variable_get('apachesolr_logging', TRUE)) {
-        // Log the search keys:
-        $log = $keys;
-        if ($filters) {
-          $log .= 'filters='. $filters;
-        }
-        watchdog('search', '%keys (@type).', array('%keys' => $log, '@type' => t('Search')), WATCHDOG_NOTICE, l(t('results'), 'search/'. $type .'/'. $keys));
-      }
 
-      // Collect the search results. See search_data().
-      $content = module_invoke($type, 'search', 'search', $keys);
-      if (isset($content) && is_array($content) && count($content)) {
-        if (module_hook($type, 'search_page')) {
-          $output = module_invoke($type, 'search_page', $content);
-        }
-        else {
-          $output = theme('search_results', $content, $type);
-        }
-        return drupal_get_form('search_form', NULL, $keys, $type) . $output;
+  $filters = '';
+  if (isset($_GET['filters'])) {
+    $filters = trim($_GET['filters']);
+  }
+  // Only perform search if there is non-whitespace search term or filters:
+  if ($keys || $filters || variable_get('apachesolr_search_browse', 'browse') == 'results') {
+    if (variable_get('apachesolr_logging', TRUE)) {
+      // Log the search keys:
+      $log = $keys;
+      if ($filters) {
+        $log .= 'filters='. $filters;
       }
+      watchdog('search', '%keys (@type).', array('%keys' => $log, '@type' => t('Search')), WATCHDOG_NOTICE, l(t('results'), 'search/'. $type .'/'. $keys));
+    }
 
-      // See search_view().
-      if ($content) {
-        $content = theme('box', t('Search results'), $content);
+    // Collect the search results. See search_data().
+    $content = module_invoke($type, 'search', 'search', $keys);
+    if (isset($content) && is_array($content) && count($content)) {
+      if (module_hook($type, 'search_page')) {
+        $output = module_invoke($type, 'search_page', $content);
       }
       else {
-        $content = theme('box', t('Your search yielded no results'), theme('apachesolr_search_noresults'));
+        $output = theme('search_results', $content, $type);
       }
+      return drupal_get_form('search_form', NULL, $keys, $type) . $output;
     }
-    elseif ($type != 'node') {
-      // Ignore $type == node. Since we override the menu path to search to point
-      // to this function, we have to count on core searches coming in here, too.
 
-      switch (variable_get('apachesolr_search_browse', 'browse')) {
-        case 'browse':
-          try {
-            // Show search form and browse-by blocks.
-            $blocks = apachesolr_search_browse('', '', '', 'search/' . $type);
-            if (count($blocks) > 0) {
-              $content = theme('apachesolr_browse_blocks', $blocks);
-            }
-          }
-          catch (Exception $e) {
-            watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
-            apachesolr_failure(t('Solr search'), $keys);
-          }
-          break;
-        case 'blocks':
-          // Launch search so that hook_block() will show blocks.
-          $dummy = search_data($keys, $type);
-          break;
-        default:
-          break;
-      }
+    // See search_view().
+    if ($content) {
+      $content = theme('box', t('Search results'), $content);
+    }
+    else {
+      $content = theme('box', t('Your search yielded no results'), theme('apachesolr_search_noresults'));
     }
   }
-  // Construct the search form.
-  $form = drupal_get_form('search_form', NULL, $keys, $type);
+  elseif ($type != 'node') {
+    // Ignore $type == node. Since we override the menu path to search to point
+    // to this function, we have to count on core searches coming in here, too.
+
+    switch (variable_get('apachesolr_search_browse', 'browse')) {
+      case 'browse':
+        try {
+          // Show search form and browse-by blocks.
+          $blocks = apachesolr_search_browse('', '', '', 'search/' . $type);
+          if (count($blocks) > 0) {
+            $content = theme('apachesolr_browse_blocks', $blocks);
+          }
+        }
+        catch (Exception $e) {
+          watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+          apachesolr_failure(t('Solr search'), $keys);
+        }
+        break;
+      case 'blocks':
+        // Launch search so that hook_block() will show blocks.
+        $dummy = search_data($keys, $type);
+        break;
+      default:
+        break;
+    }
+  }
+  if (empty($form)) {
+    // The form may be altered based on the query that was run.
+    $form = drupal_get_form('search_form', NULL, $keys, $type);
+  }
   return theme('apachesolr_search_results_page', $form, $content);
 }
 
