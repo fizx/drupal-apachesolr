@@ -80,7 +80,6 @@ function apachesolr_search_menu_alter(&$menu) {
     if (isset($menu['taxonomy/term/%'])) {
       $menu['taxonomy/term/%']['module'] = 'apachesolr_search';
       $menu['taxonomy/term/%']['page callback'] = 'apachesolr_search_taxonomy_term_page';
-      $menu['taxonomy/term/%']['file path'] = drupal_get_path('module', 'apachesolr_search');
       $menu['taxonomy/term/%']['file'] = 'apachesolr.taxonomy.inc';
     }
   }
