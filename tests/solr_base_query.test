@@ -1,6 +1,10 @@
 <?php
 
 class DummySolr {
+  function getId() {
+    return __CLASS__;
+  }
+
   function getFields() {
     return (object) array(
        'is_uid' =>
@@ -241,7 +245,7 @@ class SolrBaseQueryTests extends DrupalUnitTestCase {
   function testParseFilters() {
     $fq = array('tid:3', 'sort_label:hello', 'tid:11', 'tid:1', 'tid:12', 'label:hello');
     // Setup dummy Solr object.
-    $query = new SolrBaseQuery(new DummySolr(), 'mykeys', $fq, '', '');
+    $query = new SolrBaseQuery("apachesolr_tests", new DummySolr(), array('q' => 'mykeys', 'fq' => $fq), '', '');
     $this->assertFalse($query->hasFilter('label', 'Hello'));
     $this->assertTrue($query->hasFilter('label', 'hello'));
     $filters = $query->getFilters();
@@ -260,7 +264,14 @@ class SolrBaseQueryTests extends DrupalUnitTestCase {
     $query->removeFilter('tid');
     $filters = $query->getFilters();
     $this->assertEqual(count($filters), 2, count($filters) . ' filters found, expected 2 filters');
-    $this->assertEqual(array('fq' => array('sort_label:hello', 'label:hello')), $query->getUrlQueryvalues());
+    $this->assertEqual(array('sort_label:hello', 'label:hello'), $query->getParam('fq'));
+
+    $subquery = new SolrFilterSubQuery();
+    $subquery->addFilter('access__all', 0);
+    $subquery->addFilter('hash', apachesolr_site_hash());
+    $query->addFilterSubQuery($subquery);
+    $this->assertEqual(count($query->getParam('fq')), 3, count($query->getParam('fq')) . ' fq params found, expected 3 after adding subquery');
+    $this->assertEqual(array('sort_label:hello', 'label:hello', '(access__all:0 OR hash:'. apachesolr_site_hash() .')'), $query->getParam('fq'));
   }
 }
 

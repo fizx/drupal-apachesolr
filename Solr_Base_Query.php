@@ -129,16 +129,10 @@ class SolrFilterSubQuery {
       $fq[] = $this->makeFilterQuery($field);
     }
     foreach ($this->subqueries as $subquery) {
-      $subfq = $query->rebuildFq();
+      $subfq = $subquery->rebuildFq();
       if ($subfq) {
         $operator = $subquery->operator;
-        $subfilters = array();
-        foreach ($subfq as $key => $values) {
-          foreach ($values as $value) {
-            $subfilters[] = $value;
-          }
-        }
-        $fq[] =  " (" . implode(" {$subquery->operator} ", $subfilters) . ")";
+        $fq[] =  "(" . implode(" $operator ", $subfq) . ")";
       }
     }
     return $fq;
