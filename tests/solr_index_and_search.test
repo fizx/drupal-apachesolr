@@ -12,13 +12,15 @@ class DrupalSolrWebTestCase extends DrupalWebTestCase {
   function setUp() {
     parent::setUp('apachesolr', 'apachesolr_search', 'search');
     // Load the default server.
-    $server_id = variable_get('apachesolr_default_server', 'solr');
-    $server = apachesolr_server_id_load($server_id);
+    $env_id = variable_get('apachesolr_default_environment', 'solr');
+    $environment = apachesolr_environment_load($env_id);
     // We will use a core named after the simpltest prefix.
-    $server['path'] = '/solr/' . $this->databasePrefix;
-    apachesolr_server_save($server);
-    $solr_url = "{$server['scheme']}://{$server['host']}:{$server['port']}{$server['path']}";
-    $core_admin_url = "{$server['scheme']}://{$server['host']}:{$server['port']}/solr/admin/cores";
+    // Normal base URL will be http://loclahost:8983/solr
+    $base_url = $environment['url'];
+    $environment['url'] .= '/' . $this->databasePrefix;
+    apachesolr_environment_save($environment);
+    $solr_url = $environment['url'];
+    $core_admin_url = "$base_url/admin/cores";
     $filesdir = variable_get('file_public_path');
     mkdir("$filesdir/solr/conf", 0777, TRUE);
     mkdir("$filesdir/solr/data");
