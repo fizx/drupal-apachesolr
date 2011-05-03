@@ -826,25 +826,22 @@ function apachesolr_search_form_search_form_alter(&$form, $form_state) {
     // calling drupal_get_form('search_form').
     $apachesolr_has_searched = apachesolr_has_searched();
 
-    $queryvalues = array();
     $searcher = NULL;
+    $fq = NULL;
     if ($apachesolr_has_searched) {
       $query = apachesolr_current_query();
-      $queryvalues = $query->getUrlQueryvalues();
       $searcher = $query->getSearcher();
+      // We use the presence of filter query params as a flag for the retain filters checkbox.
+      $fq = $query->getParam('fq');
     }
 
     $form['basic']['apachesolr_search']['#tree'] = TRUE;
-    $form['basic']['apachesolr_search']['queryvalues'] = array(
-      '#type' => 'hidden',
-      '#default_value' => json_encode($queryvalues),
-    );
     $form['basic']['apachesolr_search']['get'] = array(
       '#type' => 'hidden',
-      '#default_value' => json_encode(array_diff_key($_GET, array('q' => 1, 'page' => 1, 'filters' => 1, 'solrsort' => 1, 'retain-filters' => 1))),
+      '#default_value' => json_encode(array_diff_key($_GET, array('q' => 1, 'page' => 1, 'solrsort' => 1, 'retain-filters' => 1))),
     );
 
-    if ($queryvalues || isset($form_state['input']['apachesolr_search']['retain-filters'])) {
+    if ($fq || isset($form_state['input']['apachesolr_search']['retain-filters'])) {
       $form['basic']['apachesolr_search']['retain-filters'] = array(
         '#type' => 'checkbox',
         '#title' => t('Retain current filters'),
@@ -898,13 +895,11 @@ function theme_apachesolr_search_suggestions($variables) {
 function apachesolr_search_form_search_submit($form, &$form_state) {
   $fv = $form_state['values'];
   $get = json_decode($fv['apachesolr_search']['get'], TRUE);
-  $queryvalues = json_decode($fv['apachesolr_search']['queryvalues'], TRUE);
-  if (!empty($fv['apachesolr_search']['retain-filters']) && $queryvalues) {
-    $get = $queryvalues + $get;
+  if (!empty($fv['apachesolr_search']['retain-filters'])) {
     $get['retain-filters'] = '1';
+    // Add the query values into the redirect.
+    $form_state['redirect'] = array($form_state['redirect'], array('query' => $get));
   }
-  // Add the query values into the redirect.
-  $form_state['redirect'] = array($form_state['redirect'], array('query' => $get));
 }
 
 /**
