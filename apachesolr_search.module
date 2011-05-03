@@ -87,7 +87,7 @@ function apachesolr_search_menu() {
     // @todo Honor "enabled" settings?
     $result = db_select('apachesolr_search_page', 's')
       ->fields('s', array('page_id', 'search_path', 'page_title', 'env_id'))
-      ->condition('env_id', '', '!=')
+      ->condition('env_id', '', '<>')
       ->execute();
   }
   catch (Exception $e) {

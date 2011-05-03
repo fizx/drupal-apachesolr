@@ -13,6 +13,15 @@ function apachesolr_search_user_defined_search_page($page_id, $keys = '') {
   $build = array();
   $filters = isset($search_page->settings['fq']) ? $search_page->settings['fq'] : array();
   $solrsort = isset($_GET['solrsort']) ? $_GET['solrsort'] : '';
+  // We may also have filters added by facet API module. The 'f'
+  // is determined by constant FacetapiAdapter::FILTER_KEY. Hard
+  // coded here to avoid extra class loading.
+  $conditions = array();
+  if (!empty($_GET['f']) && is_array($_GET['f'])) {
+    if (module_exists('facetapi')) {
+      $conditions['f'] = $_GET['f'];
+    }
+  }
 
   $empty_search_behavior = $search_page->settings['apachesolr_search_browse'];
 
@@ -21,7 +30,7 @@ function apachesolr_search_user_defined_search_page($page_id, $keys = '') {
     // Adds the search form to the page.
     $build['search_form'] = drupal_get_form('apachesolr_search_user_defined_search_form', $search_page, $keys);
 
-    if (!$keys && empty($_GET['f']) && ($empty_search_behavior == 'browse' || $empty_search_behavior == 'blocks')) {
+    if (!$keys && empty($conditions) && ($empty_search_behavior == 'browse' || $empty_search_behavior == 'blocks')) {
       // Pass empty search behavior as string on to apachesolr_search_search_page()
       $results = apachesolr_search_run('apachesolr', array('fq' => $filters), '', $search_page->search_path, 0, $solr);
       if ($empty_search_behavior == 'browse') {
@@ -31,7 +40,7 @@ function apachesolr_search_user_defined_search_page($page_id, $keys = '') {
 
       $build['search_results'] = apachesolr_search_page_browse($empty_search_behavior);
     }
-    elseif ($keys || !empty($_GET['f']) || $empty_search_behavior == 'results') {
+    elseif ($keys || !empty($conditions) || $empty_search_behavior == 'results') {
       $results = apachesolr_search_run('apachesolr', array('q' => $keys, 'fq' => $filters), $solrsort, $search_page->search_path, pager_find_page(), $solr);
       // Adds search results to the render array.
       $build['search_results'] = array(
