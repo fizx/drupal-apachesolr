@@ -265,7 +265,7 @@ function apachesolr_search_highlighting_params($query) {
   $params['hl.simple.pre'] = variable_get('apachesolr_hl_pretag', NULL);
   $params['hl.simple.post'] = variable_get('apachesolr_hl_posttag', NULL);
   $params['hl.snippets'] = variable_get('apachesolr_hl_numsnippets', NULL);
-  $params['hl.fl'] = variable_get('apachesolr_hl_fieldtohightlight', NULL);
+  $params['hl.fl'] = variable_get('apachesolr_hl_fieldtohighlight', NULL);
   return $params;
 }
 
