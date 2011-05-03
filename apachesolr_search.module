@@ -86,7 +86,7 @@ function apachesolr_search_menu() {
     // Gets search pages directly from the index.
     // @todo Honor "enabled" settings?
     $result = db_select('apachesolr_search_page', 's')
-      ->fields('s', array('page_id', 'search_path', 'page_title'))
+      ->fields('s', array('page_id', 'search_path', 'page_title', 'env_id'))
       ->condition('env_id', '', '!=')
       ->execute();
   }
@@ -100,6 +100,11 @@ function apachesolr_search_menu() {
 
   // Iterates over search pages, builds menu items.
   foreach ($result as $record) {
+    // Validate the environemnt ID in case of import or missed deletion.
+    $environment = apachesolr_environment_load($record->env_id);
+    if (!$environment) {
+      continue;
+    }
     // Parses search path into it's various parts, builds menu items dependent
     // on whether %keys is in the path.
     $parts = explode('/', $record->search_path);
@@ -294,7 +299,8 @@ function apachesolr_search_finalize_query(DrupalSolrQueryInterface $query) {
  * Handle browse results for empty searches.
  */
 function apachesolr_search_page_browse($empty_search_behavior) {
-  $output = array();
+  $build = array();
+
   // Switch in case we come up with new flags.
   switch ($empty_search_behavior) {
     case 'browse':
@@ -907,28 +913,8 @@ function apachesolr_search_form_search_submit($form, &$form_state) {
  * This adds options to the apachesolr admin form.
  */
 function apachesolr_search_form_apachesolr_settings_alter(&$form, $form_state) {
-  $description = t('This is what is shown when the user enters an empty search, or removes all filters from an active search.');
-  if (!module_exists('facetapi')) {
-    $description .= ' ' . t('<strong>Filters will not be shown until you enable FacetAPI module.</strong>');
-  }
-  else {
-    $description .= t('Remember to enable filters on the !filterslink and assign blocks to regions on the !blocklink', array(
-      '!filterslink' => l('enabled filters page', 'admin/config/search/apachesolr/enabled-filters'),
-      '!blocklink' => l('block settings page', 'admin/structure/block'),
-    ));
-  }
-  $form['apachesolr_search_browse'] = array(
-    '#type' => 'radios',
-    '#title' => t('Behavior on empty search'),
-    '#options' => array(
-      'none'    => t("Show search box"),
-      'browse'  => t("Show search box and enabled filters' blocks under the search box"),
-      'blocks'  => t("Show search box and enabled filters' blocks in their configured regions"),
-      'results' => t("Show search box, enabled filters' blocks in their configured regions and first page of all available results"),
-    ),
-    '#default_value' => variable_get('apachesolr_search_browse', 'browse'),
-    '#description' => $description,
-  );
+  module_load_include('inc', 'apachesolr_search', 'apachesolr_search.admin');
+  $form['apachesolr_search_browse'] = _apachesolr_search_browse_form(variable_get('apachesolr_search_browse', 'browse'));
 
   $form['apachesolr_search_spellcheck'] = array(
     '#type' => 'checkbox',

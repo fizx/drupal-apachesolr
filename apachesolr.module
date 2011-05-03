@@ -2167,7 +2167,7 @@ function theme_apachesolr_settings_title($vars) {
       'Settings for: <a href="@url">@environment</a>',
       array('@url' => $url, '@environment' => $environment['name'])
     );
-    $output .= '</h3>';
+    $output .= "</h3>\n";
   }
 
   return $output;

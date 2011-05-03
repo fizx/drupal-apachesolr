@@ -6,7 +6,35 @@
  */
 
 /**
- *
+ * Helper function for empty search configuration.
+ */
+function _apachesolr_search_browse_form($default_value) {
+  $description = t('This is what is shown when the user enters an empty search, or removes all filters from an active search.') . ' ';
+  if (!module_exists('facetapi')) {
+    $description .= t('<strong>Filters will not be shown until you enable Facet API module.</strong>');
+  }
+  else {
+    $description .= t('Remember to enable filters on the <a href="!filterslink">enabled filters page</a> and assign blocks to regions on the <a href="!blocklink">block settings page</a>', array(
+      '!filterslink' => url('admin/config/search/apachesolr/enabled-filters'),
+      '!blocklink' => url('admin/structure/block'),
+    ));
+  }
+  return array(
+    '#type' => 'radios',
+    '#title' => t('Behavior on empty search'),
+    '#options' => array(
+      'none'    => t("Show search box"),
+      'browse'  => t("Show search box and enabled filters' blocks under the search box"),
+      'blocks'  => t("Show search box and enabled filters' blocks in their configured regions"),
+      'results' => t("Show search box, enabled filters' blocks in their configured regions and first page of all available results"),
+    ),
+    '#default_value' => $default_value,
+    '#description' => $description,
+  );
+}
+
+/**
+ * Menu callback for the overview page showing custom search pages.
  */
 function apachesolr_search_page_list_page() {
   $build = array();
@@ -51,7 +79,7 @@ function apachesolr_search_page_list_page() {
     // Operations
     $row[] = array('data' => l(t('Edit'), 'admin/config/search/apachesolr/search-pages/' . $record->page_id . '/edit'));
     $row[] = array('data' => l(t('Delete'), 'admin/config/search/apachesolr/search-pages/' . $record->page_id . '/delete'));
-      
+
     $rows[] = $row;
   }
 
@@ -66,7 +94,7 @@ function apachesolr_search_page_list_page() {
 }
 
 /**
- *
+ * Menu callback/form-builder for the form to create or edit a search page.
  */
 function apachesolr_search_page_settings_form($form, &$form_state, $search_page = NULL) {
 
@@ -144,15 +172,23 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
   foreach ($environments as $id => $environment) {
     $options[$id] = $environment['name'];
   }
+  // Validate the env_id.
+  if (!empty($search_page->env_id) && !apachesolr_environment_load($search_page->env_id)) {
+    $search_page->env_id = '';
+  }
 
   $form['info']['env_id'] = array(
     '#title' => t('Search environment'),
     '#type' => 'select',
     '#options' => $options,
-    '#default_value' => !empty($search_page->env_id) ? $search_page->env_id : NULL,
-    '#description' => t('The environment that is used by this search page. If no environmentr is selected, this page will be disabled.'),
+    '#default_value' => !empty($search_page->env_id) ? $search_page->env_id : '',
+    '#description' => t('The environment that is used by this search page. If no environment is selected, this page will be disabled.'),
     '#weight' => -30,
   );
+
+  // Use the main search page setting as the default for new pages.
+  $default_value = isset($search_page->settings['apachesolr_search_browse']) ? $search_page->settings['apachesolr_search_browse'] : variable_get('apachesolr_search_browse', 'browse');
+  $form['info']['apachesolr_search_browse'] = _apachesolr_search_browse_form($default_value);
 
   $form['actions'] = array(
     '#type' => 'actions',
@@ -162,11 +198,6 @@ function apachesolr_search_page_settings_form($form, &$form_state, $search_page 
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-  );
-
-  $form['actions']['submit_list'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save and go back to list'),
   );
 
   $form['actions']['cancel'] = array(
@@ -205,6 +236,9 @@ function apachesolr_search_page_settings_form_submit($form, &$form_state) {
       }
     }
   }
+
+  $settings['apachesolr_search_browse'] = $form_state['values']['apachesolr_search_browse'];
+
   db_merge('apachesolr_search_page')
     ->key(array('page_id' => $form_state['values']['page_id']))
     ->fields(array(
@@ -219,11 +253,9 @@ function apachesolr_search_page_settings_form_submit($form, &$form_state) {
     ->execute();
 
   // Saves our values in the database, sets redirect path on success.
-  drupal_set_message(t('The configuration options have been saved.'));
+  drupal_set_message(t('The configuration options have been saved for %page.', array('%page' => $form_state['values']['label'])));
 
-  if (t('Save and go back to list') == $form_state['clicked_button']['#value']) {
-      $form_state['redirect'] = 'admin/config/search/apachesolr/search-pages';
-  }
+  $form_state['redirect'] = 'admin/config/search/apachesolr/search-pages';
 
   // Menu rebuild needed to pick up search path.
   menu_rebuild();
@@ -299,7 +331,7 @@ function apachesolr_search_settings_page($env_id = NULL) {
     $output = array(
       'apachesolr_environment' => array(
         '#theme' => 'apachesolr_settings_title',
-        '#evn_id' => $env_id,
+        '#env_id' => $env_id,
       ),
       'apachesolr_search_settings_form' => drupal_get_form('apachesolr_search_settings_form', $fields, $env_id)
     );

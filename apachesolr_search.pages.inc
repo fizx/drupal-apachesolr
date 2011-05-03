@@ -14,18 +14,32 @@ function apachesolr_search_user_defined_search_page($page_id, $keys = '') {
   $filters = isset($search_page->settings['fq']) ? $search_page->settings['fq'] : array();
   $solrsort = isset($_GET['solrsort']) ? $_GET['solrsort'] : '';
 
+  $empty_search_behavior = $search_page->settings['apachesolr_search_browse'];
+
   try {
     $solr = apachesolr_get_solr($search_page->env_id);
-    $results = apachesolr_search_run('apachesolr', array('q' => $keys, 'fq' => $filters), $solrsort, 'search/' . arg(1), pager_find_page(), $solr);
-
     // Adds the search form to the page.
     $build['search_form'] = drupal_get_form('apachesolr_search_user_defined_search_form', $search_page, $keys);
-    // Adds search results to the render array.
-    $build['search_results'] = array(
-      '#theme' => 'search_results',
-      '#results' => $results,
-      '#module' => 'apachesolr_search',
-    );
+
+    if (!$keys && empty($_GET['f']) && ($empty_search_behavior == 'browse' || $empty_search_behavior == 'blocks')) {
+      // Pass empty search behavior as string on to apachesolr_search_search_page()
+      $results = apachesolr_search_run('apachesolr', array('fq' => $filters), '', $search_page->search_path, 0, $solr);
+      if ($empty_search_behavior == 'browse') {
+        // Hide sidebar blocks for content-area browsing instead.
+        apachesolr_suppress_blocks(TRUE);
+      }
+
+      $build['search_results'] = apachesolr_search_page_browse($empty_search_behavior);
+    }
+    elseif ($keys || !empty($_GET['f']) || $empty_search_behavior == 'results') {
+      $results = apachesolr_search_run('apachesolr', array('q' => $keys, 'fq' => $filters), $solrsort, $search_page->search_path, pager_find_page(), $solr);
+      // Adds search results to the render array.
+      $build['search_results'] = array(
+        '#theme' => 'search_results',
+        '#results' => $results,
+        '#module' => 'apachesolr_search',
+      );
+    }
   }
   catch (Exception $e) {
     watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
