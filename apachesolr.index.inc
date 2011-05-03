@@ -282,7 +282,7 @@ function apachesolr_cck_userreference_indexing_callback($node, $field_name, $ind
  *
  * $text must be stripped of control characters before hand.
  */
-function apachesolr_add_tags_to_document(&$document, $text) {
+function apachesolr_add_tags_to_document($document, $text) {
   $tags_to_index = variable_get('apachesolr_tags_to_index', array(
     'h1' => 'tags_h1',
     'h2' => 'tags_h2_h3',
