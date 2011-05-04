@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1146296 by pwolanin: integrate with Facet API current search block code.
 #1145036 by slip, pwolanin: Add support for facet browsing to custom search pages.
 #1131288 by pwolanin: Rename "server" to "search environment" for better conceptual clarity.
 #1122186 by slip, pwolanin: Allow custom user-specified search pages, supporting API changes.

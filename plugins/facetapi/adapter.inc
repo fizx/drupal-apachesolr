@@ -109,4 +109,13 @@ class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
     }
   }
 
+  /**
+   * Returns the nmber of total results found for the current search.
+   */
+  public function getResultCount() {
+    $response = apachesolr_static_response_cache($this->getSearcher());
+    if ($response) {
+      return $response->response->numFound;
+    }
+  }
 }

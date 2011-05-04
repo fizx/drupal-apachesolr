@@ -770,40 +770,6 @@ function apachesolr_search_apachesolr_environment_delete($server) {
   menu_rebuild();
 }
 
-
-/**
- * Implements hook_block_info().
- */
-function apachesolr_search_block_info() {
-  // Add the blocks
-  $blocks = array();
-  $blocks['currentsearch'] = array(
-    'info' => t('Apache Solr Search: Current search'),
-    'cache' => DRUPAL_CACHE_PER_PAGE,
-  );
-  return $blocks;
-}
-
-/**
- * Implements hook_block_view().
- */
-function apachesolr_search_block_view($delta = '') {
-  if (apachesolr_has_searched() && !apachesolr_suppress_blocks()) {
-    // Get the query and response. Without these no blocks make sense.
-    if ($query = apachesolr_current_query()) {
-      $response = apachesolr_static_response_cache($query->getSearcher());
-    }
-    if (empty($response)) {
-      return;
-    }
-
-    switch ($delta) {
-      case 'currentsearch':
-        return apachesolr_search_currentsearch_block($response, $query);
-    }
-  }
-}
-
 /**
  * Implements hook_form_[form_id]_alter().
  *
@@ -948,9 +914,6 @@ function apachesolr_search_theme() {
     'apachesolr_search_browse_blocks' => array(
       'render element' => 'content',
     ),
-    'apachesolr_currentsearch' => array(
-      'variables' => array('total_found' => NULL, 'links' => NULL),
-    ),
     'apachesolr_search_snippets' => array(
       'variables' => array('doc' => NULL, 'snippets' => array()),
     ),
@@ -972,18 +935,6 @@ function theme_apachesolr_breadcrumb_date_range($vars) {
     return apachesolr_date_format_range($match[1], $match[2]);
   }
   return $field['#value'];
-}
-
-/**
- * Return current search block contents
- */
-//function theme_apachesolr_currentsearch($total_found, $links) {
-function theme_apachesolr_currentsearch($vars) {
-  return theme_item_list(array(
-    'items' => $vars['links'],
-    'title' => format_plural($vars['total_found'], 'Search found 1 item', 'Search found @count items'),
-    'type' => 'ul',
-    'attributes' => array()));
 }
 
 /**
@@ -1024,26 +975,5 @@ function theme_apachesolr_search_noresults() {
 </ul>');
 }
 
-/**
- * Return the contents of the "Current search" block.
- *
- * @param $response
- *   The Solr response object.
- * @param $query
- *   The Solr query object.
- */
-function apachesolr_search_currentsearch_block($response, DrupalSolrQueryInterface $query) {
-  $fields = $query->getFilters();
-  $links = array();
-  $facets = array();
-
-  // If current search has keys, offer current search without them
-  if ($keys = $query->getParam('q')) {
-    $links[] = theme('apachesolr_unclick_link', array(
-      'facet_text' => $keys,
-      'path' => $query->getPath(''),
-      'options' => array('query' => $query->getUrlQueryvalues())));
-  }
-}
 
 
