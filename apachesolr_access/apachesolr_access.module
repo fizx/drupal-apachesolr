@@ -58,9 +58,9 @@ function apachesolr_access_build_subquery($account) {
 }
 
 /**
- * Implements hook_apachesolr_modify_query().
+ * Implements hook_apachesolr_query_alter().
  */
-function apachesolr_access_apachesolr_modify_query(DrupalSolrQueryInterface $query, $caller = 'apachesolr_search') {
+function apachesolr_access_apachesolr_query_alter(DrupalSolrQueryInterface $query) {
   global $user;
   try {
     $subquery = apachesolr_access_build_subquery($user);
@@ -68,8 +68,7 @@ function apachesolr_access_apachesolr_modify_query(DrupalSolrQueryInterface $que
   }
   catch (Exception $e) {
     watchdog("apachesolr_access", 'User %name (UID:!uid) cannot search: @message', array('%name' => $user->name, '!uid' => $user->uid, '@message' => $e->getMessage()));
-    // Returning TRUE aborts the search.
-    return TRUE;
+    $query->abort_search = TRUE;
   }
 }
 

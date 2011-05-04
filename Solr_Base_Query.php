@@ -166,6 +166,9 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
   // Makes sure we always have a valid sort.
   protected $solrsort = array('#name' => 'score', '#direction' => 'desc');
 
+  // A flag to allow the search to be aborted.
+  public $abort_search = FALSE;
+
   /**
    * @param $name
    *   A name (namespce) for this query.  Typically 'apachesolr'.
@@ -483,6 +486,9 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
   }
 
   public function search($keys = NULL) {
+    if ($this->abort_search) {
+      return NULL;
+    }
     return $this->solr->search($keys, $this->getSolrParams());
   }
 

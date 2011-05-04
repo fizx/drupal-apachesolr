@@ -7,6 +7,7 @@
 
 define('APACHESOLR_READ_WRITE', 0);
 define('APACHESOLR_READ_ONLY', 1);
+define('APACHESOLR_API_VERSION', 3.0);
 
 /**
  * Implements hook_menu().
@@ -1329,7 +1330,7 @@ function apachesolr_server_status($url, $class = NULL) {
  *
  * Normally this function is used with the default (dismax) handler for keyword
  * searches. The $final_query that's returned will have been modified by
- * both hook_apachesolr_prepare_query() and hook_apachesolr_modify_query().
+ * both hook_apachesolr_query_prepare() and hook_apachesolr_query_alter().
  *
  * @param $current_query
  *   A query object from apachesolr_drupal_query().  It will be modified by
@@ -1342,6 +1343,9 @@ function apachesolr_server_status($url, $class = NULL) {
  * @throws Exception
  */
 function apachesolr_do_query(DrupalSolrQueryInterface $current_query, $page = 0) {
+  if (!is_object($current_query)) {
+    throw new Exception(t('NULL query object in function apachesolr_do_query()'));
+  }
   // Allow modules to alter the query prior to statically caching it.
   // This can e.g. be used to add available sorts.
   $searcher = $current_query->getSearcher();
@@ -1354,8 +1358,8 @@ function apachesolr_do_query(DrupalSolrQueryInterface $current_query, $page = 0)
     }
   }
 
-  foreach (module_implements('apachesolr_prepare_query') as $module) {
-    $function_name = $module . '_apachesolr_prepare_query';
+  foreach (module_implements('apachesolr_query_prepare') as $module) {
+    $function_name = $module . '_apachesolr_query_prepare';
     $function_name($current_query);
   }
 
@@ -1364,10 +1368,10 @@ function apachesolr_do_query(DrupalSolrQueryInterface $current_query, $page = 0)
   $query = apachesolr_current_query($current_query);
 
   // This hook allows modules to modify the query and params objects.
-  $eject = apachesolr_modify_query($query);
+  drupal_alter('apachesolr_query', $query);
 
-  // A module implementing hook_apachesolr_modify_query() aborted the search.
-  if ($eject) {
+  if ($query->abort_search) {
+    // A module implementing HOOK_apachesolr_query_alter() aborted the search.
     return array(NULL, array());
   }
   $query->addParam('start', $page * $query->getParam('rows'));
