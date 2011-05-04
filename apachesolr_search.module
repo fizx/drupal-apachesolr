@@ -287,15 +287,6 @@ function apachesolr_search_apachesolr_document_handlers($type, $namespace) {
 }
 
 /**
- * Implments hook_finalize_query().
- *
- * Handle OR facets.
- */
-function apachesolr_search_finalize_query(DrupalSolrQueryInterface $query) {
-
-}
-
-/**
  * Handle browse results for empty searches.
  */
 function apachesolr_search_page_browse($empty_search_behavior) {
