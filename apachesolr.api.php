@@ -4,26 +4,17 @@
  */
 
 /**
- * Any module performing a search should call
- * drupal_alter('apachesolr_query', $query). That function then invokes
- * this hook. It allows modules to modify the query object and params array.
- * $caller indicates which module is invoking the hook. A return value of TRUE
- * from apachesolr_modify_query() indicates the search should be aborted.
- * A module implementing HOOK_apachesolr_modify_query() may return TRUE to flag
- * the query to be aborted.
- */
-function HOOK_apachesolr_query_alter($query) {
-  // I only want to see articles by the admin!
-  $query->addFilter("is_uid", 1);
-
-  // Only search titles.
-  $query->replaceParam('qf', 'label');
-}
-
-/**
- * This is pretty much the same as HOOK_apachesolr_query_alter() but runs earlier
- * and before the query is statically cached. It can e.g. be used to add
- * available sorts to the query.
+ * Prepare the query by adding parameters, sorts, etc.
+ *
+ * This hook is invoked before the query is cached.  The cached query
+ * is used after the search such as for building facet and sort blocks,
+ * so parameters added during this hook may be visible to end users.
+ *
+ * This is otherwise the same as HOOK_apachesolr_query_alter(), but runs
+ * before it.
+ *
+ * @param $query
+ *  An object implementing DrupalSolrQueryInterface.  No need for &.
  */
 function HOOK_apachesolr_query_prepare($query) {
   // Add a sort on the node ID.
@@ -31,6 +22,27 @@ function HOOK_apachesolr_query_prepare($query) {
     'title' => t('Node ID'),
     'default' => 'asc',
   ));
+}
+
+/**
+ * Alter the query after it's prepared and cached.
+ *
+ * Any module performing a search should call
+ * drupal_alter('apachesolr_query', $query). That function then invokes
+ * this hook. It allows modules to modify the query object and its params.
+ *
+ * A module implementing HOOK_apachesolr_modify_query() may set
+ * $query->abort_search to TRUE to flag the query to be aborted.
+ *
+ * @param $query
+ *  An object implementing DrupalSolrQueryInterface.  No need for &.
+ */
+function HOOK_apachesolr_query_alter($query) {
+  // I only want to see articles by the admin!
+  $query->addFilter("is_uid", 1);
+
+  // Only search titles.
+  $query->replaceParam('qf', 'label');
 }
 
 /**
