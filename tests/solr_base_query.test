@@ -255,12 +255,12 @@ class SolrBaseQueryTests extends DrupalUnitTestCase {
       $this->assertEqual($filter, $query->makeFilterQuery($filters[$idx]));
     }
     // Check that the query string is re-assembled correctly
-    $this->assertEqual(array('fq' => $fq), $query->getUrlQueryvalues());
+    $this->assertEqual(array('fq' => $fq), $query->getUrlQueryvalues(array('fq' => array())));
     $this->assertEqual('mykeys', $query->getParam('q'));
     $query->removeFilter('tid', '11');
     $filters = $query->getFilters();
     $this->assertEqual(count($filters), 5, count($filters) . ' filters found, expected 5 filters');
-    $this->assertEqual(array('fq' => array('tid:3', 'sort_label:hello', 'tid:1', 'tid:12', 'label:hello')), $query->getUrlQueryvalues());
+    $this->assertEqual(array('fq' => array('tid:3', 'sort_label:hello', 'tid:1', 'tid:12', 'label:hello')), $query->getUrlQueryvalues(array('fq' => array())));
     $query->removeFilter('tid');
     $filters = $query->getFilters();
     $this->assertEqual(count($filters), 2, count($filters) . ' filters found, expected 2 filters');

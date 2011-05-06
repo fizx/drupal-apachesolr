@@ -471,9 +471,12 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
   public function getUrlQueryvalues($queryvalues = array()) {
     // For sanity's sake, unset the special 'q' param used by Drupal core.
     unset($queryvalues['q']);
-    $filters = $this->getParam('fq');
-    if ($filters) {
-      $queryvalues['fq'] = $filters;
+    // Only add fq params if they are already set, to avoid conflcits with facet filters.
+    if (isset($queryvalues['fq'])) {
+      $filters = $this->getParam('fq');
+      if ($filters) {
+        $queryvalues['fq'] = $filters;
+      }
     }
     $solrsort = $this->solrsort;
     if ($solrsort && ($solrsort['#name'] != 'score' || $solrsort['#direction'] != 'desc')) {
@@ -481,6 +484,10 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
         $solrsort['#name'] = $this->field_map[$solrsort['#name']];
       }
       $queryvalues['solrsort'] = $solrsort['#name'] .' '. $solrsort['#direction'];
+    }
+    else {
+      // Return to default relevancy sort.
+      unset($queryvalues['solrsort']);
     }
     return $queryvalues;
   }
