@@ -42,11 +42,11 @@ function apachesolr_environment_delete_form_submit($form, &$form_state) {
  * Form builder for adding/editing a Solr environment used as a menu callback.
  */
 function apachesolr_environment_edit_form($form, &$form_state, $environment = NULL) {
-  
+
   if (empty($environment)) {
     $environment = array();
   }
-  $environment += array('env_id' => '', 'name' => '', 'url' => '', 'service_class' => '');
+  $environment += array('env_id' => '', 'name' => '', 'url' => '', 'service_class' => '', 'conf' => array());
 
   $form['url'] = array(
     '#type' => 'textfield',
@@ -84,6 +84,16 @@ function apachesolr_environment_edit_form($form, &$form_state, $environment = NU
   $form['service_class'] = array(
     '#type' => 'value',
     '#value' => $environment['service_class'],
+  );
+  $form['conf'] = array(
+    '#tree' => TRUE,
+  );
+  $form['conf']['apachesolr_read_only'] = array(
+    '#type' => 'radios',
+    '#title' => t('Index write access'),
+    '#default_value' => isset($environment['conf']['apachesolr_read_only']) ? $environment['conf']['apachesolr_read_only'] : APACHESOLR_READ_WRITE,
+    '#options' => array(APACHESOLR_READ_WRITE => t('Read and write (normal)'), APACHESOLR_READ_ONLY => t('Read only')),
+    '#description' => t('<em>Read only</em> stops this site from sending updates to this search environment. Useful for development sites.'),
   );
   $form['actions'] = array(
     '#type' => 'actions',
@@ -164,6 +174,7 @@ function apachesolr_environment_save_submit($form, &$form_state) {
     variable_set('apachesolr_default_environment', $form_state['values']['env_id']);
   }
   cache_clear_all('apachesolr:environments', 'cache_apachesolr');
+  drupal_set_message(t('The %name search environment has been saved.', array('%name' => $form_state['values']['name'])));
   $form_state['redirect'] = 'admin/config/search/apachesolr';
 }
 
@@ -295,13 +306,7 @@ function apachesolr_settings($form, &$form_state) {
     '#default_value' => variable_get('apachesolr_set_nodeapi_messages', 1),
     '#options' => array(0 => t('Disabled'), 1 => t('Enabled')),
   );
-  $form['advanced']['apachesolr_read_only'] = array(
-    '#type' => 'radios',
-    '#title' => t('Index write access'),
-    '#default_value' => apachesolr_environment_variable_get(apachesolr_default_environment(), 'apachesolr_read_only', APACHESOLR_READ_WRITE),
-    '#options' => array(APACHESOLR_READ_WRITE => t('Read and write (normal)'), APACHESOLR_READ_ONLY => t('Read only')),
-    '#description' => t('<em>Read only</em> stops this site from sending updates to your search index. Useful for development sites.'),
-  );
+
   return system_settings_form($form);
 }
 
@@ -354,8 +359,8 @@ function apachesolr_index_page($env_id = NULL) {
   );
 
   $status_header = '';
+  $solr_msg = $num_docs = $delay_msg = $delete_msg = '';
   if (isset($data->index->numDocs)) {
-    $pending_docs = $delay_msg = $delete_msg = '';
     try {
       $stats_summary = $solr->getStatsSummary();
       $solr_msg = '<p>' . t('Using schema.xml version: <strong>@schema_version</strong>', $stats_summary);
@@ -370,17 +375,17 @@ function apachesolr_index_page($env_id = NULL) {
     }
     $status_header .= $solr_msg . $delay_msg;
     $pending_msg = $stats_summary['@pending_docs'] ? t('(@pending_docs sent but not yet processed)', $stats_summary) : '';
-    $status_header .= '<p>' . t('Number of documents in index: @num !pending', array('@num' => $data->index->numDocs, '!pending' => $pending_msg)) . "</p>\n";
-    $status_header .= $delete_msg;
+    $num_docs = '<p>' . t('Number of documents in index: @num !pending', array('@num' => $data->index->numDocs, '!pending' => $pending_msg)) . "</p>\n";
+    $status_header .= $num_docs . $delete_msg;
   }
   $status_header .= '<p>' . l(t('View more details on the search index contents'), 'admin/reports/apachesolr') . "</p>\n";
+  $output['apachesolr_index_action_status_header'] = array('#markup' => $status_header);
   if (apachesolr_environment_variable_get($env_id, 'apachesolr_read_only', APACHESOLR_READ_WRITE) == APACHESOLR_READ_WRITE) {
-    $output['apachesolr_index_action_status_header'] = array('#markup' => $status_header);
     // Display the Delete Index form.
     $output['apachesolr_index_action_form'] = drupal_get_form('apachesolr_index_action_form');
   }
   else {
-    drupal_set_message(t('The index is in read-only mode. Options for deleting and re-indexing are therefore not available. The index mode can be changed on the !settings_page', array('!settings_page' => l(t('settings page'), 'admin/config/search/apachesolr'))), 'warning');
+    drupal_set_message(t('The index is in read-only mode. Options for deleting and re-indexing are therefore not available. The index mode can be changed on the <a href="!settings_page">settings page</a>', array('!settings_page' => url('admin/config/search/apachesolr-env/' . $env_id, array('query' =>  drupal_get_destination())))), 'warning');
   }
 
   return $output;

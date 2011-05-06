@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1148768 by pwolanin: move the read-only index setting to the environment edit page.
 #1146976 by pwolanin: Rename hook_apachesolr_modify_query to hook_apachesolr_query_alter and other API clean up.
 #1146296 by pwolanin: integrate with Facet API current search block code.
 #1145036 by slip, pwolanin: Add support for facet browsing to custom search pages.
