@@ -468,16 +468,11 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
     return $this->base_path . '/' . $this->getParam('q');
   }
 
-  public function getUrlQueryvalues($queryvalues = array()) {
-    // For sanity's sake, unset the special 'q' param used by Drupal core.
-    unset($queryvalues['q']);
-    // Only add fq params if they are already set, to avoid conflcits with facet filters.
-    if (isset($queryvalues['fq'])) {
-      $filters = $this->getParam('fq');
-      if ($filters) {
-        $queryvalues['fq'] = $filters;
-      }
-    }
+  /**
+   * Return an array representing the URL query string for the current sort setting.
+   */
+  public function getSolrsortUrlQuery() {
+    $queryvalues = array();
     $solrsort = $this->solrsort;
     if ($solrsort && ($solrsort['#name'] != 'score' || $solrsort['#direction'] != 'desc')) {
       if (isset($this->field_map[$solrsort['#name']])) {

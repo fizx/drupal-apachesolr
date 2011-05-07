@@ -245,9 +245,21 @@ class SolrBaseQueryTests extends DrupalUnitTestCase {
   function testParseFilters() {
     $fq = array('tid:3', 'sort_label:hello', 'tid:11', 'tid:1', 'tid:12', 'label:hello');
     // Setup dummy Solr object.
-    $query = new SolrBaseQuery("apachesolr_tests", new DummySolr(), array('q' => 'mykeys', 'fq' => $fq), '', '');
-    $this->assertFalse($query->hasFilter('label', 'Hello'));
-    $this->assertTrue($query->hasFilter('label', 'hello'));
+    $query = new SolrBaseQuery("apachesolr_tests", new DummySolr(), array('q' => 'mykeys', 'fq' => $fq), 'sort_label asc', 'search/test');
+    // Check sortsort
+    $this->assertEqual(array('solrsort' => 'sort_label asc'), $query->getSolrsortUrlQuery());
+    $query->setSolrsort('sort_name', 'desc');
+    $this->assertEqual(array('solrsort' => 'sort_name desc'), $query->getSolrsortUrlQuery());
+    $query->setSolrsort('score', 'desc');
+    $this->assertEqual(array(), $query->getSolrsortUrlQuery());
+    // Check getPath() functionality
+    $this->assertEqual('search/test/mykeys', $query->getPath());
+    $this->assertEqual('search/test/newkeys', $query->getPath('newkeys'));
+    // Check hasFilter functionality
+    $this->assertFalse($query->hasFilter('label', 'Jello'), "hasFilter('label', 'Jello') is FALSE");
+    $this->assertTrue($query->hasFilter('label', 'hello'), "hasFilter('label', 'hello') is TRUE");
+    $this->assertTrue($query->hasFilter('label', 'hello', FALSE), "hasFilter('label', 'hello', FALSE) is TRUE");
+    $this->assertFalse($query->hasFilter('label', 'hello', TRUE), "hasFilter('label', 'hello', TRUE) is FALSE");
     $filters = $query->getFilters();
     $this->assertEqual(count($filters), 6, count($filters) . ' filters found, expected 6 filters');
     // Check positions of filters
@@ -255,12 +267,12 @@ class SolrBaseQueryTests extends DrupalUnitTestCase {
       $this->assertEqual($filter, $query->makeFilterQuery($filters[$idx]));
     }
     // Check that the query string is re-assembled correctly
-    $this->assertEqual(array('fq' => $fq), $query->getUrlQueryvalues(array('fq' => array())));
+    $this->assertEqual($fq, $query->getParam('fq'));
     $this->assertEqual('mykeys', $query->getParam('q'));
     $query->removeFilter('tid', '11');
     $filters = $query->getFilters();
     $this->assertEqual(count($filters), 5, count($filters) . ' filters found, expected 5 filters');
-    $this->assertEqual(array('fq' => array('tid:3', 'sort_label:hello', 'tid:1', 'tid:12', 'label:hello')), $query->getUrlQueryvalues(array('fq' => array())));
+    $this->assertEqual(array('tid:3', 'sort_label:hello', 'tid:1', 'tid:12', 'label:hello'), $query->getParam('fq'));
     $query->removeFilter('tid');
     $filters = $query->getFilters();
     $this->assertEqual(count($filters), 2, count($filters) . ' filters found, expected 2 filters');

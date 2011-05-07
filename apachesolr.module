@@ -977,7 +977,7 @@ function apachesolr_block_view($delta = '') {
       $sort_links[$name] = array(
         'title' => $sort['title'],
         'path' => $path,
-        'options' => array('query' => $new_query->getUrlQueryvalues($_GET)),
+        'options' => array('query' => $new_query->getSolrsortUrlQuery()),
         'active' => $active,
         'direction' => $direction,
       );
@@ -2105,15 +2105,10 @@ function apachesolr_l($text, $path, $options = array()) {
 
   // Don't need this, and just to be safe.
   unset($options['attributes']['title']);
-  // Double encode + characters for clean URL Apache quirks.
-  if (variable_get('clean_url', '0')) {
-    $path = str_replace('+', '%2B', $path);
-  }
 
-  // Retain GET parameters that ApacheSolr knows nothing about.
-  //$query = apachesolr_current_query();
-  //$get = array_diff_key($_GET, array('q' => 1, 'page' => 1), $options['query'], $query->getUrlQueryvalues());
-  //$options['query'] += $get;
+  // Retain GET parameters that Apache Solr knows nothing about.
+  $get = array_diff_key($_GET, array('q' => 1, 'page' => 1), $options['query']);
+  $options['query'] += $get;
 
   return '<a href="' . check_url(url($path, $options)) . '"' . drupal_attributes($options['attributes']) . '>' . ($options['html'] ? $text : check_plain(html_entity_decode($text))) . '</a>';
 }
@@ -2370,14 +2365,17 @@ interface DrupalSolrQueryInterface {
   function setSolrsort($name, $direction);
 
   /**
+   * Return an array representing the URL query string for the current sort setting.
+   */
+  public function getSolrsortUrlQuery();
+
+  /**
    * Return the search path (including the search keywords).
    *
    * @param string $new_keywords
    *   Optional. When set, this string overrides the query's current keywords.
    */
   public function getPath($new_keywords = NULL);
-
-  public function getUrlQueryvalues($queryvalues = array());
 
   /**
    * Send a search query using the Solr object passed into the constructor.
