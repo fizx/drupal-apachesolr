@@ -14,7 +14,7 @@
  * before it.
  *
  * @param $query
- *  An object implementing DrupalSolrQueryInterface.  No need for &.
+ *  An object implementing DrupalSolrQueryInterface. No need for &.
  */
 function HOOK_apachesolr_query_prepare($query) {
   // Add a sort on the node ID.
@@ -31,11 +31,11 @@ function HOOK_apachesolr_query_prepare($query) {
  * drupal_alter('apachesolr_query', $query). That function then invokes
  * this hook. It allows modules to modify the query object and its params.
  *
- * A module implementing HOOK_apachesolr_modify_query() may set
+ * A module implementing HOOK_apachesolr_query_alter() may set
  * $query->abort_search to TRUE to flag the query to be aborted.
  *
  * @param $query
- *  An object implementing DrupalSolrQueryInterface.  No need for &.
+ *  An object implementing DrupalSolrQueryInterface. No need for &.
  */
 function HOOK_apachesolr_query_alter($query) {
   // I only want to see articles by the admin!

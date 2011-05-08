@@ -1066,37 +1066,6 @@ function apachesolr_form_facetapi_facet_settings_form_alter(&$form, $form_state)
 }
 
 /**
- * This hook allows modules to modify the query object.
- *
- * Example:
- *
- * function my_module_apachesolr_modify_query($query) {
- *   // I only want to see articles by the admin!
- *   $query->add_filter("is_uid", 1);
- *
- * }
- *
- * @return
- *   TRUE to abort the current query, FALSE otherwise.
- */
-function apachesolr_modify_query(DrupalSolrQueryInterface $query) {
-  if (empty($query)) {
-    // This should only happen if Solr is not set up - avoids fatal errors.
-    return TRUE;
-  }
-
-  foreach (module_implements('apachesolr_modify_query') as $module) {
-    $function_name = $module . '_apachesolr_modify_query';
-    if ($function_name($query)) {
-      // Someone pulled the ejection handle.
-      return TRUE;
-    }
-  }
-  // Do not abort the query.
-  return FALSE;
-}
-
-/**
  * Semaphore that indicates whether a search has been done. Blocks use this
  * later to decide whether they should load or not.
  *
