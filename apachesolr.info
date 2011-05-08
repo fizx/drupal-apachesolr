@@ -13,5 +13,6 @@ files[] = Solr_Base_Query.php
 files[] = plugins/facetapi/adapter.inc
 files[] = plugins/facetapi/query_type_date.inc
 files[] = plugins/facetapi/query_type_term.inc
+files[] = tests/Dummy_Solr.php
 files[] = tests/solr_index_and_search.test
 files[] = tests/solr_base_query.test

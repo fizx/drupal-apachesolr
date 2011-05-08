@@ -294,7 +294,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
   public function getSolrParams() {
     $params = $this->getParams();
     // For certain fields Solr prefers a comma separated list.
-    foreach (array('fl', 'hl.fl', 'sort') as $name) {
+    foreach (array('fl', 'hl.fl', 'sort', 'mlt.fl') as $name) {
       if (isset($params[$name])) {
         $params[$name]  = implode(',', $params[$name]);
       }

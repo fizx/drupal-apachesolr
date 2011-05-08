@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1150220 by pwolanin: Fix for MLT requests are not going through query alter.
 #1150306 by pwolanin: fix for double URL encoding of plus sign (+) on search, after changing sort filters.
 
 Apache Solr integration 7.x-1.0-beta6, 2011-05-06

@@ -931,9 +931,6 @@ function apachesolr_block_view($delta = '') {
       if (!empty($docs)) {
         $suggestions['subject'] = check_plain($block['name']);
         $suggestions['content'] = theme('apachesolr_mlt_recommendation_block', array('docs' => $docs, 'delta' => $delta));
-        if (user_access('administer search')) {
-           $suggestions['content'] .= l(t('Configure this block'), 'admin/structure/block/manage/apachesolr/' . $delta . '/configure', array('attributes' => array('class' => 'apachesolr-mlt-admin-link')));
-        }
       }
     }
     return $suggestions;
@@ -1920,8 +1917,8 @@ function apachesolr_mlt_suggestions($settings, $id, $solr = NULL) {
     $params = array(
       'q' => 'id:' . $id,
       'qt' => 'mlt',
-      'fl' => 'entity_id,entity_type,label,path,url',
-      'mlt.fl' => implode(',', $settings['mlt_fl']),
+      'fl' => array('entity_id', 'entity_type', 'label', 'path', 'url'),
+      'mlt.fl' => $settings['mlt_fl'],
       'start' => 0,
       'rows' => $settings['num_results'],
     );
@@ -1935,7 +1932,7 @@ function apachesolr_mlt_suggestions($settings, $id, $solr = NULL) {
     }
 
     $type_filters = array();
-    if (is_array($settings['mlt_type_filters'])) {
+    if (is_array($settings['mlt_type_filters']) && !empty($settings['mlt_type_filters'])) {
       $query->addFilter('bundle', '(' . implode(' OR ', $settings['mlt_type_filters']) . ') ');
     }
 
@@ -1945,8 +1942,8 @@ function apachesolr_mlt_suggestions($settings, $id, $solr = NULL) {
     }
 
     // This hook allows modules to modify the query object.
-    $eject = apachesolr_modify_query($query);
-    if ($eject) {
+    drupal_alter('apachesolr_query', $query);
+    if ($query->abort_search) {
       return;
     }
 

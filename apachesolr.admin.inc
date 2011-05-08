@@ -783,9 +783,9 @@ function apachesolr_mlt_block_form($delta = NULL) {
   $form['restrictions']['mlt_type_filters'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Content Types'),
-    '#default_value' => is_array($block['mlt_type_filters']) ? $block['mlt_type_filters'] : array_keys($type_options),
+    '#default_value' => is_array($block['mlt_type_filters']) ? $block['mlt_type_filters'] : array(),
     '#options' => $type_options,
-    '#description' => t('Select the content types that similarity suggestions should be restricted to. Multiple types are joined with an OR query, so selecting more types results in more recommendations.'),
+    '#description' => t('Select the content types that similarity suggestions should be restricted to. Multiple types are joined with an OR query, so selecting more types results in more recommendations. If none are selected, no filter will be applied.'),
     '#weight' => '-2',
   );
 
@@ -823,7 +823,7 @@ function apachesolr_mlt_block_defaults($block = array()) {
     'mlt_minwl' => '3',
     'mlt_maxwl' => '15',
     'mlt_maxqt' => '20',
-    'mlt_type_filters' => array_keys(node_type_get_types()),
+    'mlt_type_filters' => array(),
     'mlt_custom_filters' => '',
   );
 }
