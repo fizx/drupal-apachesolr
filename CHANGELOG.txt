@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#1146054 by pwolanin: Remove unneded & (reference) operators for objects.
 #1104456 by jpmckinney, jhedstrom: For show more/fewer links, appendTo .content, instead of to the block itself.
 #675262 by kcoop: HTML entities erroneously generated for author names.
 #920880 by jpmckinney, mihha: facet_block_callback not propagated.
