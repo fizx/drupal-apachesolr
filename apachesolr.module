@@ -271,6 +271,7 @@ function apachesolr_facetapi_facet_info($searcher_info) {
           'label' => check_plain($field_info['display_name']),
           'description' => t('Filter by field of type @type.', array('@type' => $field_info['field']['type'])),
           'map callback' => $field_info['map callback'],
+          'map options' => $field_info['field'],
           'hierarchy callback' => $field_info['hierarchy callback'],
         );
       }
@@ -1556,7 +1557,6 @@ function apachesolr_entity_fields($entity_type = 'node') {
     foreach (array_keys($mappings) as $key) {
       // Set all values with defaults.
       $mappings[$key] += array(
-        'display_callback' => '',
         'map callback' => FALSE,
         'hierarchy callback' => FALSE,
         'indexing_callback' => '',
@@ -1614,7 +1614,6 @@ function apachesolr_entity_fields($entity_type = 'node') {
   return $fields[$entity_type];
 }
 
-
 /**
  * Strip html tags and also control characters that cause Jetty/Solr to fail.
  */
@@ -1634,19 +1633,24 @@ function apachesolr_clean_text($text) {
  *  @param $options
  *    An array of options including the hook_block $delta.
  */
-function apachesolr_fields_list_display_callback($facet, $options) {
+function apachesolr_fields_list_facet_map_callback($facets, $options) {
+  $map = array();
+  $allowed_values = array();
   // @see list_field_formatter_view()
   $fields = field_info_fields();
-  $field_name = $options['delta'];
+  $field_name = $options['field_name'];
   if (isset($fields[$field_name])) {
-    $allowed_values = list_allowed_values($field);
-    if (isset($allowed_values[$facet])) {
-      return field_filter_xss($allowed_values[$facet]);
+    $allowed_values = list_allowed_values($fields[$field_name]);
+  }
+  foreach ($facets as $key) {
+    if (isset($allowed_values[$key])) {
+      $map[$key] = field_filter_xss($allowed_values[$key]);
+    }
+    else {
+      $map[$key] = field_filter_xss($key);
     }
   }
-  else {
-    return $facet;
-  }
+  return $map;
 }
 
 /**
@@ -1959,31 +1963,30 @@ function apachesolr_hook_info() {
 function field_apachesolr_field_mappings() {
   $mappings = array(
     'list_integer' => array(
-      'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
+      'map callback' => 'apachesolr_fields_list_facet_map_callback',
       'index_type' => 'integer',
       'facets' => TRUE,
     ),
     'list_float' => array(
-      'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
+      'map callback' => 'apachesolr_fields_list_facet_map_callback',
       'index_type' => 'float',
       'facets' => TRUE,
     ),
     'list_text' => array(
-      'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
+      'map callback' => 'apachesolr_fields_list_facet_map_callback',
       'index_type' => 'string',
       'facets' => TRUE,
     ),
     'list_boolean' => array(
-      'display_callback' => 'apachesolr_fields_list_display_callback',
       'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
+      'map callback' => 'apachesolr_fields_list_facet_map_callback',
       'index_type' => 'boolean',
       'facets' => TRUE,
     ),
     'taxonomy_term_reference' => array(
-      'display_callback' => 'apachesolr_taxonomy_get_term',
       'map callback' => 'facetapi_map_taxonomy_terms',
       'hierarchy callback' => 'facetapi_get_taxonomy_hierarchy',
       'indexing_callback' => 'apachesolr_term_reference_indexing_callback',
