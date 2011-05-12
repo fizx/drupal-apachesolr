@@ -39,6 +39,12 @@ class ApacheSolrFacetapiDate extends FacetapiQueryTypeDate implements FacetapiQu
     $settings = $this->adapter->getFacet($this->facet)->getSettings();
     $limit = empty($settings->settings['hard_limit']) ? 20 : (int) $settings->settings['hard_limit'];
     $query->addParam('f.' . $this->facet['field'] . '.facet.limit', $limit);
+
+    $active = $this->adapter->getActiveItems($this->facet);
+    // Date filters don't support OR operator.
+    foreach ($active as $value => $item) {
+      $query->addFilter($this->facet['field'], $value);
+    }
   }
 
   /**

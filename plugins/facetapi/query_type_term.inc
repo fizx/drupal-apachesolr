@@ -36,6 +36,23 @@ class ApacheSolrFacetapiTerm extends FacetapiQueryType implements FacetapiQueryT
     // Adds "hard limit" parameter to prevent too many return values.
     $limit = empty($settings->settings['hard_limit']) ? 20 : (int) $settings->settings['hard_limit'];
     $query->addParam('f.' . $this->facet['field'] . '.facet.limit', $limit);
+
+    $active = $this->adapter->getActiveItems($this->facet);
+
+    // Adds filter based on the operator.
+    if (FACETAPI_OPERATOR_OR != $operator) {
+      foreach ($active as $value => $item) {
+        $query->addFilter($this->facet['field'], $value);
+      }
+    }
+    else {
+      // OR facet.
+      $local = "tag={$this->facet['field']}";
+      $values = array_keys($active);
+      if ($values) {
+        $query->addFilter($this->facet['field'], '(' . implode(' OR ', $values) . ')', FALSE, $local);
+      }
+    }
   }
 
   /**

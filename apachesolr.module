@@ -1321,7 +1321,7 @@ function apachesolr_do_query(DrupalSolrQueryInterface $current_query, $page = 0)
     // Gets enabled facets, adds filter queries to $params.
     $adapter = facetapi_adapter_load($searcher);
     if ($adapter) {
-      $adapter->addFacetsFilters($current_query);
+      $adapter->addActiveFilters($current_query);
     }
   }
 
