@@ -9,7 +9,7 @@
  * Form builder for adding/editing a Solr environment used as a menu callback.
  */
 function apachesolr_environment_delete_page($environment) {
-  $is_default = $environment['env_id'] == variable_get('apachesolr_default_environment', 'solr');
+  $is_default = $environment['env_id'] == apachesolr_default_environment();
   if ($is_default) {
     return MENU_ACCESS_DENIED;
   }
@@ -55,7 +55,7 @@ function apachesolr_environment_edit_form($form, &$form_state, $environment = NU
     '#description' => t('URL that identifies the Solr server and request path to be used. E.g. http://localhost:8983/solr'),
     '#required' => TRUE,
   );
-  $is_default = $environment['env_id'] == variable_get('apachesolr_default_environment', 'solr');
+  $is_default = $environment['env_id'] == apachesolr_default_environment();
   $form['make_default'] = array(
     '#type' => 'checkbox',
     '#title' => t('Make this Solr search environment the default'),
@@ -207,7 +207,7 @@ function apachesolr_settings($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => $collapse_host,
   );
-  $id = variable_get('apachesolr_default_environment', 'solr');
+  $id = apachesolr_default_environment();
   $environments = apachesolr_load_all_environments();
   $rows = array();
   $headers = array(
@@ -217,7 +217,7 @@ function apachesolr_settings($form, &$form_state) {
     t('URL'),
   );
   foreach ($environments as $environment_id => $data) {
-    $is_default = $environment_id == variable_get('apachesolr_default_environment', 'solr');
+    $is_default = $environment_id == apachesolr_default_environment();
     if ($is_default) {
       $type = 'selected';
       $delete_link = '';

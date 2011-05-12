@@ -129,12 +129,12 @@ function HOOK_apachesolr_sort_links_alter(&$sort_links) {
 /**
  * Respond to search environment deletion.
  *
- * This hook is invoked from apachesolr_server_delete() after the server is removed
+ * This hook is invoked from apachesolr_environment_delete() after the environment is removed
  * from the database.
  *
- * @param $server
- *   The server object that is being deleted.
+ * @param $environment
+ *   The environment object that is being deleted.
  */
-function HOOK_apachesolr_environment_delete($server) {
+function HOOK_apachesolr_environment_delete($environment) {
 }
 

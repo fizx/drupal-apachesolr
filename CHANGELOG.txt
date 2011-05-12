@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1131288 by jpmckinney: Fix install and other follow-ups for renaming "server" to "search environment".
 #1150988 by pwolanin: Fix for facet blocks based on custom fields displaying field keys instead of labels.
 #1150220 by pwolanin: Fix for MLT requests are not going through query alter.
 #1150306 by pwolanin: fix for double URL encoding of plus sign (+) on search, after changing sort filters.
