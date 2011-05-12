@@ -35,7 +35,7 @@ function apachesolr_search_help($section) {
  */
 function apachesolr_search_menu() {
   $items['admin/config/search/apachesolr/search-pages'] = array(
-    'title'            => 'Search Pages',
+    'title'            => 'Search pages',
     'description'      => t('Configure search pages.'),
     'page callback'    => 'apachesolr_search_page_list_page',
     'access arguments' => array('administer search'),
@@ -74,7 +74,7 @@ function apachesolr_search_menu() {
     'file'             => 'apachesolr_search.admin.inc',
   );
   $items['admin/config/search/apachesolr/content-bias'] = array(
-    'title'            => 'Content bias settings',
+    'title'            => 'Content bias',
     'page callback'    => 'apachesolr_boost_settings_page',
     'access arguments' => array('administer search'),
     'weight'           => 1,
