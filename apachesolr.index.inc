@@ -76,7 +76,7 @@ function apachesolr_node_to_document($node, $namespace) {
     }
     $document->ds_created = apachesolr_date_iso($node->created);
     $document->ds_changed = apachesolr_date_iso($node->changed);
-    if (isset($node->last_comment_timestamp)) {
+    if (isset($node->last_comment_timestamp) && !empty($node->comment_count)) {
       $document->ds_last_comment_timestamp = apachesolr_date_iso($node->last_comment_timestamp);
       $document->ds_last_comment_or_change = apachesolr_date_iso(max($node->last_comment_timestamp, $node->changed));
     }
