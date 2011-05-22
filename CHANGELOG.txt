@@ -4,6 +4,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#761990  by jhedstrom, pwolanin: switch to POST for long search ULRs.
 #1097988 by jpmckinney, pwolanin: minor config fixes, including Avoiding warning "No queryConverter defined".
 #1084332 by pwolanin, elliotttf: follow-up to add missing apachesolr.make
 #1141046 by craig_: fix variable name for highlighting.

@@ -260,6 +260,55 @@ class Drupal_Apache_Solr_Service extends Apache_Solr_Service {
   }
 
   /**
+   * Switch to POST for search if resultant query string is too long.
+   *
+   * Default threshold is 4000 characters. Note that this is almost an
+   * exact copy of Apache_Solr_Service::search().
+   *
+   * @see Apache_Solr_Service::search
+   */
+  public function search($query, $offset = 0, $limit = 10, $params = array(), $method = self::METHOD_GET) {
+    if (!is_array($params)) {
+      $params = array();
+    }
+
+    // Common parameters in this interface.
+    $params['wt'] = self::SOLR_WRITER;
+    $params['json.nl'] = $this->_namedListTreatment;
+
+    $params['q'] = $query;
+    $params['start'] = $offset;
+    $params['rows'] = $limit;
+
+    // Use http_build_query to encode our arguments because its faster
+    // than urlencoding all the parts ourselves in a loop.
+    $queryString = http_build_query($params, null, $this->_queryStringDelimiter);
+
+    // Because http_build_query treats arrays differently than we want
+    // to, correct the query string by changing foo[#]=bar (# being an actual
+    // number) parameter strings to just multiple foo=bar strings. This regex
+    // should always work since '=' will be urlencoded anywhere else the
+    // regex isn't expecting it.
+    $queryString = preg_replace('/%5B(?:[0-9]|[1-9][0-9]+)%5D=/', '=', $queryString);
+
+    // Check string length of the query string, change method to POST
+    // if longer than 4000 characters.
+    if (strlen($queryString) > variable_get('apachesolr_search_post_threshold', 4000)) {
+      $method = self::METHOD_POST;
+    }
+
+    if ($method == self::METHOD_GET) {
+      return $this->_sendRawGet($this->_searchUrl . $this->_queryDelimiter . $queryString);
+    }
+    else if ($method == self::METHOD_POST) {
+      return $this->_sendRawPost($this->_searchUrl, $queryString, FALSE, 'application/x-www-form-urlencoded');
+    }
+    else {
+      throw new Exception("Unsupported method '$method', please use the Apache_Solr_Service::METHOD_* constants");
+    }
+  }
+
+ /**
    * Central method for making a get operation against this Solr Server
    *
    * @see Apache_Solr_Service::_sendRawGet()
