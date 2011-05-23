@@ -440,3 +440,14 @@ function apachesolr_update_7007() {
    }
    variable_del('apachesolr_default_server');
 }
+
+/**
+ * Remove more facet-related variable deprecated by the Facet API integration.
+ */
+function apachesolr_update_7008() {
+  variable_del('apachesolr_facet_missing');
+  variable_del('apachesolr_facet_query_initial_limits');
+  variable_del('apachesolr_facet_query_sorts');
+  variable_del('apachesolr_facet_sort_active');
+  variable_del('apachesolr_operator');
+}
