@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1064972 by jpmckinney: Use is_callable not function_exists, where applicable.
 #1097988 by pwolanin: Add omitHeader to save on bandwidth.
 #1154770 by jpmckinney, pwolanin: Must double quote filter query values if containing space or colon.
 #1152382 by cpliakas, pwolanin: Modify Facet API adapter for api changes.

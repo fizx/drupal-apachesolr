@@ -596,7 +596,7 @@ function apachesolr_search_process_response($response, DrupalSolrQueryInterface 
 
       // Call entity-type-specific callbacks for extra handling.
       $function = apachesolr_entity_get_callback($doc->entity_type, 'result callback');
-      if (function_exists($function)) {
+      if (is_callable($function)) {
         $function($doc, $result, $extra);
       }
 

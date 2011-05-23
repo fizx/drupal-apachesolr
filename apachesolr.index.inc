@@ -93,7 +93,7 @@ function apachesolr_node_to_document($node, $namespace) {
       if (isset($node->{$field_name})) {
         // Got a field.
         $function = $field_info['indexing_callback'];
-        if ($function && function_exists($function)) {
+        if ($function && is_callable($function)) {
           // NOTE: This function should always return an array.  One
           // node field may be indexed to multiple Solr fields.
           $fields = $function($node, $field_name, $index_key, $field_info);
