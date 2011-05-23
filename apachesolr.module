@@ -2145,11 +2145,19 @@ function theme_apachesolr_settings_title($vars) {
  * The interface for all 'query' objects.
  */
 interface DrupalSolrQueryInterface {
-
+  /**
+   * Returns all filters matching $name, if set; otherwise, returns all filters.
+   *
+   * @param string $name
+   *   The facet field name to match. If NULL, all filters will be returned.
+   *
+   * @return array
+   *   All matching filters.
+   */
   function getFilters($name = NULL);
 
   /**
-   * Test whether a filter is already present in the query.
+   * Tests whether a filter is already present in the query.
    *
    * @param string $name
    *   The facet field name to check.
@@ -2158,27 +2166,39 @@ interface DrupalSolrQueryInterface {
    * @param boolean $exclude
    *   Optional, defaults to FALSE, must match the filter.
    *
-   * @return
+   * @return boolean
    *   TRUE or FALSE.
    */
   function hasFilter($name, $value, $exclude = FALSE);
 
   /**
-   * All individual filters apply as AND to the final result.
-   */
-  function addFilter($name, $value, $exclude = FALSE, $tag = NULL);
-
-  /**
-   * Remove a filter from the query.
+   * Adds a filter to the query.
    *
    * @param string $name
-   * the facet field name to remove
+   *   The facet field name.
    * @param string $value
-   * The facet value to remove. This value can be NULL in which case all filters
-   * matching $name are removed.
+   *   The facet field value.
    * @param boolean $exclude
-   * If name is not NULL, the name and $excldue must both match to remove the
-   * filter.
+   *   Set to TRUE to filter out documents matching $value.
+   * @param string $local
+   *   Solr LocalParams.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
+  function addFilter($name, $value, $exclude = FALSE, $local = '');
+
+  /**
+   * Removes a filter from the query.
+   *
+   * @param string $name
+   *   The name of the facet field to remove.
+   * @param string $value
+   *   The value of the facet field to remove. If NULL, all filters matching
+   *   $name are removed.
+   * @param boolean $exclude
+   *   If $value is not NULL, only filters matching both $value and $exclude are
+   *   removed. Ignored if $value is NULL.
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
@@ -2186,17 +2206,24 @@ interface DrupalSolrQueryInterface {
   function removeFilter($name, $value = NULL, $exclude = FALSE);
 
   /**
-   * Add a subquery to the query.
+   * Returns all subqueries to the query.
+   *
+   * @return array
+   *   All subqueries to the query.
+   */
+  function getFilterSubQueries();
+
+  /**
+   * Adds a subquery to the query.
    *
    * @param SolrFilterSubQuery $query
    *   The query to add to the orginal query - may have keywords or filters.
    * @param string $fq_operator
    *   The operator to use within the filter part of the subquery
    * @param string $q_operator
-   *   The operator to use in joining the subquery to
-   *   the main keywords.  Note - this is unlikely to work
-   *   with the Dismax handler when the main query is only
-   *   keywords.
+   *   The operator to use in joining the subquery to the main keywords. Note:
+   *   this is unlikely to work with the Dismax handler when the main query is
+   *   only keywords.
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
@@ -2204,10 +2231,10 @@ interface DrupalSolrQueryInterface {
   function addFilterSubQuery(SolrFilterSubQuery $query);
 
   /**
-   * Remove a specific subquery.
+   * Removes a specific subquery.
    *
    * @param DrupalSolrQueryInterface $query
-   * the query to remove
+   *   The query to remove.
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
@@ -2215,7 +2242,7 @@ interface DrupalSolrQueryInterface {
   function removeFilterSubQuery(SolrFilterSubQuery $query);
 
   /**
-   * Remove all subqueries.
+   * Removes all subqueries.
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
@@ -2223,35 +2250,55 @@ interface DrupalSolrQueryInterface {
   function removeFilterSubQueries();
 
   /**
-   * Takes an array $filter as returned by getFilters() and combines the values
-   * in a way suitable for use in a Solr query.
+   * Transforms a single filter in a form suitable for use in a Solr query.
+   *
+   * @param array $filter
+   *   A filter as an array with the keys '#name', for the facet field name,
+   *   '#value', for the facet field value, '#local', for Solr LocalParams, and
+       '#exclude' set to TRUE if it is an exclusion filter.
+   *
+   * @return string
+   *   A Solr fq parameter value.
    */
-  public function makeFilterQuery(array $filter);
+  function makeFilterQuery(array $filter);
 
   /**
-   * Get one param in normalized form.
+   * Gets the value of a parameter.
+   *
+   * @param string $name
+   *   The parameter name.
+   *
+   * @return
+   *   The value of the parameter.
    */
-  public function getParam($name);
+  function getParam($name);
 
   /**
-   * Get all params in normalized form.
+   * Gets all parameters in normalized form.
+   *
+   * @return array
+   *   All parameters as key-value pairs.
    */
   function getParams();
 
   /**
-   * Get params in a form suitable to pass to Solr.
+   * Gets parameters in a form suitable for use in a Solr query.
+   *
+   * @return array
+   *   All parameters as key-value pairs, where values have been transformed
+   *   into Solr parameter values.
    */
   function getSolrParams();
 
   /**
-   * Add a param to be sent when running the Solr search.
+   * Adds a param to be sent when running the Solr search.
    *
    * If the param is single-valued, this will replace rather than add the value.
    *
-   * @param $name
+   * @param string $name
    *   A Solr param name, e.g. 'q' or 'fl'.
    * @param $value
-   *   A Solr param value, a string for a single one, or an array of values.
+   *   A Solr param value: an array of values, or a string for a single value.
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
@@ -2259,12 +2306,13 @@ interface DrupalSolrQueryInterface {
   function addParam($name, $value);
 
   /**
-   * Add multipls params to be sent when running the Solr search.
+   * Adds multiple params to be sent when running the Solr search.
    *
    * If the param is single-valued, this will replace rather than add the value.
    *
    * @param $params
-   *   An array where the keys are param names, and the values may be string or arrays of strings.
+   *   An array where the keys are param names, and the values may be strings or
+   *   arrays of strings.
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
@@ -2272,9 +2320,9 @@ interface DrupalSolrQueryInterface {
   function addParams(array $params);
 
   /**
-   * Remove all values for one Solr param.
+   * Removes all values for one Solr param.
    *
-   * @param $name
+   * @param string $name
    *   A Solr param name, e.g. 'q' or 'fl'.
    *
    * @return DrupalSolrQueryInterface
@@ -2283,14 +2331,14 @@ interface DrupalSolrQueryInterface {
   function removeParam($name);
 
   /**
-   * Replace a param to be sent when running the Solr search.
+   * Replaces a param to be sent when running the Solr search.
    *
-   * Basically a short-cut for removeParam() plus addParam()
+   * Basically a shortcut for removeParam() plus addParam().
    *
-   * @param $name
+   * @param string $name
    *   A Solr param name, e.g. 'q' or 'fl'.
    * @param $value
-   *   A Solr param value, a string for a single one, or an array of values.
+   *   A Solr param value: an array of values, or a string for a single value.
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
@@ -2298,7 +2346,7 @@ interface DrupalSolrQueryInterface {
   function replaceParam($name, $value);
 
   /**
-   * Handle aliases for field to make nicer URLs
+   * Handles aliases for field to make nicer URLs.
    *
    * @param $field_map
    *   An array keyed with aliases with the real Solr index field name as value.
@@ -2315,44 +2363,76 @@ interface DrupalSolrQueryInterface {
   function getAvailableSorts();
 
   /**
-   * Set the solrsort.
+   * Adds an available sort.
    *
-   * @param $field
-   *  The name of a field in the solr index that's an allowed sort.
-   * @param $direction
-   *  'asc' or 'desc'
+   * @param string $name
+   *  The name of the field in the Solr index to sort on.
+   * @param array $sort
+   *  An array with the keys 'title', for the human name of the sort, and
+   *  'default', for the default sort direction ('asc' or 'desc').
    *
    * @return DrupalSolrQueryInterface
    *   The called object.
    */
   function setAvailableSort($name, $sort);
 
+  /**
+   * Removes an available sort.
+   *
+   * @param string $name
+   *  The name of the field in the Solr index to sort on.
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
   function removeAvailableSort($name);
 
+  /**
+   * Gets the current sort.
+   *
+   * @return array
+   *   The current sort as an array with the keys '#name', for the name of
+   *   the field, and '#direction', for the sort direction ('asc' or 'desc').
+   */
   function getSolrsort();
 
+  /**
+   * Sets the sort.
+   *
+   * @param string $field
+   *  The name of the field in the Solr index to sort on.
+   * @param string $direction
+   *  'asc' or 'desc'
+   *
+   * @return DrupalSolrQueryInterface
+   *   The called object.
+   */
   function setSolrsort($name, $direction);
 
   /**
-   * Return an array representing the URL query string for the current sort setting.
+   * Returns an array representing the URL query string for the current sort.
+   *
+   * @return array
+   *   The URL query string for the current sort.
    */
-  public function getSolrsortUrlQuery();
+  function getSolrsortUrlQuery();
 
   /**
-   * Return the search path (including the search keywords).
+   * Returns the search path (including the search keywords).
    *
    * @param string $new_keywords
    *   Optional. When set, this string overrides the query's current keywords.
+   *
+   * @return string
+   *   The search path.
    */
-  public function getPath($new_keywords = NULL);
+  function getPath($new_keywords = NULL);
 
   /**
-   * Send a search query using the Solr object passed into the constructor.
+   * Sends the search request to Solr, unless $query->abort_search is TRUE.
    *
-   * @param $keys
-   *   If not set, the query object will supply keywords based on its
-   *   instance variables. The params for the search are taken from
-   *   the public $query->params array.
+   * @param string $keys
+   *   The search keys.
    *
    * @return
    *   A stdClass response object.
@@ -2360,7 +2440,11 @@ interface DrupalSolrQueryInterface {
   function search($keys = NULL);
 
   /**
-   * Call a method on the Solr object passed into the constructor.
+   * Calls a method, without arguments, on the Solr object with which the query
+   * object was initialized.
+   *
+   * @param string $method
+   *   The method to call on the Solr object.
    *
    * @return
    *   Any method return.
