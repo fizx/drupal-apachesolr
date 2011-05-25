@@ -245,6 +245,9 @@ function apachesolr_fields_list_indexing_callback($entity, $field_name, $index_k
   return $fields;
 }
 
+/**
+ *  @see http://drupal.org/node/1059372
+ */
 function apachesolr_cck_nodereference_indexing_callback($node, $field_name, $index_key, $cck_info) {
   $fields = array();
   if (!empty($node->{$field_name})) {
@@ -261,6 +264,9 @@ function apachesolr_cck_nodereference_indexing_callback($node, $field_name, $ind
   return $fields;
 }
 
+/**
+ *  @see http://drupal.org/node/1059372
+ */
 function apachesolr_cck_userreference_indexing_callback($node, $field_name, $index_key, $cck_info) {
   $fields = array();
   if (!empty($node->$field_name)) {

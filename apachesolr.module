@@ -1701,6 +1701,7 @@ function apachesolr_fields_list_facet_map_callback($facets, $options) {
  *    The indexed value
  *  @param $options
  *    An array of options including the hook_block $delta.
+ *  @see http://drupal.org/node/1059372
  */
 function apachesolr_cck_nodereference_field_callback($facet, $options) {
   if (function_exists('content_format')) {
@@ -1719,6 +1720,7 @@ function apachesolr_cck_nodereference_field_callback($facet, $options) {
  *    The indexed value
  *  @param $options
  *    An array of options including the hook_block $delta.
+ *  @see http://drupal.org/node/1059372
  */
 function apachesolr_cck_userreference_field_callback($facet, $options) {
   if (function_exists('content_format')) {
@@ -1727,35 +1729,6 @@ function apachesolr_cck_userreference_field_callback($facet, $options) {
   else {
     return $facet;
   }
-}
-
-/**
- * Generalizes calling quazi-method callbacks on entities.
- *
- * The callbacks are defined in the entity's info array definition.
- *
- * @param stdClass $entity
- *   The entity on which to call this quasi-method.
- * @param string $entity_type
- *   The type of entity we have. Drupal doesn't tell us this automatically.
- * @param string $callback
- *   The name of the callback we want to call.
- * @param array $arguments
- * @return mixed
- *   NULL if the callback wasn't found.  If it was, whatever that callback returns
- *   is returned.
- */
-function apachesolr_entity_callback($entity, $entity_type, $callback, $arguments = array()) {
-  $info = entity_get_info($entity_type);
-  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
-
-  $callback_function = apachesolr_entity_get_callback($entity_type, $callback, $bundle);
-
-  if (is_callable($callback_function)) {
-    return call_user_func_array($callback_function, $arguments);
-  }
-
-  return NULL;
 }
 
 /**
@@ -1964,7 +1937,7 @@ function apachesolr_mlt_suggestions($settings, $id, $solr = NULL) {
 }
 
 /**
- * Implements hook_form_[form_id]_alter
+ * Implements hook_form_[form_id]_alter().
  */
 function apachesolr_form_block_admin_display_form_alter(&$form) {
   foreach ($form as $key => $block) {
@@ -2036,6 +2009,7 @@ function field_apachesolr_field_mappings() {
 
 /**
  * Implements hook_apachesolr_field_mappings() on behalf of CCK.
+ * @see http://drupal.org/node/1059372
  */
 function content_apachesolr_field_mappings() {
   $mappings = array(
@@ -2052,14 +2026,6 @@ function content_apachesolr_field_mappings() {
   );
 
   return $mappings;
-}
-
-function apachesolr_taxonomy_get_term($tid) {
-  if (function_exists('taxonomy_term_load')) {
-    if ($term = taxonomy_term_load($tid)) {
-      return $term->name;
-    }
-  }
 }
 
 /**
