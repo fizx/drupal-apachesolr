@@ -1052,25 +1052,37 @@ function apachesolr_form_field_ui_field_edit_form_alter(&$form, $form_state) {
 }
 
 /**
- * Implements hook_form_[form_id]_alter(). (D7)
+ * Sets breadcrumb trails for Facet API settings forms.
  *
- * Ensures breadcrumbs are reasonable for the facet settings form.
+ * @param FacetapiAdapter $adapter
+ *   The Facet API adapter object.
+ * @param array $realm
+ *   The realm definition.
  */
-function apachesolr_form_facetapi_facet_settings_form_alter(&$form, $form_state) {
-  if ('apachesolr' == $form['#facetapi']['adapter']->getId()) {
+function apachesolr_set_facetapi_breadcrumb(FacetapiAdapter $adapter, array $realm) {
+  if ('apachesolr' == $adapter->getId()) {
     // Hack here that depnds on our construction of the searcher name in this way.
-    list(, $env_id) = explode('@', $form['#facetapi']['adapter']->getSearcher());
-    $realm = $form['#facetapi']['realm'];
-    $breadcrumb = array(
-      l(t('Home'), '<front>'),
-      l(t('Administration'), 'admin'),
-      l(t('Configuration'), 'admin/config'),
-      l(t('Search and metadata'), 'admin/config/search'),
-      l(t('Apache Solr search environment edit'), 'admin/config/search/apachesolr-env/' . $env_id),
-      l($realm['label'], 'admin/config/search/apachesolr-env/' . $env_id . '/facets/' . $realm['name']),
-    );
+    list(, $env_id) = explode('@', $adapter->getSearcher());
+    // Appends additional breadcrumb items.
+    $breadcrumb = drupal_get_breadcrumb();
+    $breadcrumb[] = l(t('Apache Solr search environment edit'), 'admin/config/search/apachesolr-env/' . $env_id);
+    $breadcrumb[] = l($realm['label'], 'admin/config/search/apachesolr-env/' . $env_id . '/facets/' . $realm['name']);
     drupal_set_breadcrumb($breadcrumb);
   }
+}
+
+/**
+ * Implements hook_form_[form_id]_alter(). (D7)
+ */
+function apachesolr_form_facetapi_facet_settings_form_alter(&$form, $form_state) {
+  apachesolr_set_facetapi_breadcrumb($form['#facetapi']['adapter'], $form['#facetapi']['realm']);
+}
+
+/**
+ * Implements hook_form_[form_id]_alter(). (D7)
+ */
+function apachesolr_form_facetapi_facet_dependencies_form_alter(&$form, $form_state) {
+  apachesolr_set_facetapi_breadcrumb($form['#facetapi']['adapter'], $form['#facetapi']['realm']);
 }
 
 /**
