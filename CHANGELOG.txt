@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1162078 by jpmckinney: fix for Undefined variable: stats_summary.
 #1159172 by jpmckinney: Remove unused facet functions.
 #1167172 by cpliakas: Improve the breadcrumb handling for facet settings forms.
 #1157864 by cpliakas: Integrate with Facet API's depencency plugin system.

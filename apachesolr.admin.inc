@@ -374,7 +374,7 @@ function apachesolr_index_page($env_id = NULL) {
       watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
     }
     $status_header .= $solr_msg . $delay_msg;
-    $pending_msg = $stats_summary['@pending_docs'] ? t('(@pending_docs sent but not yet processed)', $stats_summary) : '';
+    $pending_msg = isset($stats_summary['@pending_docs']) ? t('(@pending_docs sent but not yet processed)', $stats_summary) : '';
     $num_docs = '<p>' . t('Number of documents in index: @num !pending', array('@num' => $data->index->numDocs, '!pending' => $pending_msg)) . "</p>\n";
     $status_header .= $num_docs . $delete_msg;
   }
