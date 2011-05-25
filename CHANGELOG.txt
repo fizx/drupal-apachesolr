@@ -4,6 +4,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#1167722 by pwolanin: fix for Drush command "solr-index" cannot be run.
 #1138602 by pwolanin: fix for search block broken in certain block configurations.
 
 Apache Solr Search Integration 6.x-1.4, 2011-05-22
