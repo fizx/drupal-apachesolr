@@ -81,4 +81,11 @@ class ApacheSolrFacetapiAdapter extends FacetapiAdapter {
       return $response->response->numFound;
     }
   }
+
+  /**
+   * Allows for backend specific overrides to the settings form.
+   */
+  public function settingsForm(&$form, &$form_state) {
+    $form['#validate'][] = 'apachesolr_facet_form_validate';
+  }
 }
