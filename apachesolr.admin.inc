@@ -364,7 +364,12 @@ function apachesolr_index_page($env_id = NULL) {
     try {
       $stats_summary = $solr->getStatsSummary();
       $solr_msg = '<p>' . t('Using schema.xml version: <strong>@schema_version</strong>', $stats_summary);
-      if ($stats_summary['@core_name']) {
+      // We need a schema version greater than beta3. This is mostly to catch
+      // people using the Drupal 6 schema.
+      if (version_compare($stats_summary['@schema_version'], 'drupal-3.0-beta3', '<=')) {
+        drupal_set_message(t('Your schema.xml version is too old. You must update it and re-index your content.'), 'error');
+      }
+      if (!empty($stats_summary['@core_name'])) {
         $solr_msg .= '<br />' . t('Solr core name: <strong>@core_name</strong>', $stats_summary);
       }
       $delay_msg = '<br />' . t('<em>The server has a @autocommit_time delay before updates are processed.</em>', $stats_summary) . "</p>\n";
