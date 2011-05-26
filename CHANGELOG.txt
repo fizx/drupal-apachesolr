@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#1165932 by Ravi.J, jpmckinney: Uncaught exception on MLT block.
 #1098860 by jpmckinney: Add apachesolr_cron_check_node_table back to cron.
 #881760 by pwolanin: account for http://drupal.org/node/345591
 #1141046 by craig_, pwolanin, jpmckinney: Highlight field not used, when setting variable apachesolr_hl_highlight.
