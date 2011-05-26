@@ -484,7 +484,7 @@ function apachesolr_index_nodes($rows, $namespace) {
         $solr->addDocuments($docs);
       }
       // Set the timestamp to indicate an index update.
-      apachesolr_index_set_last_updated(time());
+      apachesolr_index_set_last_updated($position['last_change']);
     }
     catch (Exception $e) {
       $nids = array();
