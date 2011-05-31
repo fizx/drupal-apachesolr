@@ -390,7 +390,7 @@ function apachesolr_nodeapi_mass_update($nodes) {
   try {
     $solr = apachesolr_get_solr();
     $solr->deleteByMultipleIds($unpublished_ids);
-    apachesolr_index_updated($time);
+    apachesolr_index_set_last_updated(time());
 
       // There was no exception, so update the table.
     if ($published_ids) {
@@ -425,7 +425,7 @@ function apachesolr_nodeapi_mass_delete($nodes) {
   try {
     $solr = apachesolr_get_solr();
     $solr->deleteByMultipleIds($ids);
-    apachesolr_index_updated($time);
+    apachesolr_index_set_last_updated(time());
     // There was no exception, so update the table.
     db_query("DELETE FROM {apachesolr_search_node} WHERE nid IN (" . db_placeholders($nids) . ")", $nids);
     return TRUE;
