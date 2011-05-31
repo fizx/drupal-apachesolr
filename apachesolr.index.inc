@@ -332,7 +332,7 @@ function apachesolr_cron_check_node_table() {
       $nodes = array();
     }
   }
-  // Any remaning ones if the limit is not reached.
+  // Any remaining ones if the limit is not reached.
   if (count($nodes)) {
     $node_lists[] = $nodes;
   }
@@ -343,6 +343,7 @@ function apachesolr_cron_check_node_table() {
       break;
     }
   }
+
   // Check for deleted content that wasn't deleted from the index.
   $result = db_query("SELECT asn.nid FROM {apachesolr_search_node} asn LEFT JOIN {node} n ON n.nid = asn.nid WHERE n.nid IS NULL");
   $node_lists = array();
@@ -392,12 +393,12 @@ function apachesolr_nodeapi_mass_update($nodes) {
     $solr->deleteByMultipleIds($unpublished_ids);
     apachesolr_index_set_last_updated(time());
 
-      // There was no exception, so update the table.
+    // There was no exception, so update the table.
     if ($published_ids) {
-      db_query("UPDATE {apachesolr_search_node} SET changed = %d, status = 1 WHERE nid IN (". db_placeholders($published_ids) .")", array_merge((array) $time, array_keys($published_ids)));
+      db_query("UPDATE {apachesolr_search_node} SET changed = %d, status = 1 WHERE nid IN (". db_placeholders($published_ids) .")", array_merge(array($time), array_keys($published_ids)));
     }
     if ($unpublished_ids) {
-      db_query("UPDATE {apachesolr_search_node} SET changed = %d, status = 0 WHERE nid IN (". db_placeholders($unpublished_ids) .")", array_merge((array) $time, array_keys($unpublished_ids)));
+      db_query("UPDATE {apachesolr_search_node} SET changed = %d, status = 0 WHERE nid IN (". db_placeholders($unpublished_ids) .")", array_merge(array($time), array_keys($unpublished_ids)));
     }
     return TRUE;
   }
@@ -422,10 +423,11 @@ function apachesolr_nodeapi_mass_delete($nodes) {
     $ids[] = apachesolr_document_id($node->nid);
     $nids[] = $node->nid;
   }
+  $time = time();
   try {
     $solr = apachesolr_get_solr();
     $solr->deleteByMultipleIds($ids);
-    apachesolr_index_set_last_updated(time());
+    apachesolr_index_set_last_updated($time);
     // There was no exception, so update the table.
     db_query("DELETE FROM {apachesolr_search_node} WHERE nid IN (" . db_placeholders($nids) . ")", $nids);
     return TRUE;
