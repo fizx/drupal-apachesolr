@@ -49,7 +49,7 @@ class DrupalSolrMatchTestCase extends DrupalWebTestCase {
 
     variable_set('minimum_word_size', 3);
     for ($i = 1; $i <= 7; ++$i) {
-      $documents[] = $this->_solr_build_document($i, array('nid' => $i, 'text' => $this->getText($i)));
+      $documents[] = $this->_solr_build_document($i, array('nid' => $i, 'body' => $this->getText($i)));
     }
 
     $this->_solr_index($documents);
