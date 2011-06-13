@@ -202,7 +202,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
     $this->addParams($params);
     $this->available_sorts = $this->defaultSorts();
     $this->sortstring = trim($sortstring);
-    $this->parseSortstring();
+    $this->parseSortString();
     $this->base_path = $base_path;
   }
 
@@ -425,7 +425,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
     // We expect non-aliased sorts to be added.
     $this->available_sorts[$name] = $sort;
     // Re-parse the sortstring.
-    $this->parseSortstring();
+    $this->parseSortString();
     return $this;
   }
 
@@ -442,7 +442,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
 
   public function setSolrsort($name, $direction) {
     $this->sortstring = trim($name) . ' ' . trim($direction);
-    $this->parseSortstring();
+    $this->parseSortString();
     return $this;
   }
 
@@ -456,7 +456,7 @@ class SolrBaseQuery extends SolrFilterSubQuery implements DrupalSolrQueryInterfa
   public function getSolrsortUrlQuery() {
     $queryvalues = array();
     $solrsort = $this->solrsort;
-    if ($solrsort && ($solrsort['#name'] != 'score' || $solrsort['#direction'] != 'desc')) {
+    if ($solrsort && ($solrsort['#name'] != 'score')) {
       if (isset($this->field_map[$solrsort['#name']])) {
         $solrsort['#name'] = $this->field_map[$solrsort['#name']];
       }

@@ -980,7 +980,7 @@ function apachesolr_block_view($delta = '') {
       }
       $new_query->setSolrsort($name, $new_direction);
       $sort_links[$name] = array(
-        'title' => $sort['title'],
+        'text' => $sort['title'],
         'path' => $path,
         'options' => array('query' => $new_query->getSolrsortUrlQuery()),
         'active' => $active,
@@ -990,12 +990,7 @@ function apachesolr_block_view($delta = '') {
     // Allow other modules to add or remove sorts.
     drupal_alter('apachesolr_sort_links', $sort_links);
     foreach ($sort_links as $name => $link) {
-      $themed_links[$name] = theme('apachesolr_sort_link', array(
-        'text' => $link['title'],
-        'path' => $link['path'],
-        'options' => $link['options'],
-        'active' => $link['active'],
-        'direction' => $link['direction']));
+      $themed_links[$name] = theme('apachesolr_sort_link', $link);
     }
     return array(
     'subject' => t('Sort by'),
@@ -2077,7 +2072,7 @@ function apachesolr_l($text, $path, $options = array()) {
   unset($options['attributes']['title']);
 
   // Retain GET parameters that Apache Solr knows nothing about.
-  $get = array_diff_key($_GET, array('q' => 1, 'page' => 1), $options['query']);
+  $get = array_diff_key($_GET, array('q' => 1, 'page' => 1, 'solrsort' => 1), $options['query']);
   $options['query'] += $get;
 
   return '<a href="' . check_url(url($path, $options)) . '"' . drupal_attributes($options['attributes']) . '>' . ($options['html'] ? $text : check_plain(html_entity_decode($text))) . '</a>';
