@@ -5,6 +5,11 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
 
+Apache Solr integration 7.x-1.0-beta8, 2011-06-13
+------------------------------
+#1174960 by pwolanin: fix critical indexing bug from DBTNG error in apachesolr_cron_check_node_table().
+#1148612 by pwolanin: fix regression; Clicking "Relevancy" has no effect after choosing another sort.
+
 Apache Solr integration 7.x-1.0-beta7, 2011-05-24
 ------------------------------
 #1162600 by pwolanin: Display an error if the schema version in use is incompatible.
