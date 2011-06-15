@@ -4,6 +4,7 @@ Apache Solr Search Integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr Search Integration 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#1186830 by jp.stacey: db_rewrite_sql on term_hierarchy can lead to invalid SQL.
 
 Apache Solr Search Integration 6.x-1.5, 2011-05-25
 ------------------------------
