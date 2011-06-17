@@ -1946,11 +1946,37 @@ function apachesolr_form_block_admin_display_form_alter(&$form) {
  * Implements hook_hook_info().
  */
 function apachesolr_hook_info() {
-  $hooks['apachesolr_field_mappings'] = array(
-    'group' => 'apachesolr',
-  );
-  $hooks['apachesolr_field_mappings_alter'] = array(
-    'group' => 'apachesolr',
+  $hooks = array(
+    'apachesolr_field_mappings' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_field_mappings_alter' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_update_index' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_query_prepare' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_query_alter' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_types_exclude' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_node_exclude' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_search_result_alter' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_sort_links_alter' => array(
+      'group' => 'apachesolr',
+    ),
+    'apachesolr_environment_delete' => array(
+      'group' => 'apachesolr',
+    )
   );
 
   return $hooks;
