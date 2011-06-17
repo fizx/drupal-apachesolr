@@ -4,6 +4,7 @@ Apache Solr integration x.x-x.x, xxxx-xx-xx
 
 Apache Solr integration 6.x-2.x, xxxx-xx-xx
 ------------------------------
+#761990 by pwolanin, jhedstrom: 400 Bad Status if URL length limit exceeded.
 #1173696 by arekanderu, jpmckinney: Fix apachesolr_nodeapi_mass_delete and apachesolr_nodeapi_mass_update.
 
 Apache Solr integration 6.x-2.0-beta4, 2011-05-26
