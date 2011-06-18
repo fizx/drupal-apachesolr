@@ -230,19 +230,43 @@ function apachesolr_vocab_name($vid) {
 /**
  * Callback that converts list module field into an array
  */
-function apachesolr_fields_list_indexing_callback($entity, $field_name, $index_key, $field_info) {
+function apachesolr_fields_default_indexing_callback($entity, $field_name, $index_key, $field_info) {
   $fields = array();
   if (!empty($entity->{$field_name})) {
     $field = $entity->$field_name;
     list($lang, $values) = each($field);
+    switch ($field_info['index_type']) {
+      case 'integer':
+      case 'half-int':
+      case 'sint':
+      case 'tint':
+      case 'thalf-int':
+      case 'boolean':
+        $function = 'intval';
+        break;
+      case 'float':
+      case 'double':
+      case 'sfloat':
+      case 'sdouble':
+      case 'tfloat':
+      case 'tdouble':
+        $function = 'apachesolr_floatval';
+        break;
+      default:
+        $function = 'apachesolr_clean_text';
+    }
     foreach ($values as $fval) {
       $fields[] = array(
         'key' => $index_key,
-        'value' => apachesolr_clean_text($fval['value']),
+        'value' => $function($fval['value']),
       );
     }
   }
   return $fields;
+}
+
+function apachesolr_floatval($value) {
+  return sprintf('%0.100f', $value);
 }
 
 /**

@@ -1962,32 +1962,45 @@ function apachesolr_hook_info() {
 function field_apachesolr_field_mappings() {
   $mappings = array(
     'list_integer' => array(
-      'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
+      'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
       'map callback' => 'apachesolr_fields_list_facet_map_callback',
       'index_type' => 'integer',
       'facets' => TRUE,
       'facet missing allowed' => TRUE,
+      'query type' => 'numeric_range',
     ),
     'list_float' => array(
-      'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
+      'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
       'map callback' => 'apachesolr_fields_list_facet_map_callback',
       'index_type' => 'float',
       'facets' => TRUE,
       'facet missing allowed' => TRUE,
     ),
     'list_text' => array(
-      'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
+      'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
       'map callback' => 'apachesolr_fields_list_facet_map_callback',
       'index_type' => 'string',
       'facets' => TRUE,
       'facet missing allowed' => TRUE,
     ),
     'list_boolean' => array(
-      'indexing_callback' => 'apachesolr_fields_list_indexing_callback',
+      'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
       'map callback' => 'apachesolr_fields_list_facet_map_callback',
       'index_type' => 'boolean',
       'facets' => TRUE,
       'facet missing allowed' => TRUE,
+    ),
+    'number_integer' => array(
+      'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
+      'index_type' => 'tint',
+    ),
+    'number_decimal' => array(
+      'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
+      'index_type' => 'tfloat',
+    ),
+    'number_float' => array(
+      'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
+      'index_type' => 'tfloat',
     ),
     'taxonomy_term_reference' => array(
       'map callback' => 'facetapi_map_taxonomy_terms',

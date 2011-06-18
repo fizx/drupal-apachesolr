@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1183742 by MrHaroldA, pwolanin: Index all numeric field API fields by default.
 
 Apache Solr integration 7.x-1.0-beta8, 2011-06-13
 ------------------------------
