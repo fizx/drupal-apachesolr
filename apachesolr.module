@@ -1647,6 +1647,8 @@ function apachesolr_entity_fields($entity_type = 'node') {
  * Strip html tags and also control characters that cause Jetty/Solr to fail.
  */
 function apachesolr_clean_text($text) {
+  // Remove invisible content.
+  $text = preg_replace('@<(applet|audio|canvas|command|embed|iframe|map|menu|noembed|noframes|noscript|script|style|svg|video)[^>]*>.*</\1>@siU', ' ', $text);
   // Add spaces before stripping tags to avoid running words together.
   $text = filter_xss(str_replace(array('<', '>'), array(' <', '> '), $text), array());
   // Decode entities and then make safe any < or > characters.
