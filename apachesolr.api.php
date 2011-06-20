@@ -110,7 +110,7 @@ function HOOK_apachesolr_node_exclude($node, $namespace) {
  * To add a new field to the document, you should generally use one of the pre-defined dynamic fields.
  * Follow the naming conventions for the type of data being added based on the schema.xml file.
  */
-function HOOK_apachesolr_update_index($document, $node) {
+function HOOK_apachesolr_update_index($document, $node, $namespace) {
 }
 
 /**
