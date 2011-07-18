@@ -4,6 +4,7 @@ Apache Solr integration 7.x-1.x-xxxx, xxxx-xx-xx
 
 Apache Solr integration 7.x-1.0-xxxx, 2011-xx-xx
 ------------------------------
+#1216184 by cpliakas: remove unneeded static variable.
 #1204450 by blazey: fix for parameter error in apachesolr_taxonomy module.
 #1150174 by mr.andrey, pwolanin: Strip content of script and similar tags when indexing.
 #1183742 by MrHaroldA, pwolanin: Index all numeric field API fields by default.

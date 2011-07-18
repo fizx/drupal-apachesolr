@@ -1572,7 +1572,6 @@ function apachesolr_facet_form_validate($form, &$form_state) {
  * Returns array containing information about node fields that should be indexed
  */
 function apachesolr_entity_fields($entity_type = 'node') {
-  static $fields = array();
   $fields = &drupal_static(__FUNCTION__, array());
 
   if (!isset($fields[$entity_type])) {
