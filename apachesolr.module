@@ -220,6 +220,7 @@ function apachesolr_facetapi_searcher_info() {
       'adapter' => 'apachesolr',
       'instance' => $id,
       'path' => '',
+      'supports facet mincount' => TRUE,
       'supports facet missing' => TRUE,
     );
   }
@@ -276,6 +277,7 @@ function apachesolr_facetapi_facet_info($searcher_info) {
           'map callback' => $field_info['map callback'],
           'map options' => $field_info,
           'hierarchy callback' => $field_info['hierarchy callback'],
+          'facet mincount allowed' => $field_info['facet mincount allowed'],
           'facet missing allowed' => $field_info['facet missing allowed'],
         );
       }
@@ -2020,14 +2022,17 @@ function field_apachesolr_field_mappings() {
     'number_integer' => array(
       'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
       'index_type' => 'tint',
+      'facet mincount allowed' => TRUE,
     ),
     'number_decimal' => array(
       'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
       'index_type' => 'tfloat',
+      'facet mincount allowed' => TRUE,
     ),
     'number_float' => array(
       'indexing_callback' => 'apachesolr_fields_default_indexing_callback',
       'index_type' => 'tfloat',
+      'facet mincount allowed' => TRUE,
     ),
     'taxonomy_term_reference' => array(
       'map callback' => 'facetapi_map_taxonomy_terms',
@@ -2036,6 +2041,7 @@ function field_apachesolr_field_mappings() {
       'index_type' => 'integer',
       'facet_block_callback' => 'apachesolr_search_taxonomy_facet_block',
       'facets' => TRUE,
+      'facet mincount allowed' => TRUE,
     ),
   );
 
