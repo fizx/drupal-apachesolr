@@ -60,7 +60,7 @@ function apachesolr_node_to_document($nid, $namespace) {
       // exclude 'comment' for a type to skip indexing its comments.
       if (empty($exclude_nodeapi[$module])) {
         $function = $module .'_nodeapi';
-        if ($output = $function($node, 'update index', FALSE, FALSE)) {
+        if ($output = $function($node, 'update index')) {
           $extra[$module] = $output;
         }
       }
